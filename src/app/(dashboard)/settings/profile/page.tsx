@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Header } from '@/components/layout/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -95,11 +94,10 @@ export default function ProfileSettingsPage() {
   }
 
   return (
-    <>
-      <Header title="Profile Settings" />
-      <main className="flex-1 p-6">
-        <div className="max-w-xl mx-auto">
-          <Card>
+    <main className="flex-1 p-6">
+      <div className="max-w-xl mx-auto">
+        <h1 className="text-lg font-semibold text-gray-900 mb-6">Profile Settings</h1>
+        <Card>
             <CardHeader>
               <CardTitle className="text-base">Your Profile</CardTitle>
             </CardHeader>
@@ -185,9 +183,8 @@ export default function ProfileSettingsPage() {
                 </form>
               )}
             </CardContent>
-          </Card>
-        </div>
-      </main>
-    </>
+        </Card>
+      </div>
+    </main>
   )
 }

@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       .order('transitioned_at', { ascending: false })
       .limit(5)
 
-    recentActivity = (history ?? []) as RecentActivity[]
+    recentActivity = (history ?? []) as unknown as RecentActivity[]
   }
 
   const hasFullName = Boolean(profile?.full_name)
