@@ -9,6 +9,8 @@
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
   "/api/auth/callback/route": "/api/auth/callback",
+  "/api/jobs/[id]/route": "/api/jobs/[id]",
+  "/api/jobs/route": "/api/jobs",
   "/favicon.ico/route": "/favicon.ico",
   "/page": "/"
 }

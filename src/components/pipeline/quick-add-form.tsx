@@ -22,7 +22,7 @@ export function QuickAddForm({ stage, onAdd }: QuickAddFormProps) {
     if (!company.trim() || !title.trim()) return
     setLoading(true)
     try {
-      await onAdd({ company_name: company.trim(), job_title: title.trim(), stage })
+      await onAdd({ company_name: company.trim(), job_title: title.trim(), stage, priority: 'medium' })
       setCompany('')
       setTitle('')
       setOpen(false)
