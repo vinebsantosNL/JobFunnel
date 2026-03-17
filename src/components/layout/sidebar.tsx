@@ -8,11 +8,11 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
-  { href: '/app/dashboard', label: 'Dashboard', icon: '◈' },
-  { href: '/app/pipeline', label: 'Pipeline', icon: '⬡' },
-  { href: '/app/analytics', label: 'Analytics', icon: '▲' },
-  { href: '/app/stories', label: 'Story Library', icon: '✦' },
-  { href: '/app/settings', label: 'Settings', icon: '⚙' },
+  { href: '/dashboard', label: 'Dashboard', icon: '◈' },
+  { href: '/pipeline', label: 'Pipeline', icon: '⬡' },
+  { href: '/analytics', label: 'Analytics', icon: '▲' },
+  { href: '/stories', label: 'Story Library', icon: '✦' },
+  { href: '/settings', label: 'Settings', icon: '⚙' },
 ]
 
 export function Sidebar() {

@@ -34,7 +34,7 @@ export async function proxy(request: NextRequest) {
 
   // Redirect authenticated users away from auth pages
   if (user && (pathname === '/login' || pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/app/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return supabaseResponse

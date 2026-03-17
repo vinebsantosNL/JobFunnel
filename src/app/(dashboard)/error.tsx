@@ -21,7 +21,7 @@ export default function DashboardError({
         <p className="text-sm text-gray-500 mb-4">
           An unexpected error occurred. Please try navigating back to the dashboard.
         </p>
-        <Link href="/app/dashboard">
+        <Link href="/dashboard">
           <Button>Go to Dashboard</Button>
         </Link>
       </div>

@@ -28,7 +28,7 @@ export function UpgradeBanner({ activeCount, limit }: UpgradeBannerProps) {
         </span>
       </div>
       <a
-        href="/app/settings"
+        href="/settings"
         className={`shrink-0 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
           isBlocked
             ? 'bg-red-600 text-white hover:bg-red-700'

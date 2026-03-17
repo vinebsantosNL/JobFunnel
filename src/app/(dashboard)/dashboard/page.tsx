@@ -156,13 +156,13 @@ export default async function DashboardPage() {
                   <div className="space-y-2">
                     <p className="text-sm text-gray-400">No activity yet.</p>
                     <div className="pt-2 space-y-2">
-                      <a href="/app/pipeline" className="block text-sm text-blue-600 hover:underline">
+                      <a href="/pipeline" className="block text-sm text-blue-600 hover:underline">
                         → Go to Pipeline
                       </a>
-                      <a href="/app/stories" className="block text-sm text-blue-600 hover:underline">
+                      <a href="/stories" className="block text-sm text-blue-600 hover:underline">
                         → Add Interview Story
                       </a>
-                      <a href="/app/settings/profile" className="block text-sm text-blue-600 hover:underline">
+                      <a href="/settings/profile" className="block text-sm text-blue-600 hover:underline">
                         → Complete Profile
                       </a>
                     </div>
