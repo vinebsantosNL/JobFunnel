@@ -28,6 +28,14 @@
         "nxtPid": "nxtPid"
       },
       "namedRegex": "^/api/jobs/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/stories/[id]",
+      "regex": "^/api/stories/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/stories/(?<nxtPid>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -56,6 +64,24 @@
       "namedRegex": "^/analytics(?:/)?$"
     },
     {
+      "page": "/api/analytics/funnel",
+      "regex": "^/api/analytics/funnel(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/analytics/funnel(?:/)?$"
+    },
+    {
+      "page": "/api/analytics/stage-time",
+      "regex": "^/api/analytics/stage\\-time(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/analytics/stage\\-time(?:/)?$"
+    },
+    {
+      "page": "/api/analytics/timeline",
+      "regex": "^/api/analytics/timeline(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/analytics/timeline(?:/)?$"
+    },
+    {
       "page": "/api/auth/callback",
       "regex": "^/api/auth/callback(?:/)?$",
       "routeKeys": {},
@@ -66,6 +92,12 @@
       "regex": "^/api/jobs(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/jobs(?:/)?$"
+    },
+    {
+      "page": "/api/stories",
+      "regex": "^/api/stories(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/stories(?:/)?$"
     },
     {
       "page": "/dashboard",
