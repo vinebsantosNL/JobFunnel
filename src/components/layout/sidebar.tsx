@@ -29,8 +29,8 @@ export function Sidebar() {
     <aside className="flex flex-col w-64 min-h-screen bg-white border-r border-gray-100">
       {/* Logo */}
       <div className="flex items-center h-16 px-6 border-b border-gray-100">
-        <span className="text-xl font-bold text-blue-600">JobFunnel</span>
-        <span className="text-xl font-bold text-gray-900"> OS</span>
+        <span className="text-xl font-bold text-blue-600">Job</span>
+        <span className="text-xl font-bold text-gray-900"> Funnel</span>
       </div>
 
       {/* Navigation */}
