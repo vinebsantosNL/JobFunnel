@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       })
 
       await resend.emails.send({
-        from: 'JobFunnel OS <noreply@jobfunnel.app>',
+        from: 'JobFunnel OS <onboarding@resend.dev>',
         to: profile.email as string,
         subject,
         html,

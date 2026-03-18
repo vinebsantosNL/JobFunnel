@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       const { subject, html } = staleApplicationEmail(profile.full_name ?? '', jobsForEmail)
 
       await resend.emails.send({
-        from: 'JobFunnel OS <noreply@jobfunnel.app>',
+        from: 'JobFunnel OS <onboarding@resend.dev>',
         to: profile.email as string,
         subject,
         html,
