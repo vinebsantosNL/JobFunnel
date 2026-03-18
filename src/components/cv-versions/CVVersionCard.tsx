@@ -138,7 +138,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
                 <span className="text-xl font-bold text-gray-300">—</span>
               ) : (
                 <span className="text-xl font-bold text-gray-900">
-                  {stats.avg_days_in_applied}d
+                  {stats?.avg_days_in_applied}d
                 </span>
               )}
               <p className="text-xs text-gray-400 mt-0.5">Avg Response</p>
