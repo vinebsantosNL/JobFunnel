@@ -37,6 +37,7 @@ export interface JobApplication {
   notes: string | null
   applied_at: string | null
   stage_updated_at: string
+  cv_version_id: string | null
   created_at: string
   updated_at: string
 }
@@ -47,6 +48,22 @@ export interface StageHistory {
   from_stage: Stage | null
   to_stage: Stage
   transitioned_at: string
+}
+
+export type FileType = 'pdf' | 'docx' | 'external_link'
+
+export interface CVVersion {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  tags: string[]
+  is_default: boolean
+  is_archived: boolean
+  file_url: string | null
+  file_type: FileType | null
+  created_at: string
+  updated_at: string
 }
 
 export interface InterviewStory {
