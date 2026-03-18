@@ -27,6 +27,19 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.created_at) {
+        const createdAt = new Date(user.created_at).getTime()
+        const now = Date.now()
+        const isNewUser = now - createdAt < 60 * 1000
+        if (isNewUser) {
+          fetch(`${origin}/api/email/welcome`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.id }),
+          })
+        }
+      }
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
