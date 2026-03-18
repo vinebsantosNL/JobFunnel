@@ -1,14 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { useCVVersions } from '@/hooks/useCVVersions'
 
 interface CVVersionPickerProps {
@@ -22,35 +14,24 @@ export function CVVersionPicker({ value, onChange, disabled = false }: CVVersion
 
   const activeVersions = versions.filter((v) => !v.is_archived)
 
-  const selectValue = value ?? '__untagged__'
-
-  function handleValueChange(v: string | null) {
-    if (!v) return
-    onChange(v === '__untagged__' ? null : v)
-  }
-
   if (disabled) {
     const current = activeVersions.find((v) => v.id === value)
     const label = current ? current.name : 'Untagged'
     return (
-      <div
+      <span
         title="CV version cannot be changed after the application reaches screening stage"
-        className="flex items-center gap-2"
+        className="flex h-9 items-center text-sm text-gray-500 bg-gray-100 border border-gray-200 rounded-lg px-3 w-full cursor-not-allowed"
       >
-        <span className="text-sm text-gray-500 bg-gray-100 border border-gray-200 rounded px-3 py-2 w-full cursor-not-allowed">
-          {label}
-        </span>
-      </div>
+        {label}
+      </span>
     )
   }
 
   if (isLoading) {
     return (
-      <Select disabled>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Loading versions..." />
-        </SelectTrigger>
-      </Select>
+      <select disabled className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none opacity-50">
+        <option>Loading versions…</option>
+      </select>
     )
   }
 
@@ -66,25 +47,17 @@ export function CVVersionPicker({ value, onChange, disabled = false }: CVVersion
   }
 
   return (
-    <Select value={selectValue} onValueChange={handleValueChange}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select CV version" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="__untagged__">Untagged</SelectItem>
-        {activeVersions.map((version) => (
-          <SelectItem key={version.id} value={version.id}>
-            <span className="flex items-center gap-2">
-              {version.name}
-              {version.is_default && (
-                <Badge variant="secondary" className="text-xs px-1 py-0 ml-1">
-                  Default
-                </Badge>
-              )}
-            </span>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <select
+      value={value ?? '__untagged__'}
+      onChange={(e) => onChange(e.target.value === '__untagged__' ? null : e.target.value)}
+      className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+    >
+      <option value="__untagged__">Untagged</option>
+      {activeVersions.map((version) => (
+        <option key={version.id} value={version.id}>
+          {version.name}{version.is_default ? ' (Default)' : ''}
+        </option>
+      ))}
+    </select>
   )
 }
