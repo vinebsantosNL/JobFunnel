@@ -37,14 +37,14 @@ function formatSalary(
 export function NextCareerGoal({ initialProfile }: NextCareerGoalProps) {
   const [modalOpen, setModalOpen] = useState(false)
 
-  const { data: profile } = useQuery<Profile>({
+  const { data: profile } = useQuery({
     queryKey: ['career-goal'],
-    queryFn: async () => {
+    queryFn: async (): Promise<Partial<Profile>> => {
       const res = await fetch('/api/profile')
       if (!res.ok) throw new Error('Failed to fetch')
       return res.json()
     },
-    initialData: initialProfile as Profile,
+    initialData: initialProfile,
     staleTime: 60_000,
   })
 

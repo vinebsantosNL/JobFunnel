@@ -35,7 +35,14 @@ export default async function DashboardPage() {
               <DashboardStatsBlock />
 
               {/* Next Career Goal */}
-              <NextCareerGoal initialProfile={profile ?? {}} />
+              <NextCareerGoal initialProfile={{
+                full_name: profile?.full_name,
+                target_role: profile?.target_role,
+                target_date: profile?.target_date,
+                target_salary_min: profile?.target_salary_min,
+                target_salary_max: profile?.target_salary_max,
+                target_salary_currency: profile?.target_salary_currency,
+              }} />
             </div>
 
             {/* RIGHT COLUMN */}
