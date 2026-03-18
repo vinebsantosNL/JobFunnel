@@ -1,0 +1,218 @@
+'use client'
+
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CVComparisonChart } from '@/components/analytics/CVComparisonChart'
+import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
+import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
+import type { CVVersion, Profile } from '@/types/database'
+
+async function fetchProfile(): Promise<Profile> {
+  const res = await fetch('/api/auth/me')
+  if (!res.ok) throw new Error('Failed to fetch profile')
+  return res.json()
+}
+
+async function fetchCVComparison(params: {
+  from?: string
+  to?: string
+}): Promise<CVComparisonRow[]> {
+  const url = new URL('/api/analytics/cv-comparison', window.location.origin)
+  if (params.from) url.searchParams.set('from', params.from)
+  if (params.to) url.searchParams.set('to', params.to)
+  const res = await fetch(url.toString())
+  if (!res.ok) throw new Error('Failed to fetch CV comparison data')
+  return res.json()
+}
+
+async function fetchAllCVVersions(): Promise<CVVersion[]> {
+  const url = new URL('/api/cv-versions', window.location.origin)
+  url.searchParams.set('include_archived', 'true')
+  const res = await fetch(url.toString())
+  if (!res.ok) throw new Error('Failed to fetch CV versions')
+  return res.json()
+}
+
+export function CVTestingPanel() {
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: fetchProfile,
+  })
+
+  const { data: cvVersions, isLoading: versionsLoading } = useQuery({
+    queryKey: ['cv-versions-all'],
+    queryFn: fetchAllCVVersions,
+  })
+
+  const dateParams = {
+    from: fromDate || undefined,
+    to: toDate || undefined,
+  }
+
+  const { data: comparisonRows, isLoading: comparisonLoading } = useQuery({
+    queryKey: ['cv-comparison', dateParams],
+    queryFn: () => fetchCVComparison(dateParams),
+  })
+
+  const isPro = profile?.subscription_tier === 'pro'
+  const isLoading = profileLoading || versionsLoading || comparisonLoading
+
+  // Build lookup maps from versions list
+  const cvVersionDefaults: Record<string, boolean> = {}
+  const cvVersionArchived: Record<string, boolean> = {}
+  for (const v of cvVersions ?? []) {
+    cvVersionDefaults[v.id] = v.is_default
+    cvVersionArchived[v.id] = v.is_archived
+  }
+
+  const hasNoVersions = !versionsLoading && (cvVersions ?? []).length === 0
+  const hasNoData = !comparisonLoading && (comparisonRows ?? []).length === 0
+
+  const dataSection = (
+    <div className="space-y-6">
+      {/* Date range picker */}
+      <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600 font-medium" htmlFor="cv-from-date">
+            From
+          </label>
+          <input
+            id="cv-from-date"
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600 font-medium" htmlFor="cv-to-date">
+            To
+          </label>
+          <input
+            id="cv-to-date"
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        {(fromDate || toDate) && (
+          <button
+            onClick={() => {
+              setFromDate('')
+              setToDate('')
+            }}
+            className="text-xs text-gray-500 hover:text-gray-700 underline underline-offset-2"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Empty: no CV versions at all */}
+      {hasNoVersions ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
+          <p className="text-gray-500 text-sm">
+            Create your first CV version to start tracking performance
+          </p>
+          <Link
+            href="/cv-versions"
+            className="text-sm font-medium text-blue-600 hover:text-blue-700 underline underline-offset-2"
+          >
+            Go to CV Versions
+          </Link>
+        </div>
+      ) : isLoading ? (
+        <div className="space-y-4">
+          <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
+            Loading...
+          </div>
+        </div>
+      ) : hasNoData ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
+          <p className="text-gray-500 text-sm">
+            No applications found for the selected date range.
+          </p>
+          <p className="text-gray-400 text-xs">
+            Tag your applications with a CV version to start comparing performance.
+          </p>
+        </div>
+      ) : (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Screening Rate by CV Version</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CVComparisonChart rows={comparisonRows ?? []} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Performance Breakdown</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CVComparisonTable
+                rows={comparisonRows ?? []}
+                cvVersionDefaults={cvVersionDefaults}
+                cvVersionArchived={cvVersionArchived}
+              />
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
+  )
+
+  if (profileLoading) {
+    return (
+      <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
+        Loading...
+      </div>
+    )
+  }
+
+  if (!isPro) {
+    return (
+      <div className="space-y-4">
+        <div className="relative">
+          {/* Blurred preview */}
+          <div className="pointer-events-none select-none blur-sm opacity-60">
+            {dataSection}
+          </div>
+
+          {/* Upgrade overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/50 z-10 flex items-center justify-center">
+            <Card className="max-w-sm w-full mx-4 shadow-xl border-blue-100">
+              <CardContent className="pt-8 pb-8 text-center space-y-4">
+                <div className="text-3xl">🔒</div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">
+                    Upgrade to Pro to unlock CV A/B Testing
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Compare how different CV versions perform across your job applications.
+                  </p>
+                </div>
+                <Link
+                  href="/settings/billing"
+                  className="inline-flex items-center justify-center px-5 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Upgrade to Pro
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return dataSection
+}
