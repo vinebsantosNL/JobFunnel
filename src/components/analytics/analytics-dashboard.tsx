@@ -16,7 +16,7 @@ const DATE_PRESETS = [
   { label: 'Last 6 months', days: 180 },
 ] as const
 
-type Tab = 'overview' | 'cv-testing'
+type Tab = 'funnel' | 'timeline' | 'cv-testing'
 
 function getDateRange(days?: number): { from?: string; to?: string } {
   if (!days) return {}
@@ -26,7 +26,7 @@ function getDateRange(days?: number): { from?: string; to?: string } {
 }
 
 export function AnalyticsDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>('overview')
+  const [activeTab, setActiveTab] = useState<Tab>('funnel')
   const [presetIndex, setPresetIndex] = useState(0)
   const dateRange = getDateRange(DATE_PRESETS[presetIndex].days)
 
@@ -48,43 +48,47 @@ export function AnalyticsDashboard() {
         <div className="flex gap-1 border-b border-gray-200">
           {(
             [
-              { key: 'overview', label: 'Overview' },
-              { key: 'cv-testing', label: 'CV Testing' },
-            ] as { key: Tab; label: string }[]
-          ).map(({ key, label }) => (
+              { key: 'funnel', label: 'Funnel Overview' },
+              { key: 'timeline', label: 'Timeline' },
+              { key: 'cv-testing', label: 'CV Testing', dot: true },
+            ] as { key: Tab; label: string; dot?: boolean }[]
+          ).map(({ key, label, dot }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px flex items-center gap-1.5 ${
                 activeTab === key
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               {label}
+              {dot && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />}
             </button>
           ))}
         </div>
 
-        {activeTab === 'overview' && (
-          <>
-            {/* Date filter */}
-            <div className="flex gap-2 flex-wrap">
-              {DATE_PRESETS.map((preset, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPresetIndex(i)}
-                  className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                    presetIndex === i
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
+        {(activeTab === 'funnel' || activeTab === 'timeline') && (
+          /* Date filter — shared for both tabs */
+          <div className="flex gap-2 flex-wrap">
+            {DATE_PRESETS.map((preset, i) => (
+              <button
+                key={i}
+                onClick={() => setPresetIndex(i)}
+                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                  presetIndex === i
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        )}
 
+        {activeTab === 'funnel' && (
+          <>
             {/* Metric cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard title="Total Applied" value={funnelLoading ? '—' : String(totalApplied)} subtitle="Applications submitted" />
@@ -114,39 +118,39 @@ export function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            {/* Charts row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Applications Over Time</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {timelineLoading ? (
-                    <div className="h-56 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
-                  ) : timeline && timeline.length > 0 ? (
-                    <TimelineChart data={timeline} />
-                  ) : (
-                    <div className="h-56 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Average Days per Stage</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {stageTimeLoading ? (
-                    <div className="h-56 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
-                  ) : stageTime && stageTime.length > 0 ? (
-                    <StageTimeChart data={stageTime} />
-                  ) : (
-                    <div className="h-56 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            {/* Stage time chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Average Days per Stage</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {stageTimeLoading ? (
+                  <div className="h-56 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
+                ) : stageTime && stageTime.length > 0 ? (
+                  <StageTimeChart data={stageTime} />
+                ) : (
+                  <div className="h-56 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
+                )}
+              </CardContent>
+            </Card>
           </>
+        )}
+
+        {activeTab === 'timeline' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Applications Over Time</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {timelineLoading ? (
+                <div className="h-56 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
+              ) : timeline && timeline.length > 0 ? (
+                <TimelineChart data={timeline} />
+              ) : (
+                <div className="h-56 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {activeTab === 'cv-testing' && <CVTestingPanel />}

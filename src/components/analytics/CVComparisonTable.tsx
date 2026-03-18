@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { LowConfidenceBadge } from '@/components/analytics/LowConfidenceBadge'
 import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
+
+const LOW_DATA_THRESHOLD = 10
 
 type SortKey = keyof Pick<
   CVComparisonRow,
@@ -24,6 +25,28 @@ interface CVComparisonTableProps {
 function fmt(value: number | null, suffix = '%'): string {
   if (value === null) return '—'
   return `${value}${suffix}`
+}
+
+function ConfidenceBadge({ count, isUntagged }: { count: number; isUntagged: boolean }) {
+  if (isUntagged) {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">
+        Untracked
+      </span>
+    )
+  }
+  if (count < LOW_DATA_THRESHOLD) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200">
+        ⚠ &lt; {LOW_DATA_THRESHOLD} apps
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+      Good
+    </span>
+  )
 }
 
 export function CVComparisonTable({
@@ -80,37 +103,53 @@ export function CVComparisonTable({
     return <span className="text-blue-600 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
   }
 
+  const columns: { key: SortKey; label: string }[] = [
+    { key: 'version_name', label: 'CV Version' },
+    { key: 'total_applied', label: 'Applications' },
+    { key: 'screening_rate', label: 'Applied → Screen' },
+    { key: 'interview_rate', label: 'Screen → Interview' },
+    { key: 'overall_conversion', label: 'Overall (Applied → Offer)' },
+    { key: 'avg_days_in_applied', label: 'Avg Days in Applied' },
+  ]
+
   return (
     <div className="space-y-3">
+      {/* Show archived checkbox — top right */}
+      <div className="flex justify-end">
+        <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={showArchived}
+            onChange={(e) => setShowArchived(e.target.checked)}
+            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          Show archived versions
+        </label>
+      </div>
+
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              {(
-                [
-                  { key: 'version_name', label: 'Version Name' },
-                  { key: 'total_applied', label: 'Applications' },
-                  { key: 'screening_rate', label: 'Screening Rate' },
-                  { key: 'interview_rate', label: 'Interview Rate' },
-                  { key: 'overall_conversion', label: 'Overall Conversion' },
-                  { key: 'avg_days_in_applied', label: 'Avg Days in Applied' },
-                ] as { key: SortKey; label: string }[]
-              ).map(({ key, label }) => (
+              {columns.map(({ key, label }) => (
                 <th
                   key={key}
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide cursor-pointer select-none hover:bg-gray-100 transition-colors"
+                  className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort(key)}
                 >
                   {label}
                   <SortIndicator col={key} />
                 </th>
               ))}
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
+                Confidence
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400 text-sm">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-sm">
                   No data available
                 </td>
               </tr>
@@ -126,38 +165,48 @@ export function CVComparisonTable({
                 return (
                   <tr
                     key={row.version_id ?? 'untagged'}
-                    className="hover:bg-gray-50 transition-colors"
+                    className={`transition-colors ${isUntagged ? 'bg-gray-50/50' : 'hover:bg-gray-50'}`}
                   >
+                    {/* Version name */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 flex-wrap">
                         {isUntagged ? (
-                          <span className="text-gray-400 italic">Untagged</span>
+                          <span className="text-gray-400 italic text-sm">Untagged</span>
                         ) : (
-                          <span className="font-medium text-gray-900">{row.version_name}</span>
+                          <span className="font-semibold text-gray-900">{row.version_name}</span>
                         )}
                         {isDefault && (
-                          <Badge
-                            variant="secondary"
-                            className="text-xs px-1.5 py-0"
-                          >
-                            Default
+                          <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                            DEFAULT
                           </Badge>
                         )}
-                        <LowConfidenceBadge count={row.total_applied} />
                       </div>
                     </td>
+
+                    {/* Applications */}
                     <td className="px-4 py-3 text-gray-700">{row.total_applied}</td>
-                    <td
-                      className={`px-4 py-3 font-medium ${
-                        isBestScreening ? 'text-green-600' : 'text-gray-700'
-                      }`}
-                    >
+
+                    {/* Applied → Screen */}
+                    <td className={`px-4 py-3 font-medium ${isBestScreening ? 'text-green-600' : 'text-gray-700'}`}>
                       {fmt(row.screening_rate)}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{fmt(row.interview_rate)}</td>
+
+                    {/* Screen → Interview */}
+                    <td className={`px-4 py-3 font-medium ${isBestScreening && row.interview_rate ? 'text-green-600' : 'text-gray-700'}`}>
+                      {fmt(row.interview_rate)}
+                    </td>
+
+                    {/* Overall conversion */}
                     <td className="px-4 py-3 text-gray-700">{fmt(row.overall_conversion)}</td>
+
+                    {/* Avg days */}
                     <td className="px-4 py-3 text-gray-700">
-                      {row.avg_days_in_applied !== null ? `${row.avg_days_in_applied}d` : '—'}
+                      {row.avg_days_in_applied !== null ? `${row.avg_days_in_applied} days` : '—'}
+                    </td>
+
+                    {/* Confidence */}
+                    <td className="px-4 py-3">
+                      <ConfidenceBadge count={row.total_applied} isUntagged={isUntagged} />
                     </td>
                   </tr>
                 )
@@ -165,15 +214,6 @@ export function CVComparisonTable({
             )}
           </tbody>
         </table>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setShowArchived((v) => !v)}
-          className="text-xs text-gray-500 hover:text-gray-700 underline underline-offset-2 transition-colors"
-        >
-          {showArchived ? 'Hide archived versions' : 'Show archived versions'}
-        </button>
       </div>
     </div>
   )

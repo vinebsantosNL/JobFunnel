@@ -9,6 +9,8 @@ import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
 import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
 import type { CVVersion, Profile } from '@/types/database'
 
+const INDUSTRY_AVG_SCREENING = 15 // %
+
 async function fetchProfile(): Promise<Profile> {
   const res = await fetch('/api/auth/me')
   if (!res.ok) throw new Error('Failed to fetch profile')
@@ -33,6 +35,89 @@ async function fetchAllCVVersions(): Promise<CVVersion[]> {
   const res = await fetch(url.toString())
   if (!res.ok) throw new Error('Failed to fetch CV versions')
   return res.json()
+}
+
+function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
+  const tagged = rows.filter((r) => r.version_id !== null)
+  const untagged = rows.find((r) => r.version_id === null)
+  const untaggedCount = untagged?.total_applied ?? 0
+
+  // Best performer by screening rate
+  const best = tagged.reduce<CVComparisonRow | null>((acc, r) => {
+    if ((r.screening_rate ?? 0) > (acc?.screening_rate ?? 0)) return r
+    return acc
+  }, null)
+
+  // Total tracked (tagged only)
+  const totalTracked = tagged.reduce((acc, r) => acc + r.total_applied, 0)
+  const versionCount = tagged.length
+
+  // Overall screening rate across all tagged
+  const totalReachedScreening = tagged.reduce((acc, r) => acc + r.reached_screening, 0)
+  const overallScreening =
+    totalTracked > 0 ? Math.round((totalReachedScreening / totalTracked) * 100) : 0
+  const vsIndustry = overallScreening - INDUSTRY_AVG_SCREENING
+
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Best Performing Version */}
+      <Card>
+        <CardContent className="pt-5 pb-4">
+          <p className="text-xs text-gray-500 mb-1">Best Performing Version</p>
+          {best ? (
+            <>
+              <p className="text-base font-semibold text-green-600 leading-tight">{best.version_name}</p>
+              <p className="text-xs text-gray-500 mt-1">{best.screening_rate ?? 0}% screening rate</p>
+            </>
+          ) : (
+            <p className="text-sm text-gray-400">No data yet</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Total Tracked Applications */}
+      <Card>
+        <CardContent className="pt-5 pb-4">
+          <p className="text-xs text-gray-500 mb-1">Total Tracked Applications</p>
+          <p className="text-2xl font-bold text-gray-900">{totalTracked}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            across {versionCount} version{versionCount !== 1 ? 's' : ''}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Screening Rate All Versions */}
+      <Card>
+        <CardContent className="pt-5 pb-4">
+          <p className="text-xs text-gray-500 mb-1">Screening Rate (All Versions)</p>
+          <p className="text-2xl font-bold text-gray-900">{overallScreening}%</p>
+          {totalTracked > 0 && (
+            <p className={`text-xs mt-1 ${vsIndustry >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+              {vsIndustry >= 0 ? '↑' : '↓'} {Math.abs(vsIndustry)}% vs. industry avg ({INDUSTRY_AVG_SCREENING}%)
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Untagged Applications */}
+      <Card>
+        <CardContent className="pt-5 pb-4">
+          <p className="text-xs text-gray-500 mb-1">Untagged Applications</p>
+          <p className={`text-2xl font-bold ${untaggedCount > 0 ? 'text-amber-500' : 'text-gray-900'}`}>
+            {untaggedCount}
+          </p>
+          {untaggedCount > 0 && (
+            <Link
+              href="/pipeline"
+              className="text-xs text-gray-500 hover:text-blue-600 underline underline-offset-2 mt-1 inline-block"
+            >
+              Tag them →
+            </Link>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
 }
 
 export function CVTestingPanel() {
@@ -75,6 +160,11 @@ export function CVTestingPanel() {
 
   const dataSection = (
     <div className="space-y-6">
+      {/* Summary cards */}
+      {!isLoading && !hasNoData && (
+        <SummaryCards rows={comparisonRows ?? []} />
+      )}
+
       {/* Date range picker */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
@@ -146,7 +236,7 @@ export function CVTestingPanel() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Screening Rate by CV Version</CardTitle>
+              <CardTitle className="text-base">Applied → Screening Rate by CV Version</CardTitle>
             </CardHeader>
             <CardContent>
               <CVComparisonChart rows={comparisonRows ?? []} />
@@ -154,8 +244,8 @@ export function CVTestingPanel() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Performance Breakdown</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-base">Detailed Comparison</CardTitle>
             </CardHeader>
             <CardContent>
               <CVComparisonTable
