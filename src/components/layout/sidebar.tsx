@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: '◈' },
+  { href: '/dashboard', label: 'Home', icon: '◈' },
   { href: '/pipeline', label: 'Pipeline', icon: '⬡' },
   { href: '/analytics', label: 'Analytics', icon: '▲' },
   { href: '/stories', label: 'Story Library', icon: '✦' },
