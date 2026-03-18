@@ -60,17 +60,14 @@ export function CVVersionList() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">CV Versions</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Create and manage different CV variants to find what works best
-          </p>
-        </div>
+        <p className="text-sm text-gray-500">
+          Create and manage different CV variants to find what works best
+        </p>
         <Button
           onClick={() => setCreateOpen(true)}
           disabled={atFreeLimit}
           title={atFreeLimit ? 'Upgrade to Pro for unlimited CV versions' : undefined}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 ml-4"
         >
           + New Version
         </Button>

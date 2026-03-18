@@ -119,17 +119,17 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
 
         {/* Stats */}
         <div className="border-t border-gray-100 pt-4">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-4">
             {/* Applications */}
             <div>
               <p className="text-xl font-bold text-gray-900">{totalApplied}</p>
-              <p className="text-xs text-gray-400 mt-0.5">Applications</p>
+              <p className="text-xs text-gray-400 mt-0.5 whitespace-nowrap">Applications</p>
             </div>
 
             {/* Screen Rate */}
             <div>
               <ScreenRateValue rate={stats?.screening_rate ?? null} count={totalApplied} />
-              <p className="text-xs text-gray-400 mt-0.5">Screen Rate</p>
+              <p className="text-xs text-gray-400 mt-0.5 whitespace-nowrap">Screen Rate</p>
             </div>
 
             {/* Avg Response */}
@@ -141,7 +141,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
                   {stats?.avg_days_in_applied}d
                 </span>
               )}
-              <p className="text-xs text-gray-400 mt-0.5">Avg Response</p>
+              <p className="text-xs text-gray-400 mt-0.5 whitespace-nowrap">Avg Response</p>
             </div>
           </div>
 
