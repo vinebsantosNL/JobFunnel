@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, subscription_tier')
+    .select('full_name, subscription_tier, target_role, target_date, target_salary_min, target_salary_max, target_salary_currency')
     .eq('id', user?.id ?? '')
     .single()
 
@@ -35,7 +35,7 @@ export default async function DashboardPage() {
               <DashboardStatsBlock />
 
               {/* Next Career Goal */}
-              <NextCareerGoal fullName={profile?.full_name} />
+              <NextCareerGoal initialProfile={profile ?? {}} />
             </div>
 
             {/* RIGHT COLUMN */}

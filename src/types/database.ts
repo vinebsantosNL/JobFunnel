@@ -18,6 +18,11 @@ export interface Profile {
     weekly_summary: boolean
     stale_applications: boolean
   }
+  target_role: string | null
+  target_date: string | null
+  target_salary_min: number | null
+  target_salary_max: number | null
+  target_salary_currency: string | null
   created_at: string
   updated_at: string
 }

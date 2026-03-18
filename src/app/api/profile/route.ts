@@ -14,6 +14,11 @@ const updateProfileSchema = z.object({
       stale_applications: z.boolean(),
     })
     .optional(),
+  target_role: z.string().max(100).optional().nullable(),
+  target_date: z.string().optional().nullable(),
+  target_salary_min: z.number().int().min(0).optional().nullable(),
+  target_salary_max: z.number().int().min(0).optional().nullable(),
+  target_salary_currency: z.string().max(10).optional().nullable(),
 })
 
 export async function GET() {
