@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import type { JobApplication, Stage, Priority } from '@/types/database'
 import { STAGE_CONFIG, STAGES, PRIORITY_CONFIG } from '@/lib/stages'
 import type { UpdateJobInput } from '@/lib/validations/job'
+import { CVVersionPicker } from '@/components/cv-versions/CVVersionPicker'
 
 interface ApplicationModalProps {
   job: JobApplication | null
@@ -37,6 +38,9 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
 
   if (!job) return null
 
+  const LOCKED_STAGES: Stage[] = ['screening', 'interviewing', 'offer', 'rejected', 'withdrawn']
+  const isCVVersionLocked = LOCKED_STAGES.includes(job?.stage ?? 'saved')
+
   function handleSave() {
     if (!job) return
     onUpdate(job.id, {
@@ -50,6 +54,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
       salary_max: form.salary_max,
       salary_currency: form.salary_currency ?? undefined,
       applied_at: form.applied_at ?? undefined,
+      cv_version_id: form.cv_version_id,
     })
     setEditing(false)
   }
@@ -135,6 +140,13 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                 </div>
               )}
 
+              <div>
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">CV Version</p>
+                <p className="text-sm text-gray-700">
+                  {job.cv_versions ? job.cv_versions.name : 'Untagged'}
+                </p>
+              </div>
+
               <div className="flex gap-2 pt-2">
                 <Button onClick={() => setEditing(true)} variant="outline" size="sm" className="flex-1">
                   Edit
@@ -211,6 +223,14 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                     value={form.notes ?? ''}
                     onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                     rows={4}
+                  />
+                </div>
+                <div>
+                  <Label>CV Version</Label>
+                  <CVVersionPicker
+                    value={form.cv_version_id ?? null}
+                    onChange={(id) => setForm(f => ({ ...f, cv_version_id: id }))}
+                    disabled={isCVVersionLocked}
                   />
                 </div>
               </div>

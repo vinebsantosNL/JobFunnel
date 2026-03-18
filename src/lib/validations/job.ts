@@ -12,6 +12,7 @@ export const createJobSchema = z.object({
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
   notes: z.string().max(5000).optional(),
   applied_at: z.string().optional().nullable(),
+  cv_version_id: z.string().uuid().optional().nullable(),
 })
 
 export const updateJobSchema = createJobSchema.partial()

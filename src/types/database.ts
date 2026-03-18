@@ -38,6 +38,7 @@ export interface JobApplication {
   applied_at: string | null
   stage_updated_at: string
   cv_version_id: string | null
+  cv_versions: { name: string } | null
   created_at: string
   updated_at: string
 }

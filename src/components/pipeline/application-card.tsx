@@ -66,6 +66,16 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
           {job.salary_max ? `–${job.salary_max.toLocaleString()}` : '+'}
         </p>
       )}
+
+      {job.cv_versions && (
+        <div className="mt-2">
+          <span className="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded">
+            {job.cv_versions.name.length > 15
+              ? `${job.cv_versions.name.slice(0, 15)}…`
+              : job.cv_versions.name}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

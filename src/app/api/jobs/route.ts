@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('job_applications')
-    .select('*')
+    .select('*, cv_versions(name)')
     .eq('user_id', user.id)
     .order('stage_updated_at', { ascending: false })
 
@@ -60,11 +60,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
+  let resolvedCVVersionId: string | null = parsed.data.cv_version_id ?? null
+
+  if (resolvedCVVersionId) {
+    // Verify the cv_version belongs to this user
+    const { data: versionCheck } = await supabase
+      .from('cv_versions')
+      .select('id')
+      .eq('id', resolvedCVVersionId)
+      .eq('user_id', user.id)
+      .single()
+    if (!versionCheck) {
+      return NextResponse.json({ error: 'CV version not found' }, { status: 400 })
+    }
+  } else {
+    // Use the user's default CV version if none provided
+    const { data: defaultVersion } = await supabase
+      .from('cv_versions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('is_default', true)
+      .eq('is_archived', false)
+      .single()
+    resolvedCVVersionId = defaultVersion?.id ?? null
+  }
+
   const jobData = {
     ...parsed.data,
     user_id: user.id,
     job_url: parsed.data.job_url || null,
     stage_updated_at: new Date().toISOString(),
+    cv_version_id: resolvedCVVersionId,
   }
 
   const { data, error } = await supabase

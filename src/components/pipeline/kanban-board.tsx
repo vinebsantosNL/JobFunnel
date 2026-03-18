@@ -22,10 +22,21 @@ import type { CreateJobInput, UpdateJobInput } from '@/lib/validations/job'
 export function KanbanBoard() {
   const [search, setSearch] = useState('')
   const [priority, setPriority] = useState('all')
+  const [cvVersionIds, setCVVersionIds] = useState<string[]>([])
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null)
   const [activeJob, setActiveJob] = useState<JobApplication | null>(null)
 
-  const { data: jobs = [], isLoading, error } = useJobs({ search, priority })
+  const { data: rawJobs = [], isLoading, error } = useJobs({ search, priority })
+
+  // Client-side CV version filter (AND logic with server-side priority/search filters)
+  const jobs = useMemo(() => {
+    if (cvVersionIds.length === 0) return rawJobs
+    return rawJobs.filter((job) => {
+      const selected = cvVersionIds[0]
+      if (selected === '__untagged__') return job.cv_version_id === null
+      return job.cv_version_id === selected
+    })
+  }, [rawJobs, cvVersionIds])
   const createJob = useCreateJob()
   const updateJob = useUpdateJob()
   const deleteJob = useDeleteJob()
@@ -92,8 +103,10 @@ export function KanbanBoard() {
       <FilterBar
         search={search}
         priority={priority}
+        cvVersionIds={cvVersionIds}
         onSearchChange={setSearch}
         onPriorityChange={setPriority}
+        onCVVersionChange={setCVVersionIds}
         totalCount={jobs.length}
       />
 
