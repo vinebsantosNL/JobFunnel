@@ -53,15 +53,14 @@ interface ChartDataPoint {
 }
 
 // Custom label that shows % + warning triangle for low data
-function CustomLabel(props: {
-  x?: number
-  y?: number
-  width?: number
-  value?: number
-  index?: number
-  data?: ChartDataPoint[]
-}) {
-  const { x = 0, y = 0, width = 0, value, index = 0, data = [] } = props
+function CustomLabel(props: Record<string, unknown>) {
+  const x = typeof props.x === 'number' ? props.x : 0
+  const y = typeof props.y === 'number' ? props.y : 0
+  const width = typeof props.width === 'number' ? props.width : 0
+  const value = typeof props.value === 'number' ? props.value : 0
+  const index = typeof props.index === 'number' ? props.index : 0
+  const data = Array.isArray(props.data) ? (props.data as ChartDataPoint[]) : []
+
   if (!value || value === 0) return null
 
   const isLowData = data[index]?.isLowData
@@ -133,11 +132,7 @@ export function CVComparisonChart({ rows }: CVComparisonChartProps) {
             ))}
             <LabelList
               content={(props) => (
-                <CustomLabel
-                  {...props}
-                  value={props.value as number}
-                  data={chartData}
-                />
+                <CustomLabel {...props} data={chartData} />
               )}
             />
           </Bar>
