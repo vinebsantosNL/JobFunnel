@@ -21,8 +21,8 @@ const navItems = [
   { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
   { href: '/pipeline', label: 'Pipeline', icon: Kanban },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/stories', label: 'Story Library', icon: BookOpen },
-  { href: '/cv-versions', label: 'CV Versions', icon: FileText },
+  { href: '/stories', label: 'STAR Stories', icon: BookOpen },
+  { href: '/cv-versions', label: 'Resume Builder', icon: FileText },
 ]
 
 const bottomItems = [
