@@ -120,7 +120,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="max-w-2xl w-full p-0 gap-0 overflow-hidden rounded-2xl"
+        className="!max-w-2xl w-full p-0 gap-0 overflow-hidden rounded-2xl sm:!max-w-2xl"
       >
         <DialogTitle className="sr-only">{job.job_title} at {job.company_name}</DialogTitle>
 
