@@ -10,11 +10,43 @@ import { WordCount } from './WordCount'
 import { useCreateStory, useUpdateStory } from '@/hooks/use-stories'
 import { useStoryLibrary } from '@/hooks/useStoryLibrary'
 import type { InterviewStory } from '@/types/database'
+import { cn } from '@/lib/utils'
 
 interface StoryFormProps {
   mode: 'create' | 'edit'
   initialValues?: Partial<InterviewStory>
 }
+
+const STAR_CONFIG = [
+  {
+    id: 'situation' as const,
+    letter: 'S',
+    label: 'Situation',
+    placeholder: 'Describe the context and background...',
+    colors: 'bg-blue-50 text-blue-600',
+  },
+  {
+    id: 'task' as const,
+    letter: 'T',
+    label: 'Task',
+    placeholder: 'What was your responsibility?',
+    colors: 'bg-purple-50 text-purple-600',
+  },
+  {
+    id: 'action' as const,
+    letter: 'A',
+    label: 'Action',
+    placeholder: 'What specific steps did you take?',
+    colors: 'bg-amber-50 text-amber-600',
+  },
+  {
+    id: 'result' as const,
+    letter: 'R',
+    label: 'Result',
+    placeholder: 'What was the outcome? Use metrics where possible.',
+    colors: 'bg-green-50 text-green-600',
+  },
+]
 
 export function StoryForm({ mode, initialValues }: StoryFormProps) {
   const { closeExpanded } = useStoryLibrary()
@@ -34,12 +66,13 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
 
   const isPending = createStory.isPending || updateStory.isPending
 
-  const starFields = [
-    { id: 'situation' as const, label: 'Situation', value: situation, setter: setSituation, placeholder: 'Describe the context and background...' },
-    { id: 'task' as const, label: 'Task', value: task, setter: setTask, placeholder: 'What was your responsibility?' },
-    { id: 'action' as const, label: 'Action', value: action, setter: setAction, placeholder: 'What specific steps did you take?' },
-    { id: 'result' as const, label: 'Result', value: result, setter: setResult, placeholder: 'What was the outcome? Use metrics where possible.' },
-  ]
+  const fieldValues: Record<string, string> = { situation, task, action, result }
+  const fieldSetters: Record<string, (v: string) => void> = {
+    situation: setSituation,
+    task: setTask,
+    action: setAction,
+    result: setResult,
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -66,66 +99,73 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Title */}
       <div>
-        <Label htmlFor="story-title-inline">Title</Label>
+        <Label htmlFor="story-title-inline" className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          Title
+        </Label>
         <Input
           id="story-title-inline"
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="e.g. Led cross-team migration to microservices"
+          className="mt-1"
           required
         />
       </div>
 
       {/* Mode toggle */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setFormMode('star')}
-          className={`px-3 py-1.5 rounded text-sm border transition-colors ${
-            formMode === 'star'
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
-          }`}
-        >
-          STAR Format
-        </button>
-        <button
-          type="button"
-          onClick={() => setFormMode('freeform')}
-          className={`px-3 py-1.5 rounded text-sm border transition-colors ${
-            formMode === 'freeform'
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
-          }`}
-        >
-          Free Form
-        </button>
+      <div className="flex gap-2 border border-gray-200 rounded-lg overflow-hidden w-fit">
+        {(['star', 'freeform'] as const).map(m => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setFormMode(m)}
+            className={cn(
+              'px-4 py-1.5 text-sm font-medium transition-colors',
+              formMode === m
+                ? 'bg-gray-900 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+            )}
+          >
+            {m === 'star' ? 'STAR Format' : 'Free Form'}
+          </button>
+        ))}
       </div>
 
+      {/* Fields */}
       {formMode === 'star' ? (
-        <div className="space-y-3">
-          {starFields.map(field => (
+        <div className="space-y-4">
+          {STAR_CONFIG.map(field => (
             <div key={field.id}>
-              <div className="flex justify-between items-center mb-1">
-                <Label htmlFor={`inline-${field.id}`}>{field.label}</Label>
-                <WordCount value={field.value} />
+              {/* Section header with letter badge */}
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-2">
+                  <div className={cn('w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs', field.colors)}>
+                    {field.letter}
+                  </div>
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{field.label}</span>
+                </div>
+                <WordCount value={fieldValues[field.id]} />
               </div>
               <Textarea
                 id={`inline-${field.id}`}
-                value={field.value}
-                onChange={e => field.setter(e.target.value)}
+                value={fieldValues[field.id]}
+                onChange={e => fieldSetters[field.id](e.target.value)}
                 placeholder={field.placeholder}
                 rows={3}
+                className="text-sm"
               />
             </div>
           ))}
         </div>
       ) : (
         <div>
-          <div className="flex justify-between items-center mb-1">
-            <Label htmlFor="inline-full-content">Story</Label>
+          <div className="flex justify-between items-center mb-1.5">
+            <Label htmlFor="inline-full-content" className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Story
+            </Label>
             <WordCount value={fullContent} />
           </div>
           <Textarea
@@ -134,17 +174,22 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
             onChange={e => setFullContent(e.target.value)}
             placeholder="Write your full story..."
             rows={8}
+            className="text-sm"
           />
         </div>
       )}
 
+      {/* Competencies */}
       <div>
-        <Label className="mb-2 block">Competencies</Label>
+        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+          Competencies
+        </Label>
         <CompetencyPicker selected={competencies} onChange={setCompetencies} />
       </div>
 
-      <div className="flex gap-2 pt-2">
-        <Button type="submit" disabled={isPending} className="flex-1">
+      {/* Submit */}
+      <div className="flex gap-2 pt-1">
+        <Button type="submit" disabled={isPending} className="flex-1 bg-blue-600 hover:bg-blue-700">
           {isPending ? 'Saving...' : 'Save Story'}
         </Button>
         <Button type="button" variant="outline" onClick={closeExpanded}>

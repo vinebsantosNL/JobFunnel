@@ -18,12 +18,9 @@ export function StoryInlinePanel() {
       ? stories.find(s => s.id === expandedView.storyId) ?? null
       : null
 
-  const panelTitle =
-    expandedView.type === 'new'
-      ? 'New Story'
-      : expandedView.type === 'edit'
-      ? 'Edit Story'
-      : activeStory?.title ?? 'Story'
+  // Only show header title for form modes — view mode shows its own title
+  const isFormMode = expandedView.type === 'new' || expandedView.type === 'edit'
+  const panelTitle = expandedView.type === 'new' ? 'New Story' : 'Edit Story'
 
   return (
     <AnimatePresence>
@@ -36,34 +33,47 @@ export function StoryInlinePanel() {
           className="overflow-hidden"
         >
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
-            {/* Panel header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-sm text-gray-900">{panelTitle}</h2>
-              <button
-                type="button"
-                onClick={closeExpanded}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                aria-label="Close panel"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+            {/* Panel header — only shown for form modes */}
+            {isFormMode && (
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <h2 className="font-semibold text-base text-gray-900">{panelTitle}</h2>
+                <button
+                  type="button"
+                  onClick={closeExpanded}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Close panel"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
 
             {/* Panel body */}
-            <div className="p-5">
-              {expandedView.type === 'new' && (
-                <StoryForm mode="create" />
+            <div className="p-6">
+              {/* View mode — close button floated */}
+              {expandedView.type === 'view' && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={closeExpanded}
+                    className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label="Close panel"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  {activeStory
+                    ? <StoryDetail story={activeStory} />
+                    : <p className="text-sm text-gray-400">Loading story...</p>
+                  }
+                </div>
               )}
+
+              {expandedView.type === 'new' && <StoryForm mode="create" />}
+
               {expandedView.type === 'edit' && activeStory && (
                 <StoryForm mode="edit" initialValues={activeStory} />
               )}
               {expandedView.type === 'edit' && !activeStory && (
-                <p className="text-sm text-gray-400">Loading story...</p>
-              )}
-              {expandedView.type === 'view' && activeStory && (
-                <StoryDetail story={activeStory} />
-              )}
-              {expandedView.type === 'view' && !activeStory && (
                 <p className="text-sm text-gray-400">Loading story...</p>
               )}
             </div>
