@@ -72,6 +72,14 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
     setDeleteOpen(false)
   }
 
+  // Determine top pills
+  const topPills: string[] = []
+  if (version.tags.length > 0) {
+    topPills.push(...version.tags)
+  } else if (version.is_default) {
+    topPills.push('DEFAULT')
+  }
+
   return (
     <>
       <div
@@ -83,15 +91,24 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
           version.is_archived && 'opacity-60'
         )}
       >
+        {/* Top pills */}
+        {topPills.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {topPills.map((tag) => (
+              <span
+                key={tag}
+                className="text-xs uppercase tracking-wider text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full font-medium"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-bold text-gray-900 leading-snug">{version.name}</h3>
+          <h3 className="text-lg font-bold text-gray-900 leading-snug">{version.name}</h3>
           <div className="flex items-center gap-1 flex-shrink-0">
-            {version.is_default && (
-              <Badge className="bg-blue-600 text-white hover:bg-blue-600 text-xs font-semibold tracking-wide px-2">
-                DEFAULT
-              </Badge>
-            )}
             {version.is_archived && (
               <Badge variant="secondary" className="text-xs">Archived</Badge>
             )}
@@ -101,20 +118,6 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
         {/* Description */}
         {version.description && (
           <p className="text-sm text-gray-500 leading-relaxed -mt-2">{version.description}</p>
-        )}
-
-        {/* Tags */}
-        {version.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {version.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border border-gray-200 text-gray-600 bg-white"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
         )}
 
         {/* Stats */}
@@ -153,36 +156,51 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
           )}
         </div>
 
+        {/* Overlapping avatar circles */}
+        <div className="flex items-center">
+          <div className="w-6 h-6 rounded-full bg-blue-200" />
+          <div className="w-6 h-6 rounded-full bg-green-200 -ml-1" />
+          <div className="w-6 h-6 rounded-full bg-purple-200 -ml-1" />
+        </div>
+
         {/* Actions */}
-        <div className="flex items-center gap-3 pt-1">
-          <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
-            Edit
-          </Button>
-          {!version.is_default && (
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer">
+            View Full Stats →
+          </span>
+          <div className="flex items-center gap-3">
             <button
-              onClick={handleSetDefault}
-              disabled={updateMutation.isPending}
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              onClick={() => setEditOpen(true)}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
-              Set Default
+              Edit
             </button>
-          )}
-          {hasNoApps ? (
-            <button
-              onClick={() => setDeleteOpen(true)}
-              className="text-sm text-red-500 hover:text-red-600 transition-colors"
-            >
-              Delete
-            </button>
-          ) : (
-            <button
-              onClick={handleArchiveToggle}
-              disabled={updateMutation.isPending}
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              {version.is_archived ? 'Unarchive' : 'Archive'}
-            </button>
-          )}
+            {!version.is_default && (
+              <button
+                onClick={handleSetDefault}
+                disabled={updateMutation.isPending}
+                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                Set Default
+              </button>
+            )}
+            {hasNoApps ? (
+              <button
+                onClick={() => setDeleteOpen(true)}
+                className="text-sm text-red-500 hover:text-red-600 transition-colors"
+              >
+                Delete
+              </button>
+            ) : (
+              <button
+                onClick={handleArchiveToggle}
+                disabled={updateMutation.isPending}
+                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                {version.is_archived ? 'Unarchive' : 'Archive'}
+              </button>
+            )}
+          </div>
         </div>
 
         {updateMutation.error && (

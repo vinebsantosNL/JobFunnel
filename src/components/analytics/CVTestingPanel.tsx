@@ -58,64 +58,65 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
     totalTracked > 0 ? Math.round((totalReachedScreening / totalTracked) * 100) : 0
   const vsIndustry = overallScreening - INDUSTRY_AVG_SCREENING
 
+  // Compute best version's advantage vs average
+  const avgScreeningRate = totalTracked > 0 ? (totalReachedScreening / totalTracked) * 100 : 0
+  const bestAdvantage = best ? ((best.screening_rate ?? 0) - avgScreeningRate).toFixed(1) : '0.0'
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Best Performing Version */}
-      <Card>
-        <CardContent className="pt-5 pb-4">
-          <p className="text-xs text-gray-500 mb-1">Best Performing Version</p>
-          {best ? (
-            <>
-              <p className="text-base font-semibold text-green-600 leading-tight">{best.version_name}</p>
-              <p className="text-xs text-gray-500 mt-1">{best.screening_rate ?? 0}% screening rate</p>
-            </>
-          ) : (
-            <p className="text-sm text-gray-400">No data yet</p>
-          )}
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-blue-500 p-5">
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Best Performing Version</p>
+        {best ? (
+          <>
+            <p className="text-xl font-bold text-gray-900 leading-tight">{best.version_name}</p>
+            <div className="mt-1.5">
+              <span className="inline-flex items-center bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5 rounded-full">
+                +{bestAdvantage}% vs Avg
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">{best.screening_rate ?? 0}% screening rate</p>
+          </>
+        ) : (
+          <p className="text-sm text-gray-400">No data yet</p>
+        )}
+      </div>
 
       {/* Total Tracked Applications */}
-      <Card>
-        <CardContent className="pt-5 pb-4">
-          <p className="text-xs text-gray-500 mb-1">Total Tracked Applications</p>
-          <p className="text-2xl font-bold text-gray-900">{totalTracked}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            across {versionCount} version{versionCount !== 1 ? 's' : ''}
-          </p>
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-purple-500 p-5">
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Total Tracked Applications</p>
+        <p className="text-2xl font-bold text-gray-900">{totalTracked}</p>
+        <p className="text-xs text-gray-400 mt-1">
+          across {versionCount} version{versionCount !== 1 ? 's' : ''}
+        </p>
+      </div>
 
       {/* Screening Rate All Versions */}
-      <Card>
-        <CardContent className="pt-5 pb-4">
-          <p className="text-xs text-gray-500 mb-1">Screening Rate (All Versions)</p>
-          <p className="text-2xl font-bold text-gray-900">{overallScreening}%</p>
-          {totalTracked > 0 && (
-            <p className={`text-xs mt-1 ${vsIndustry >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-              {vsIndustry >= 0 ? '↑' : '↓'} {Math.abs(vsIndustry)}% vs. industry avg ({INDUSTRY_AVG_SCREENING}%)
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-green-500 p-5">
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Screening Rate (All Versions)</p>
+        <p className="text-2xl font-bold text-gray-900">{overallScreening}%</p>
+        {totalTracked > 0 && (
+          <p className={`text-xs mt-1 ${vsIndustry >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+            {vsIndustry >= 0 ? '↑' : '↓'} {Math.abs(vsIndustry)}% vs. industry avg ({INDUSTRY_AVG_SCREENING}%)
+          </p>
+        )}
+      </div>
 
       {/* Untagged Applications */}
-      <Card>
-        <CardContent className="pt-5 pb-4">
-          <p className="text-xs text-gray-500 mb-1">Untagged Applications</p>
-          <p className={`text-2xl font-bold ${untaggedCount > 0 ? 'text-amber-500' : 'text-gray-900'}`}>
-            {untaggedCount}
-          </p>
-          {untaggedCount > 0 && (
-            <Link
-              href="/pipeline"
-              className="text-xs text-gray-500 hover:text-blue-600 underline underline-offset-2 mt-1 inline-block"
-            >
-              Tag them →
-            </Link>
-          )}
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-amber-500 p-5">
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Untagged Applications</p>
+        <p className={`text-2xl font-bold ${untaggedCount > 0 ? 'text-amber-500' : 'text-gray-900'}`}>
+          {untaggedCount}
+        </p>
+        {untaggedCount > 0 && (
+          <Link
+            href="/pipeline"
+            className="text-xs text-gray-500 hover:text-blue-600 underline underline-offset-2 mt-1 inline-block"
+          >
+            Tag them →
+          </Link>
+        )}
+      </div>
     </div>
   )
 }
@@ -160,49 +161,59 @@ export function CVTestingPanel() {
 
   const dataSection = (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">CV Testing Optimization</h2>
+          <p className="text-sm text-gray-500 mt-1">Comparing performance across your resume iterations.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {/* Date range picker */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600 font-medium" htmlFor="cv-from-date">
+              From
+            </label>
+            <input
+              id="cv-from-date"
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600 font-medium" htmlFor="cv-to-date">
+              To
+            </label>
+            <input
+              id="cv-to-date"
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          {(fromDate || toDate) && (
+            <button
+              onClick={() => {
+                setFromDate('')
+                setToDate('')
+              }}
+              className="text-xs text-gray-500 hover:text-gray-700 underline underline-offset-2"
+            >
+              Clear
+            </button>
+          )}
+          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            ↓ Export
+          </button>
+        </div>
+      </div>
+
       {/* Summary cards */}
       {!isLoading && !hasNoData && (
         <SummaryCards rows={comparisonRows ?? []} />
       )}
-
-      {/* Date range picker */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-600 font-medium" htmlFor="cv-from-date">
-            From
-          </label>
-          <input
-            id="cv-from-date"
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-600 font-medium" htmlFor="cv-to-date">
-            To
-          </label>
-          <input
-            id="cv-to-date"
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        {(fromDate || toDate) && (
-          <button
-            onClick={() => {
-              setFromDate('')
-              setToDate('')
-            }}
-            className="text-xs text-gray-500 hover:text-gray-700 underline underline-offset-2"
-          >
-            Clear
-          </button>
-        )}
-      </div>
 
       {/* Empty: no CV versions at all */}
       {hasNoVersions ? (

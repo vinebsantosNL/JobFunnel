@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
 import { CareerGoalModal } from './CareerGoalModal'
 import type { Profile } from '@/types/database'
 
@@ -53,42 +54,60 @@ export function NextCareerGoal({ initialProfile }: NextCareerGoalProps) {
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs text-gray-500 mb-1">Next Career Goal</p>
-            <h3 className="text-lg font-semibold text-gray-900">{greeting} 👋</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Track your job search, prepare your stories, and land your next role.
-            </p>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4">
+        {/* Left card */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">{greeting}</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                You&apos;re making great progress towards your next career milestone.
+              </p>
+            </div>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="flex-shrink-0 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            >
+              Edit Goals
+            </button>
           </div>
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex-shrink-0 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
-          >
-            Edit Goals
-          </button>
+
+          <div className="grid grid-cols-3 gap-4 mt-5 pt-5 border-t border-gray-100">
+            <div>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Target Title</p>
+              <p className="text-sm font-semibold text-blue-600">
+                {profile?.target_role ?? '—'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Target Date</p>
+              <p className="text-sm font-semibold text-blue-600">
+                {formatDate(profile?.target_date)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Target Salary</p>
+              <p className="text-sm font-semibold text-blue-600">
+                {formatSalary(profile?.target_salary_min, profile?.target_salary_max, profile?.target_salary_currency)}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-5 pt-5 border-t border-gray-100">
+        {/* Right card — blue insight */}
+        <div className="bg-blue-600 text-white rounded-xl p-5 flex flex-col justify-between">
           <div>
-            <p className="text-xs text-gray-400 mb-1">Target Title</p>
-            <p className="text-sm font-medium text-gray-900">
-              {profile?.target_role ?? '—'}
+            <h3 className="text-base font-bold mb-2">Job Search Readiness</h3>
+            <p className="text-sm text-blue-100 leading-relaxed">
+              Your profile is 85% complete. Adding more STAR stories will put you in the top 5% of candidates.
             </p>
           </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-1">Target Date</p>
-            <p className="text-sm font-medium text-gray-900">
-              {formatDate(profile?.target_date)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-1">Target Salary</p>
-            <p className="text-sm font-medium text-gray-900">
-              {formatSalary(profile?.target_salary_min, profile?.target_salary_max, profile?.target_salary_currency)}
-            </p>
-          </div>
+          <Link
+            href="/settings"
+            className="mt-4 inline-flex items-center justify-center bg-white text-blue-600 font-medium text-sm px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors self-start"
+          >
+            Optimize Profile
+          </Link>
         </div>
       </div>
 

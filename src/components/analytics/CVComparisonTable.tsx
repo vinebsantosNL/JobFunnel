@@ -27,24 +27,40 @@ function fmt(value: number | null, suffix = '%'): string {
   return `${value}${suffix}`
 }
 
-function ConfidenceBadge({ count, isUntagged }: { count: number; isUntagged: boolean }) {
+const ROW_BORDER_COLORS = ['#2563EB', '#64748B', '#93C5FD', '#7C3AED', '#059669']
+
+function ConfidenceBadge({ count, isUntagged, screeningRate }: { count: number; isUntagged: boolean; screeningRate: number | null }) {
   if (isUntagged) {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">
-        Untracked
+      <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-orange-100 text-orange-700">
+        UNTRACKED
+      </span>
+    )
+  }
+  if (count < 5) {
+    return (
+      <span className="inline-flex items-center gap-1 px-3 py-1 rounded text-xs font-bold bg-amber-100 text-amber-700">
+        LOW
       </span>
     )
   }
   if (count < LOW_DATA_THRESHOLD) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200">
-        ⚠ &lt; {LOW_DATA_THRESHOLD} apps
+      <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700">
+        MEDIUM
+      </span>
+    )
+  }
+  if (count >= LOW_DATA_THRESHOLD && (screeningRate ?? 0) >= 25) {
+    return (
+      <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-green-500 text-white">
+        HIGH
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-      Good
+    <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-gray-200 text-gray-700">
+      STABLE
     </span>
   )
 }
@@ -154,22 +170,27 @@ export function CVComparisonTable({
                 </td>
               </tr>
             ) : (
-              sorted.map((row) => {
+              sorted.map((row, rowIndex) => {
                 const isUntagged = row.version_id === null
                 const isDefault = row.version_id ? cvVersionDefaults[row.version_id] : false
                 const isBestScreening =
                   !isUntagged &&
                   bestScreeningRate > 0 &&
                   row.screening_rate === bestScreeningRate
+                const borderColor = ROW_BORDER_COLORS[rowIndex % ROW_BORDER_COLORS.length]
 
                 return (
                   <tr
                     key={row.version_id ?? 'untagged'}
                     className={`transition-colors ${isUntagged ? 'bg-gray-50/50' : 'hover:bg-gray-50'}`}
                   >
-                    {/* Version name */}
+                    {/* Version name with colored left border */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 flex-wrap">
+                        <div
+                          className="w-[3px] h-6 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: borderColor }}
+                        />
                         {isUntagged ? (
                           <span className="text-gray-400 italic text-sm">Untagged</span>
                         ) : (
@@ -206,7 +227,7 @@ export function CVComparisonTable({
 
                     {/* Confidence */}
                     <td className="px-4 py-3">
-                      <ConfidenceBadge count={row.total_applied} isUntagged={isUntagged} />
+                      <ConfidenceBadge count={row.total_applied} isUntagged={isUntagged} screeningRate={row.screening_rate} />
                     </td>
                   </tr>
                 )

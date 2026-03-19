@@ -12,9 +12,9 @@ interface ChecklistItem {
 
 function CheckItem({ item }: { item: ChecklistItem }) {
   const content = (
-    <div className="flex items-start gap-3 py-4 border-b border-gray-100 last:border-0">
+    <div className="flex items-center gap-3 py-4 border-b border-gray-100 last:border-0">
       <div
-        className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
           item.done
             ? 'bg-blue-600 border-blue-600'
             : item.soon
@@ -45,13 +45,10 @@ function CheckItem({ item }: { item: ChecklistItem }) {
         </p>
       </div>
       {!item.done && !item.soon && item.href && (
-        <span className="flex-shrink-0 text-xs border border-gray-200 text-gray-500 rounded-full px-2.5 py-0.5 hover:border-blue-400 hover:text-blue-600 transition-colors">
-          Start →
-        </span>
-      )}
-      {item.done && (
-        <span className="flex-shrink-0 text-xs bg-gray-100 text-gray-400 rounded-full px-2.5 py-0.5">
-          Done ✓
+        <span className="flex-shrink-0 text-gray-400">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
         </span>
       )}
     </div>
@@ -96,6 +93,7 @@ export function GettingStartedBlock() {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 h-full">
       <h2 className="text-base font-semibold text-gray-900 mb-1">Getting Started</h2>
+      <p className="text-xs text-gray-500 mb-3">Complete these tasks to kickstart your job search.</p>
 
       {/* Progress bar */}
       <div className="flex items-center justify-between mb-3">
@@ -118,7 +116,7 @@ export function GettingStartedBlock() {
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-3 py-3 border-b border-gray-100">
-              <div className="w-5 h-5 rounded-full bg-gray-100 animate-pulse" />
+              <div className="w-5 h-5 rounded bg-gray-100 animate-pulse" />
               <div className="h-4 flex-1 bg-gray-100 rounded animate-pulse" />
             </div>
           ))}

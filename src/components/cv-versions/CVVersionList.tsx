@@ -138,6 +138,39 @@ export function CVVersionList() {
         </div>
       )}
 
+      {/* Strategy Insight + AI Optimizer */}
+      {active.length >= 1 && (
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 mt-6">
+          {/* Strategy Insight */}
+          <div className="bg-blue-600 text-white rounded-xl p-6">
+            <h3 className="text-lg font-bold mb-2">Strategy Insight</h3>
+            <p className="text-sm text-blue-100 leading-relaxed">
+              Versions with localized keywords are seeing higher response rates. Consider creating a targeted variant for specific markets.
+            </p>
+            <div className="flex gap-3 mt-4">
+              <button className="bg-white text-blue-600 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors">
+                Apply Recommendation
+              </button>
+              <button className="border border-white text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Dismiss
+              </button>
+            </div>
+          </div>
+          {/* AI Optimizer placeholder */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center text-center">
+            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3">
+              <span className="text-blue-600 text-xl">✦</span>
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-1">AI Optimizer</h3>
+            <p className="text-sm text-gray-500 mb-4">Let AI analyze your CV versions and suggest the best one for each job post automatically.</p>
+            <div className="w-full bg-gray-100 rounded-full h-1.5">
+              <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: '75%' }} />
+            </div>
+            <p className="text-xs text-gray-400 mt-1">75% OPTIMIZED</p>
+          </div>
+        </div>
+      )}
+
       {/* Create Sheet */}
       <Sheet open={createOpen} onOpenChange={setCreateOpen}>
         <SheetContent>
