@@ -403,7 +403,7 @@ Following the existing pattern: Next.js API routes with Supabase client, all end
 | **Sprint 1: Data & CRUD** | Week 1–2 | Database migration, `cv_versions` table, RLS policies, API endpoints for CRUD, CVVersionList and CVVersionForm UI |
 | **Sprint 2: Application Integration** | Week 2–3 | CVVersionPicker in ApplicationModal and QuickAddForm, version badge on ApplicationCard, FilterBar integration, version locking logic |
 | **Sprint 3: Analytics & Dashboard** | Week 3–4 | CV comparison API endpoint, CVComparisonTable, CVComparisonChart, LowConfidenceBadge, DateRangePicker integration, empty states |
-| **Sprint 4: Polish & Launch** | Week 4–5 | Free tier limits and upgrade prompts, bulk tagging (P1), file attachment (P1 if time permits), E2E tests, performance optimization, beta rollout |
+| **Sprint 4: Polish & Launch** | Week 4–5 | bulk tagging (P1), file attachment (P1 if time permits), E2E tests, performance optimization, beta rollout |
 
 ### Hard Deadlines
 
