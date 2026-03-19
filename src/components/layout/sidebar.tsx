@@ -1,24 +1,51 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import {
+  LayoutDashboard,
+  Kanban,
+  BarChart3,
+  BookOpen,
+  FileText,
+  Settings,
+  HelpCircle,
+  LogOut,
+  User,
+} from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard', label: 'Home', icon: '◈' },
-  { href: '/pipeline', label: 'Pipeline', icon: '⬡' },
-  { href: '/analytics', label: 'Analytics', icon: '▲' },
-  { href: '/stories', label: 'Story Library', icon: '✦' },
-  { href: '/cv-versions', label: 'CV Versions', icon: '📄' },
-  { href: '/settings', label: 'Settings', icon: '⚙' },
+  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
+  { href: '/pipeline', label: 'Pipeline', icon: Kanban },
+  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/stories', label: 'Story Library', icon: BookOpen },
+  { href: '/cv-versions', label: 'CV Versions', icon: FileText },
+]
+
+const bottomItems = [
+  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const [profile, setProfile] = useState<{ full_name?: string | null; subscription_tier?: string | null } | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase
+        .from('profiles')
+        .select('full_name, subscription_tier')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => setProfile(data))
+    })
+  }, [])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -26,42 +53,98 @@ export function Sidebar() {
     router.push('/login')
   }
 
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + '/')
+
   return (
-    <aside className="flex flex-col w-64 min-h-screen bg-white border-r border-gray-100">
+    <aside className="flex flex-col w-60 min-h-screen bg-[#f0f2f8] border-r border-gray-200">
       {/* Logo */}
-      <div className="flex items-center h-16 px-6 border-b border-gray-100">
-        <span className="text-xl font-bold text-blue-600">Job</span>
-        <span className="text-xl font-bold text-gray-900"> Funnel</span>
+      <div className="flex items-center h-16 px-5">
+        <span className="text-lg font-bold text-blue-600">Job</span>
+        <span className="text-lg font-bold text-gray-900">Funnel</span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => (
+      <nav className="flex-1 px-3 py-2 space-y-0.5">
+        {navItems.map(({ href, label, icon: Icon }) => (
           <Link
-            key={item.href}
-            href={item.href}
+            key={href}
+            href={href}
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-              pathname === item.href || pathname.startsWith(item.href + '/')
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              isActive(href)
+                ? 'bg-white text-blue-700 shadow-sm border-l-4 border-blue-600'
+                : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
             )}
           >
-            <span className="text-base">{item.icon}</span>
-            {item.label}
+            <Icon
+              className={cn(
+                'w-4 h-4 flex-shrink-0',
+                isActive(href) ? 'text-blue-600' : 'text-gray-400'
+              )}
+            />
+            {label}
           </Link>
         ))}
       </nav>
 
-      {/* Sign out */}
-      <div className="p-3 border-t border-gray-100">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-gray-600 hover:text-gray-900"
-          onClick={handleSignOut}
+      {/* Bottom section */}
+      <div className="px-3 pb-4 space-y-1">
+        {/* User profile card */}
+        {profile && (
+          <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg bg-white/60">
+            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+              <User className="w-4 h-4 text-orange-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-800 truncate">
+                {profile.full_name ?? 'User'}
+              </p>
+              <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
+                {profile.subscription_tier === 'pro' ? 'Premium Tier' : 'Free Tier'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Settings */}
+        {bottomItems.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              isActive(href)
+                ? 'bg-white text-blue-700 shadow-sm border-l-4 border-blue-600'
+                : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
+            )}
+          >
+            <Icon
+              className={cn(
+                'w-4 h-4 flex-shrink-0',
+                isActive(href) ? 'text-blue-600' : 'text-gray-400'
+              )}
+            />
+            {label}
+          </Link>
+        ))}
+
+        {/* Support */}
+        <button
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-white/60 hover:text-gray-800 transition-colors"
         >
+          <HelpCircle className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          Support
+        </button>
+
+        {/* Sign out */}
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-white/60 hover:text-gray-800 transition-colors"
+        >
+          <LogOut className="w-4 h-4 text-gray-400 flex-shrink-0" />
           Sign out
-        </Button>
+        </button>
       </div>
     </aside>
   )
