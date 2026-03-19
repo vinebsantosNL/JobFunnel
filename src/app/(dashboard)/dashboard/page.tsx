@@ -24,8 +24,8 @@ export default async function DashboardPage() {
 
       <UpgradeBanner isPro={isPro} />
 
-      <main className="flex-1 px-8 py-6 overflow-auto">
-        <div className="max-w-5xl mx-auto space-y-5">
+      <main className="flex-1 p-6 overflow-auto">
+        <div className="max-w-6xl mx-auto space-y-5">
           <DashboardStatsBlock />
 
           <NextCareerGoal initialProfile={{
