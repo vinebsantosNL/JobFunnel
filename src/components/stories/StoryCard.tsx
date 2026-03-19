@@ -18,10 +18,10 @@ export function StoryCard({ story, isActive }: StoryCardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border p-4 hover:shadow-md transition-all cursor-pointer',
+        'bg-white rounded-xl border p-4 hover:shadow-sm transition-all cursor-pointer',
         isActive
-          ? 'ring-2 ring-blue-500 border-blue-200 shadow-md'
-          : 'border-gray-100 hover:border-gray-200'
+          ? 'ring-2 ring-blue-500 border-blue-300 shadow-sm'
+          : 'border-gray-200 hover:border-gray-300'
       )}
       onClick={() => openStory(story.id)}
     >

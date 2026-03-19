@@ -99,7 +99,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
 
               {(job.salary_min || job.salary_max) && (
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Salary</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Salary</p>
                   <p className="text-sm text-gray-700">
                     {job.salary_currency ?? '€'}{job.salary_min?.toLocaleString() ?? '?'}
                     {job.salary_max ? ` – ${job.salary_max.toLocaleString()}` : '+'}
@@ -108,7 +108,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
               )}
 
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Priority</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Priority</p>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${PRIORITY_CONFIG[job.priority].color}`} />
                   <span className="text-sm text-gray-700">{PRIORITY_CONFIG[job.priority].label}</span>
@@ -116,7 +116,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
               </div>
 
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Move to stage</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Move to stage</p>
                 <div className="grid grid-cols-2 gap-2">
                   {STAGES.filter(s => s !== job.stage).map(stage => (
                     <Button
@@ -135,13 +135,13 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
 
               {job.notes && (
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Notes</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Notes</p>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{job.notes}</p>
                 </div>
               )}
 
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">CV Version</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">CV Version</p>
                 <p className="text-sm text-gray-700">
                   {job.cv_versions ? job.cv_versions.name : 'Untagged'}
                 </p>

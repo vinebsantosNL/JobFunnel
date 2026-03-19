@@ -5,7 +5,9 @@ export default function AnalyticsPage() {
   return (
     <>
       <Header title="Analytics" />
-      <AnalyticsDashboard />
+      <main className="flex-1 overflow-auto">
+        <AnalyticsDashboard />
+      </main>
     </>
   )
 }

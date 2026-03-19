@@ -22,7 +22,7 @@ function CheckItem({ item }: { item: ChecklistItem }) {
             ? 'bg-blue-600 border-blue-600'
             : item.soon
             ? 'border-gray-200'
-            : 'border-gray-300'
+            : 'border-gray-400'
         }`}
       >
         {item.done && (

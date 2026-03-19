@@ -53,10 +53,10 @@ export function FilterBar({
         placeholder="Search company or title..."
         value={search}
         onChange={e => onSearchChange(e.target.value)}
-        className="max-w-xs h-9 text-sm"
+        className="max-w-xs h-8 text-sm"
       />
       <Select value={priority} onValueChange={(v) => onPriorityChange(v ?? 'all')}>
-        <SelectTrigger className="w-36 h-9 text-sm">
+        <SelectTrigger className="w-36 h-8 text-sm">
           <SelectValue placeholder="All priorities" />
         </SelectTrigger>
         <SelectContent>
@@ -69,7 +69,7 @@ export function FilterBar({
 
       {activeVersions.length > 0 && (
         <Select value={selectValue} onValueChange={handleCVVersionSelect}>
-          <SelectTrigger className="w-44 h-9 text-sm">
+          <SelectTrigger className="w-44 h-8 text-sm">
             <SelectValue placeholder="CV Version" />
           </SelectTrigger>
           <SelectContent>

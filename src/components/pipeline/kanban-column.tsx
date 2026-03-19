@@ -22,7 +22,7 @@ export function KanbanColumn({ stage, jobs, onCardClick, onAddJob }: KanbanColum
   return (
     <div className="flex flex-col w-72 flex-shrink-0">
       {/* Column header */}
-      <div className={`flex items-center justify-between px-3 py-2 rounded-t-lg ${config.bgColor} border ${config.borderColor}`}>
+      <div className={`flex items-center justify-between px-3 py-2 rounded-t-xl ${config.bgColor} border ${config.borderColor}`}>
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${config.dotColor}`} />
           <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
@@ -35,8 +35,8 @@ export function KanbanColumn({ stage, jobs, onCardClick, onAddJob }: KanbanColum
       {/* Drop zone */}
       <div
         ref={setNodeRef}
-        className={`flex-1 min-h-[200px] p-2 space-y-2 rounded-b-lg border-x border-b transition-colors ${
-          isOver ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-100'
+        className={`flex-1 min-h-[200px] p-2 space-y-2 rounded-b-xl border-x border-b transition-colors ${
+          isOver ? 'bg-blue-50 border-blue-200' : 'bg-gray-50/80 border-gray-200'
         }`}
       >
         <SortableContext items={jobs.map(j => j.id)} strategy={verticalListSortingStrategy}>

@@ -43,7 +43,7 @@ export function AnalyticsDashboard() {
     : 0
 
   return (
-    <main className="flex-1 p-6 overflow-auto">
+    <div className="flex-1 p-6 overflow-auto">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Tab navigation */}
         <div className="flex gap-1 border-b border-gray-200">
@@ -206,6 +206,6 @@ export function AnalyticsDashboard() {
 
         {activeTab === 'cv-testing' && <CVTestingPanel />}
       </div>
-    </main>
+    </div>
   )
 }

@@ -3,7 +3,7 @@ import { MobileNav } from '@/components/layout/mobile-nav'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-[#FAFAFA]">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Desktop sidebar */}
       <div className="hidden md:flex">
         <Sidebar />
