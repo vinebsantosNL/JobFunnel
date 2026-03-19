@@ -56,7 +56,7 @@ export default function NotificationsSettingsPage() {
   }
 
   return (
-    <main className="flex-1 p-6">
+    <main className="flex-1 p-6 overflow-auto">
       <div className="max-w-xl mx-auto">
         <h1 className="text-lg font-semibold text-gray-900 mb-6">Notification Settings</h1>
         <Card>
