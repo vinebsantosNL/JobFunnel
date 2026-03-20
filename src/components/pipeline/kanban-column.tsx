@@ -20,7 +20,7 @@ export function KanbanColumn({ stage, jobs, onCardClick, onAddJob }: KanbanColum
   const config = STAGE_CONFIG[stage]
 
   return (
-    <div className="flex flex-col w-72 flex-shrink-0">
+    <div className="flex flex-col w-64 min-w-[220px] flex-1 max-w-xs xl:max-w-sm 2xl:max-w-none">
       {/* Column header */}
       <div className={`flex items-center justify-between px-3 py-2 rounded-t-xl ${config.bgColor} border ${config.borderColor}`}>
         <div className="flex items-center gap-2">
