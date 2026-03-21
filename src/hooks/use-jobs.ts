@@ -61,18 +61,29 @@ export function useUpdateJob() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateJobInput }) => updateJob(id, input),
     onMutate: async ({ id, input }) => {
+      // Cancel any in-flight refetches for ALL ['jobs', *] variations
       await queryClient.cancelQueries({ queryKey: ['jobs'] })
-      const previous = queryClient.getQueryData<JobApplication[]>(['jobs'])
-      if (previous) {
-        queryClient.setQueryData<JobApplication[]>(['jobs'], (old) =>
-          old?.map((j) => j.id === id ? { ...j, ...input } : j) ?? []
-        )
-      }
-      return { previous }
+
+      // Snapshot every active jobs cache (params may differ per component)
+      const previousEntries = queryClient.getQueriesData<JobApplication[]>({ queryKey: ['jobs'] })
+
+      // Optimistically patch every matching cache — card moves instantly
+      queryClient.setQueriesData<JobApplication[]>(
+        { queryKey: ['jobs'] },
+        (old) =>
+          old?.map((j) =>
+            j.id === id
+              ? { ...j, ...input, stage_updated_at: new Date().toISOString() }
+              : j
+          ) ?? []
+      )
+
+      return { previousEntries }
     },
     onError: (_err, _vars, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(['jobs'], context.previous)
+      // Roll back all snapshots on failure
+      for (const [queryKey, data] of context?.previousEntries ?? []) {
+        queryClient.setQueryData(queryKey, data)
       }
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
