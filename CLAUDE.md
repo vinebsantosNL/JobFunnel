@@ -297,4 +297,12 @@ Collaboration: Cross-functional Work, Stakeholder Management, Communication
 Execution: Project Delivery, Prioritization, Working Under Pressure, Adaptability
 Growth: Learning Agility, Feedback Reception, Self-improvement
 
+---
+
+## Automated Hooks
+
+After every successful `vercel deploy` or `vercel --prod`, always use the @qa-engineer skill to run a QA pass before marking the task done. Do not skip this even if the deploy looks clean.
+
+To trigger a manual architecture review at any time, use the @architecture-patterns skill.
+
 
