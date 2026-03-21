@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { BookOpen, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { StoryInlinePanel } from './StoryInlinePanel'
@@ -55,9 +56,8 @@ function StoryListItem({
   isActive: boolean
   onClick: () => void
 }) {
-  const excerpt = (story.situation ?? story.full_content ?? '').slice(0, 80)
+  const excerpt = (story.situation ?? story.full_content ?? '').slice(0, 72)
   const primaryCompetency = story.competencies[0] ?? null
-  const category = primaryCompetency ? getCompetencyCategory(primaryCompetency) : null
   const dotColor = primaryCompetency ? (COMPETENCY_COLORS[primaryCompetency] ?? 'bg-gray-400') : 'bg-gray-400'
   const dateStr = new Date(story.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 
@@ -65,23 +65,29 @@ function StoryListItem({
     <div
       onClick={onClick}
       className={cn(
-        'px-4 py-3 border-b border-gray-100 cursor-pointer transition-colors',
-        isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+        'px-4 py-3.5 border-b border-gray-100 cursor-pointer transition-all duration-150 border-l-2',
+        isActive
+          ? 'bg-blue-50 border-l-blue-500'
+          : 'hover:bg-gray-50 border-l-transparent'
       )}
     >
-      {category && (
-        <div className="flex items-center gap-1.5 mb-1">
-          <span className={cn('w-2 h-2 rounded-full flex-shrink-0', dotColor)} />
-          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">{category}</span>
-        </div>
-      )}
-      <h4 className="text-sm font-bold text-gray-900 line-clamp-1">{story.title}</h4>
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug">{story.title}</h4>
+        {story.is_favorite && <span className="text-amber-400 text-sm flex-shrink-0 leading-none mt-0.5">★</span>}
+      </div>
       {excerpt && (
-        <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{excerpt}</p>
+        <p className="text-xs text-gray-500 line-clamp-1 mb-2">{excerpt}</p>
       )}
-      <div className="flex items-center justify-between mt-1.5">
-        <span className="text-xs text-gray-400">{dateStr}</span>
-        {story.is_favorite && <span className="text-yellow-400 text-xs">★</span>}
+      <div className="flex items-center justify-between gap-2">
+        {primaryCompetency ? (
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', dotColor)} />
+            <span className="text-xs text-gray-500 truncate">{primaryCompetency}</span>
+          </div>
+        ) : (
+          <span />
+        )}
+        <span className="text-xs text-gray-400 flex-shrink-0">{dateStr}</span>
       </div>
     </div>
   )
@@ -134,9 +140,10 @@ export function StoriesPageClient() {
         {/* Header */}
         <div className="px-4 pt-4 pb-3 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-gray-400 tracking-wider uppercase">Your Catalog</span>
-            <Button size="sm" onClick={openNewStory} className="text-xs h-7 px-2">
-              + New
+            <h2 className="text-sm font-semibold text-gray-900">Story Library</h2>
+            <Button size="sm" onClick={openNewStory} className="h-7 px-2.5 gap-1 text-xs">
+              <Plus className="w-3 h-3" />
+              New
             </Button>
           </div>
 
@@ -153,10 +160,10 @@ export function StoriesPageClient() {
             <button
               onClick={() => setCompetencyFilter(undefined)}
               className={cn(
-                'px-2.5 py-1 rounded-full text-xs border transition-colors',
+                'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors',
                 !competencyFilter
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                  ? 'bg-gray-900 text-white border-gray-900'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
               )}
             >
               All
@@ -166,10 +173,10 @@ export function StoriesPageClient() {
                 key={c}
                 onClick={() => setCompetencyFilter(competencyFilter === c ? undefined : c)}
                 className={cn(
-                  'px-2.5 py-1 rounded-full text-xs border transition-colors',
+                  'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors',
                   competencyFilter === c
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
                 )}
               >
                 {c}
@@ -235,15 +242,17 @@ export function StoriesPageClient() {
               <StoryInlinePanel key="inline-panel" />
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-center">
+            <div className="flex items-center justify-center h-full text-center p-8">
               <div>
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-7 h-7 text-gray-300" strokeWidth={1.5} />
                 </div>
-                <p className="text-sm font-medium text-gray-500">Select a story to view details</p>
-                <p className="text-xs text-gray-400 mt-1">Or press N to create a new one</p>
+                <p className="text-sm font-semibold text-gray-700 mb-1">Select a story</p>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Choose from the list, or press{' '}
+                  <kbd className="inline-flex items-center px-1.5 py-0.5 rounded border border-gray-200 text-xs font-mono text-gray-500 bg-white">N</kbd>
+                  {' '}to create a new one
+                </p>
               </div>
             </div>
           )}

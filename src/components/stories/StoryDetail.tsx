@@ -32,16 +32,16 @@ function StarSection({
   const colors = LETTER_COLORS[letter] ?? { bg: 'bg-gray-100', text: 'text-gray-500' }
 
   return (
-    <div className="space-y-3">
+    <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 space-y-2.5">
       {/* Section header */}
-      <div className="flex items-center gap-2.5">
-        <div className={cn('w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm', colors.bg, colors.text)}>
+      <div className="flex items-center gap-2">
+        <div className={cn('w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs', colors.bg, colors.text)}>
           {letter}
         </div>
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{label}</span>
       </div>
       {/* Content */}
-      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap pl-9">{content}</p>
+      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
     </div>
   )
 }
@@ -92,17 +92,17 @@ export function StoryDetail({ story }: StoryDetailProps) {
           {/* Breadcrumb */}
           {category && (
             <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-xs font-medium text-blue-600">{category}</span>
-              {story.competencies[1] && (
+              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">{category}</span>
+              {story.competencies[0] && (
                 <>
-                  <span className="text-xs text-gray-400">/</span>
-                  <span className="text-xs text-gray-500">{story.competencies[1]}</span>
+                  <span className="text-xs text-gray-300">›</span>
+                  <span className="text-xs text-gray-500">{story.competencies[0]}</span>
                 </>
               )}
             </div>
           )}
           {/* Title */}
-          <h2 className="text-2xl font-bold text-gray-900 leading-snug">{story.title}</h2>
+          <h2 className="text-xl font-bold text-gray-900 leading-snug">{story.title}</h2>
         </div>
 
         {/* Action buttons */}
@@ -141,10 +141,15 @@ export function StoryDetail({ story }: StoryDetailProps) {
       {/* Competency badges */}
       {story.competencies.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {story.competencies.map(c => (
+          {story.competencies.map((c, i) => (
             <span
               key={c}
-              className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100"
+              className={cn(
+                'px-2.5 py-0.5 rounded-full text-xs font-medium border',
+                i === 0
+                  ? 'bg-blue-50 text-blue-700 border-blue-200'
+                  : 'bg-gray-50 text-gray-600 border-gray-200'
+              )}
             >
               {c}
             </span>
@@ -157,14 +162,14 @@ export function StoryDetail({ story }: StoryDetailProps) {
 
       {/* STAR sections or freeform */}
       {story.full_content ? (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 font-bold text-sm text-gray-500">
-              S
+        <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 space-y-2.5">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 font-bold text-xs text-gray-500">
+              ¶
             </div>
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Story</span>
           </div>
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap pl-9">{story.full_content}</p>
+          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{story.full_content}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -187,8 +192,9 @@ export function StoryDetail({ story }: StoryDetailProps) {
       )}
 
       {/* Timestamps */}
-      <div className="pt-4 border-t border-gray-100 text-xs text-gray-400 flex gap-4">
+      <div className="pt-4 border-t border-gray-100 text-xs text-gray-400 flex gap-4 flex-wrap">
         <span>Created {new Date(story.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+        <span>·</span>
         <span>Updated {new Date(story.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
       </div>
     </div>
