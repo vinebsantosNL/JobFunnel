@@ -23,7 +23,7 @@ export async function GET(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   const stageCounts: Record<Stage, number> = {
-    saved: 0, applied: 0, screening: 0, interviewing: 0, offer: 0, rejected: 0, withdrawn: 0,
+    saved: 0, applied: 0, screening: 0, interviewing: 0, offer: 0, hired: 0, rejected: 0, withdrawn: 0,
   }
   for (const row of data ?? []) {
     stageCounts[row.stage as Stage] = (stageCounts[row.stage as Stage] ?? 0) + 1

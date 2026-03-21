@@ -44,6 +44,13 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     borderColor: 'border-green-200',
     dotColor: 'bg-green-500',
   },
+  hired: {
+    label: 'Hired',
+    color: 'text-emerald-700',
+    bgColor: 'bg-emerald-50',
+    borderColor: 'border-emerald-300',
+    dotColor: 'bg-emerald-500',
+  },
   rejected: {
     label: 'Rejected',
     color: 'text-red-500',
@@ -60,7 +67,23 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
   },
 }
 
-export const STAGES: Stage[] = ['saved', 'applied', 'screening', 'interviewing', 'offer', 'rejected', 'withdrawn']
+export const STAGES: Stage[] = ['saved', 'applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn']
+
+// Sequential funnel stages (skippable steps used for skip detection)
+export const SEQUENTIAL_STAGES: Stage[] = ['saved', 'applied', 'screening', 'interviewing', 'offer', 'hired']
+
+// Stage order index for skip detection
+export const STAGE_ORDER: Partial<Record<Stage, number>> = {
+  saved: 0,
+  applied: 1,
+  screening: 2,
+  interviewing: 3,
+  offer: 4,
+  hired: 5,
+}
+
+// Active stages for pipeline counter (in-progress applications)
+export const ACTIVE_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer']
 
 export const PRIORITY_CONFIG = {
   low: { label: 'Low', color: 'bg-gray-300' },

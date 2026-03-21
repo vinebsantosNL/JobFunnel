@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { CVVersion, JobApplication, Stage } from '@/types/database'
 
-const APPLIED_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer', 'rejected', 'withdrawn']
-const SCREENING_STAGES: Stage[] = ['screening', 'interviewing', 'offer']
-const INTERVIEWING_STAGES: Stage[] = ['interviewing', 'offer']
+const APPLIED_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn']
+const SCREENING_STAGES: Stage[] = ['screening', 'interviewing', 'offer', 'hired']
+const INTERVIEWING_STAGES: Stage[] = ['interviewing', 'offer', 'hired']
 
 export interface CVComparisonRow {
   version_id: string | null
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
     const totalApplied = groupApps.length
     const reachedScreening = groupApps.filter((a) => SCREENING_STAGES.includes(a.stage)).length
     const reachedInterviewing = groupApps.filter((a) => INTERVIEWING_STAGES.includes(a.stage)).length
-    const reachedOffer = groupApps.filter((a) => a.stage === 'offer').length
+    const reachedOffer = groupApps.filter((a) => a.stage === 'offer' || a.stage === 'hired').length
 
     // avg days from applied_at to stage_updated_at (for non-applied stages)
     const daysValues = groupApps

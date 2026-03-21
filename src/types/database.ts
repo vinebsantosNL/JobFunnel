@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export type Stage = 'saved' | 'applied' | 'screening' | 'interviewing' | 'offer' | 'rejected' | 'withdrawn'
+export type Stage = 'saved' | 'applied' | 'screening' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn'
 export type Priority = 'low' | 'medium' | 'high'
 export type UserRole = 'software_engineer' | 'product_manager' | 'data_scientist' | 'other'
 export type SubscriptionTier = 'free' | 'pro'

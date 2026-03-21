@@ -6,18 +6,23 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useCVVersions } from '@/hooks/useCVVersions'
 
 interface FilterBarProps {
   search: string
   priority: string
-  cvVersionIds: string[] // selected cv version ids; empty array = no filter; ['__untagged__'] = untagged only
+  cvVersionIds: string[]
   onSearchChange: (v: string) => void
   onPriorityChange: (v: string) => void
   onCVVersionChange: (ids: string[]) => void
-  totalCount: number
+  activeCount: number
 }
 
 export function FilterBar({
@@ -27,17 +32,13 @@ export function FilterBar({
   onSearchChange,
   onPriorityChange,
   onCVVersionChange,
-  totalCount,
+  activeCount,
 }: FilterBarProps) {
   const { data: versions = [] } = useCVVersions(false)
   const activeVersions = versions.filter((v) => !v.is_archived)
 
-  // Derive a single display value for the Select (simple single-select for composability)
-  // '__all__' means no filter; '__untagged__' means only untagged; a uuid means filter by that version
-  const selectValue =
-    cvVersionIds.length === 0
-      ? '__all__'
-      : cvVersionIds[0]
+  const cvSelectValue = cvVersionIds.length === 0 ? '__all__' : cvVersionIds[0]
+  const selectedResume = activeVersions.find((v) => v.id === cvSelectValue)
 
   function handleCVVersionSelect(v: string | null) {
     if (!v || v === '__all__') {
@@ -47,17 +48,32 @@ export function FilterBar({
     }
   }
 
+  const priorityLabel =
+    priority === 'all'
+      ? 'Priority'
+      : `Priority: ${priority.charAt(0).toUpperCase() + priority.slice(1)}`
+
+  let resumeLabel = 'Resumes'
+  if (cvSelectValue === '__untagged__') {
+    resumeLabel = 'Resume: Untagged'
+  } else if (selectedResume) {
+    resumeLabel = `Resume: ${selectedResume.name.length > 12 ? selectedResume.name.slice(0, 12) + '…' : selectedResume.name}`
+  }
+
   return (
     <div className="flex items-center gap-3 flex-wrap">
       <Input
         placeholder="Search company or title..."
         value={search}
-        onChange={e => onSearchChange(e.target.value)}
+        onChange={(e) => onSearchChange(e.target.value)}
         className="max-w-xs h-8 text-sm"
       />
+
       <Select value={priority} onValueChange={(v) => onPriorityChange(v ?? 'all')}>
-        <SelectTrigger className="w-36 h-8 text-sm">
-          <SelectValue placeholder="All priorities" />
+        <SelectTrigger className="w-40 h-8 text-sm">
+          <span className={priority !== 'all' ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+            {priorityLabel}
+          </span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All priorities</SelectItem>
@@ -68,12 +84,14 @@ export function FilterBar({
       </Select>
 
       {activeVersions.length > 0 && (
-        <Select value={selectValue} onValueChange={handleCVVersionSelect}>
+        <Select value={cvSelectValue} onValueChange={handleCVVersionSelect}>
           <SelectTrigger className="w-44 h-8 text-sm">
-            <SelectValue placeholder="CV Version" />
+            <span className={cvSelectValue !== '__all__' ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+              {resumeLabel}
+            </span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All CV versions</SelectItem>
+            <SelectItem value="__all__">All resumes</SelectItem>
             <SelectItem value="__untagged__">Untagged</SelectItem>
             {activeVersions.map((v) => (
               <SelectItem key={v.id} value={v.id}>
@@ -84,7 +102,20 @@ export function FilterBar({
         </Select>
       )}
 
-      <span className="text-xs text-gray-400 ml-auto">{totalCount} application{totalCount !== 1 ? 's' : ''}</span>
+      <TooltipProvider delay={300}>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span className="text-xs text-gray-400 ml-auto cursor-default" />
+            }
+          >
+            {activeCount} active application{activeCount !== 1 ? 's' : ''}
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            Active: Applied, Screening, Interviewing &amp; Offer
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   )
 }

@@ -8,7 +8,7 @@ export const createJobSchema = z.object({
   salary_min: z.number().int().positive().optional().nullable(),
   salary_max: z.number().int().positive().optional().nullable(),
   salary_currency: z.string().length(3).optional().nullable(),
-  stage: z.enum(['saved', 'applied', 'screening', 'interviewing', 'offer', 'rejected', 'withdrawn']).default('saved'),
+  stage: z.enum(['saved', 'applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn']).default('saved'),
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
   notes: z.string().max(5000).optional(),
   applied_at: z.string().optional().nullable(),
@@ -18,7 +18,7 @@ export const createJobSchema = z.object({
 export const updateJobSchema = createJobSchema.partial()
 
 export const updateStageSchema = z.object({
-  stage: z.enum(['saved', 'applied', 'screening', 'interviewing', 'offer', 'rejected', 'withdrawn']),
+  stage: z.enum(['saved', 'applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn']),
 })
 
 export type CreateJobInput = z.infer<typeof createJobSchema>

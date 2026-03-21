@@ -50,6 +50,7 @@ const STAGE_NEXT: Partial<Record<Stage, Stage>> = {
   applied: 'screening',
   screening: 'interviewing',
   interviewing: 'offer',
+  offer: 'hired',
 }
 
 const avatarColors = [
@@ -75,7 +76,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
 
   if (!job) return null
 
-  const LOCKED_STAGES: Stage[] = ['screening', 'interviewing', 'offer', 'rejected', 'withdrawn']
+  const LOCKED_STAGES: Stage[] = ['screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn']
   const isCVVersionLocked = LOCKED_STAGES.includes(job.stage)
 
   const stageConfig = STAGE_CONFIG[job.stage]

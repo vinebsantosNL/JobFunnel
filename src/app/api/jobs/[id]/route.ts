@@ -2,6 +2,18 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { updateJobSchema } from '@/lib/validations/job'
 
+const SEQUENTIAL_STAGES_SERVER = ['saved', 'applied', 'screening', 'interviewing', 'offer', 'hired'] as const
+type SequentialStage = typeof SEQUENTIAL_STAGES_SERVER[number]
+
+const STAGE_ORDER_SERVER: Record<string, number> = {
+  saved: 0,
+  applied: 1,
+  screening: 2,
+  interviewing: 3,
+  offer: 4,
+  hired: 5,
+}
+
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
@@ -33,7 +45,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const updatePayload: Record<string, unknown> = { ...parsed.data }
 
-  const LOCKED_STAGES = ['screening', 'interviewing', 'offer', 'rejected', 'withdrawn'] as const
+  const LOCKED_STAGES = ['screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn'] as const
 
   // Fetch current job for stage history and version locking
   const { data: current } = await supabase
@@ -73,6 +85,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   if (parsed.data.stage && current.stage !== parsed.data.stage) {
+    const fromIdx = STAGE_ORDER_SERVER[current.stage] ?? -1
+    const toIdx = STAGE_ORDER_SERVER[parsed.data.stage] ?? -1
+
+    // Insert intermediate stage_history entries if skipping sequential stages
+    if (fromIdx >= 0 && toIdx > fromIdx + 1) {
+      for (let i = fromIdx; i < toIdx - 1; i++) {
+        await supabase.from('stage_history').insert({
+          job_id: id,
+          from_stage: SEQUENTIAL_STAGES_SERVER[i] as SequentialStage,
+          to_stage: SEQUENTIAL_STAGES_SERVER[i + 1] as SequentialStage,
+        })
+      }
+    }
+
+    // Insert the actual transition
     await supabase.from('stage_history').insert({
       job_id: id,
       from_stage: current.stage,

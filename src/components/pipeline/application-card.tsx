@@ -2,7 +2,8 @@
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { JobApplication } from '@/types/database'
+import { Clock } from 'lucide-react'
+import type { JobApplication, Stage } from '@/types/database'
 import { PRIORITY_CONFIG } from '@/lib/stages'
 import { Badge } from '@/components/ui/badge'
 
@@ -16,6 +17,12 @@ const AVATAR_COLORS = ['#2563EB', '#7C3AED', '#059669', '#D97706', '#DC2626']
 function getDaysInStage(stageUpdatedAt: string): number {
   const diff = Date.now() - new Date(stageUpdatedAt).getTime()
   return Math.floor(diff / (1000 * 60 * 60 * 24))
+}
+
+const STALE_THRESHOLDS: Partial<Record<Stage, number>> = {
+  screening: 5,
+  interviewing: 7,
+  offer: 5,
 }
 
 export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
@@ -33,6 +40,9 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
   const days = getDaysInStage(job.stage_updated_at)
   const priority = PRIORITY_CONFIG[job.priority]
 
+  const staleThreshold = STALE_THRESHOLDS[job.stage]
+  const isStale = staleThreshold !== undefined && days >= staleThreshold
+
   const colorIdx = job.company_name.charCodeAt(0) % AVATAR_COLORS.length
   const avatarColor = AVATAR_COLORS[colorIdx]
   const firstLetter = job.company_name.charAt(0).toUpperCase()
@@ -44,7 +54,7 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
       {...attributes}
       {...listeners}
       onClick={() => onClick(job)}
-      className="bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-gray-200 transition-all cursor-grab active:cursor-grabbing select-none"
+      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-gray-200 transition-all cursor-grab active:cursor-grabbing select-none${isStale ? ' ring-1 ring-amber-300' : ''}`}
     >
       {/* Top row: avatar + company + priority dot + days */}
       <div className="flex items-center gap-2">
@@ -59,6 +69,11 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
           className={`w-2 h-2 rounded-full flex-shrink-0 ${priority.color}`}
           title={`${priority.label} priority`}
         />
+        {isStale && (
+          <span title="Follow-up recommended">
+            <Clock className="w-3 h-3 text-amber-500 flex-shrink-0" />
+          </span>
+        )}
         <Badge variant="secondary" className="text-xs flex-shrink-0">
           {days === 0 ? 'Today' : `${days}d`}
         </Badge>

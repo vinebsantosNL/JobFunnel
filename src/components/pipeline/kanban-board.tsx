@@ -11,13 +11,18 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import type { JobApplication, Stage } from '@/types/database'
-import { STAGES } from '@/lib/stages'
+import { STAGES, STAGE_CONFIG, SEQUENTIAL_STAGES, STAGE_ORDER, ACTIVE_STAGES } from '@/lib/stages'
 import { KanbanColumn } from './kanban-column'
 import { ApplicationCard } from './application-card'
 import { ApplicationModal } from './application-modal'
 import { FilterBar } from './filter-bar'
 import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/use-jobs'
 import type { CreateJobInput, UpdateJobInput } from '@/lib/validations/job'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 export function KanbanBoard() {
   const [search, setSearch] = useState('')
@@ -25,6 +30,7 @@ export function KanbanBoard() {
   const [cvVersionIds, setCVVersionIds] = useState<string[]>([])
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null)
   const [activeJob, setActiveJob] = useState<JobApplication | null>(null)
+  const [pendingMove, setPendingMove] = useState<{ job: JobApplication; newStage: Stage } | null>(null)
 
   const { data: rawJobs = [], isLoading, error } = useJobs({ search, priority })
 
@@ -37,6 +43,12 @@ export function KanbanBoard() {
       return job.cv_version_id === selected
     })
   }, [rawJobs, cvVersionIds])
+
+  const activeCount = useMemo(
+    () => jobs.filter((j) => ACTIVE_STAGES.includes(j.stage)).length,
+    [jobs]
+  )
+
   const createJob = useCreateJob()
   const updateJob = useUpdateJob()
   const deleteJob = useDeleteJob()
@@ -65,9 +77,18 @@ export function KanbanBoard() {
     const job = (active.data.current as { job: JobApplication }).job
     const newStage = over.id as Stage
 
-    if (job.stage !== newStage && STAGES.includes(newStage)) {
-      updateJob.mutate({ id: job.id, input: { stage: newStage } })
+    if (job.stage === newStage || !STAGES.includes(newStage)) return
+
+    const oldIdx = STAGE_ORDER[job.stage]
+    const newIdx = STAGE_ORDER[newStage]
+    const isSkip = oldIdx !== undefined && newIdx !== undefined && (newIdx - oldIdx) > 1
+
+    if (isSkip) {
+      setPendingMove({ job, newStage })
+      return
     }
+
+    updateJob.mutate({ id: job.id, input: { stage: newStage } })
   }
 
   async function handleAddJob(input: CreateJobInput) {
@@ -107,12 +128,12 @@ export function KanbanBoard() {
         onSearchChange={setSearch}
         onPriorityChange={setPriority}
         onCVVersionChange={setCVVersionIds}
-        totalCount={jobs.length}
+        activeCount={activeCount}
       />
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4 min-w-0">
-          {STAGES.map(stage => (
+          {STAGES.map((stage) => (
             <KanbanColumn
               key={stage}
               stage={stage}
@@ -137,6 +158,68 @@ export function KanbanBoard() {
         onUpdate={handleUpdate}
         onDelete={handleDelete}
       />
+
+      {/* Skip Stage Confirmation Modal */}
+      {pendingMove && (
+        <Dialog open onOpenChange={(open) => { if (!open) setPendingMove(null) }}>
+          <DialogContent className="max-w-md">
+            <DialogTitle className="text-base font-semibold">Confirm Stage Jump</DialogTitle>
+            <div className="text-sm text-gray-600 space-y-1 mt-1">
+              {(() => {
+                const fromLabel = STAGE_CONFIG[pendingMove.job.stage].label
+                const toLabel = STAGE_CONFIG[pendingMove.newStage].label
+                const fromIdx = STAGE_ORDER[pendingMove.job.stage] ?? 0
+                const toIdx = STAGE_ORDER[pendingMove.newStage] ?? 0
+                const skipped = SEQUENTIAL_STAGES.slice(fromIdx + 1, toIdx).map(
+                  (s) => STAGE_CONFIG[s].label
+                )
+                const nextStage = SEQUENTIAL_STAGES[fromIdx + 1]
+                return (
+                  <>
+                    <p>
+                      You&apos;re moving <strong>{pendingMove.job.job_title}</strong> from{' '}
+                      <strong>{fromLabel}</strong> directly to <strong>{toLabel}</strong>
+                      {skipped.length > 0 && `, skipping ${skipped.join(', ')}`}.
+                    </p>
+                    <p className="text-gray-400 mt-2">
+                      Was this intentional? If you confirm, intermediate stages will be logged
+                      automatically to preserve your funnel metrics.
+                    </p>
+                    <div className="flex flex-col gap-2 mt-4">
+                      <button
+                        className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        onClick={() => {
+                          updateJob.mutate({ id: pendingMove.job.id, input: { stage: pendingMove.newStage } })
+                          setPendingMove(null)
+                        }}
+                      >
+                        Yes, move to {toLabel}
+                      </button>
+                      {nextStage && nextStage !== pendingMove.newStage && (
+                        <button
+                          className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                          onClick={() => {
+                            updateJob.mutate({ id: pendingMove.job.id, input: { stage: nextStage } })
+                            setPendingMove(null)
+                          }}
+                        >
+                          No, move to {STAGE_CONFIG[nextStage].label} instead
+                        </button>
+                      )}
+                      <button
+                        className="w-full px-4 py-2 text-gray-400 hover:text-gray-600 text-sm transition-colors"
+                        onClick={() => setPendingMove(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
