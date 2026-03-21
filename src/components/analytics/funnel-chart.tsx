@@ -5,32 +5,26 @@ import type { Stage } from '@/types/database'
 import { ArrowDown } from 'lucide-react'
 
 const STAGE_COLORS: Partial<Record<Stage, string>> = {
-  applied: '#2563EB',
-  screening: '#7C3AED',
+  applied:      '#2563EB',
+  screening:    '#7C3AED',
   interviewing: '#F59E0B',
-  offer: '#10B981',
-  hired: '#059669',
-  rejected: '#EF4444',
-}
-
-const STAGE_LABELS: Partial<Record<Stage, string>> = {
-  applied: 'Applied',
-  screening: 'Screening',
-  interviewing: 'Interviewing',
-  offer: 'Offer',
-  hired: 'Hired',
-  rejected: 'Rejected',
+  offer:        '#10B981',
 }
 
 const FUNNEL_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer']
 
-// Bottom row: current stage counts — Screening+Interviewing+Offer+Hired+Rejected should sum to Total Applied
-const SUMMARY_STAGES: Stage[] = ['screening', 'interviewing', 'offer', 'hired', 'rejected']
+const STAGE_LABELS: Partial<Record<Stage, string>> = {
+  applied:      'Applied',
+  screening:    'Screening',
+  interviewing: 'Interviewing',
+  offer:        'Offer',
+}
 
+// Conversion rate for each stage transition (shown between bars)
 const CONVERSION_LABELS: Partial<Record<Stage, string>> = {
-  screening: 'Applied → Screening',
+  screening:    'Applied → Screening',
   interviewing: 'Screening → Interview',
-  offer: 'Interview → Offer',
+  offer:        'Interview → Offer',
 }
 
 interface FunnelChartProps {
@@ -41,91 +35,83 @@ export function FunnelChart({ data }: FunnelChartProps) {
   const stageCounts = data.stage_counts
   const funnelCounts = data.funnel_counts
 
-  // Applied is cumulative (denominator). Everything else is relative to it.
-  const totalApplied = Math.max(funnelCounts.applied ?? 0, 1)
-
-  const conversionRates: Partial<Record<Stage, number>> = {
-    screening: data.applied_to_screening,
+  // Bar width = step-over-step conversion rate so bar and label tell the same story
+  // Applied is always 100% (the baseline anchor)
+  const barWidths: Partial<Record<Stage, number>> = {
+    applied:      100,
+    screening:    data.applied_to_screening,
     interviewing: data.screening_to_interview,
-    offer: data.interview_to_offer,
+    offer:        data.interview_to_offer,
   }
 
-  // Get count and width% for each bar
-  function getBarData(stage: Stage): { count: number; pct: number } {
-    if (stage === 'applied') {
-      // Applied bar uses cumulative total, always 100%
-      return { count: funnelCounts.applied ?? 0, pct: 100 }
-    }
-    // All other bars use current stage count
-    const count = stageCounts[stage] ?? 0
-    const pct = Math.round((count / totalApplied) * 100)
-    return { count, pct }
+  const conversionRates: Partial<Record<Stage, number>> = {
+    screening:    data.applied_to_screening,
+    interviewing: data.screening_to_interview,
+    offer:        data.interview_to_offer,
+  }
+
+  // Count to show next to label — Applied uses cumulative, others use current stage
+  function getCount(stage: Stage): number {
+    if (stage === 'applied') return funnelCounts.applied ?? 0
+    return stageCounts[stage] ?? 0
   }
 
   return (
     <div className="space-y-0">
       {FUNNEL_STAGES.map((stage, idx) => {
-        const { count, pct } = getBarData(stage)
+        const width = barWidths[stage] ?? 0
+        const count = getCount(stage)
         const color = STAGE_COLORS[stage]!
         const convRate = conversionRates[stage]
         const convLabel = CONVERSION_LABELS[stage]
+        const isApplied = stage === 'applied'
 
         return (
           <div key={stage}>
-            {/* Conversion rate arrow between stages */}
-            {idx > 0 && (
+            {/* Step-over-step conversion label between stages */}
+            {idx > 0 && convRate !== undefined && (
               <div className="flex items-center gap-2 py-1.5 pl-1">
                 <ArrowDown className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
                 <span className="text-xs text-gray-400">{convLabel}:</span>
                 <span className={`text-xs font-semibold ${
-                  (convRate ?? 0) >= 50 ? 'text-green-600' :
-                  (convRate ?? 0) >= 25 ? 'text-amber-600' : 'text-red-500'
-                }`}>{convRate ?? 0}%</span>
+                  convRate >= 50  ? 'text-green-600' :
+                  convRate >= 25  ? 'text-amber-500' : 'text-red-500'
+                }`}>
+                  {convRate}%
+                </span>
               </div>
             )}
 
             {/* Bar row */}
             <div className="flex items-center gap-3">
-              <div className="w-24 text-right flex-shrink-0">
-                <span className="text-sm font-medium text-gray-700">{STAGE_LABELS[stage]}</span>
-                <span className="text-xs text-gray-400 ml-1">({count})</span>
-              </div>
-              <div className="flex-1 bg-gray-100 rounded-full h-7 relative overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-700 flex items-center justify-end pr-2"
-                  style={{ width: `${Math.max(pct, pct > 0 ? 4 : 0)}%`, backgroundColor: color }}
-                >
-                  {pct >= 15 && (
-                    <span className="text-white text-xs font-semibold">{pct}%</span>
-                  )}
-                </div>
-                {pct > 0 && pct < 15 && (
-                  <span
-                    className="absolute top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600"
-                    style={{ left: `calc(${pct}% + 8px)` }}
-                  >
-                    {pct}%
+              {/* Left label: Stage · X jobs */}
+              <div className="w-32 text-right flex-shrink-0">
+                {isApplied ? (
+                  <span className="text-sm font-bold text-gray-900">
+                    Applied · <span className="font-normal text-gray-500">{count} jobs</span>
+                  </span>
+                ) : (
+                  <span className="text-sm text-gray-600">
+                    {STAGE_LABELS[stage]} · <span className="text-gray-400">{count}</span>
                   </span>
                 )}
+              </div>
+
+              {/* Bar — width equals the step-over-step conversion rate */}
+              <div className="flex-1 bg-gray-100 rounded-full h-7 relative overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.max(width, width > 0 ? 3 : 0)}%`,
+                    backgroundColor: color,
+                    opacity: isApplied ? 1 : 0.85,
+                  }}
+                />
               </div>
             </div>
           </div>
         )
       })}
-
-      {/* Bottom summary: Screening+Interviewing+Offer+Hired+Rejected sums to Total Applied */}
-      <div className="flex items-end justify-between mt-5 pt-4 border-t border-gray-100">
-        {SUMMARY_STAGES.map((stage) => (
-          <div key={stage} className="text-center">
-            <p className="text-2xl font-bold tabular-nums" style={{ color: STAGE_COLORS[stage] }}>
-              {String(stageCounts[stage] ?? 0).padStart(2, '0')}
-            </p>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">
-              {STAGE_LABELS[stage]}
-            </p>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
