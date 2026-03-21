@@ -45,7 +45,6 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
   const deleteMutation = useDeleteCVVersion()
 
   const totalApplied = stats?.total_applied ?? 0
-  const isLowData = totalApplied < LOW_DATA_THRESHOLD && totalApplied > 0
   const hasNoApps = totalApplied === 0
 
   async function handleArchiveToggle() {
@@ -67,14 +66,6 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
     setDeleteOpen(false)
   }
 
-  // Determine top pills
-  const topPills: string[] = []
-  if (version.tags.length > 0) {
-    topPills.push(...version.tags)
-  } else if (version.is_default) {
-    topPills.push('DEFAULT')
-  }
-
   return (
     <>
       <div
@@ -86,10 +77,27 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
           version.is_archived && 'opacity-60'
         )}
       >
-        {/* Top pills */}
-        {topPills.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {topPills.map((tag) => (
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-gray-900 leading-snug">{version.name}</h3>
+            {version.is_default && (
+              <span className="text-xs uppercase tracking-wider text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full font-medium flex-shrink-0">
+                DEFAULT
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {version.is_archived && (
+              <Badge variant="secondary" className="text-xs">Archived</Badge>
+            )}
+          </div>
+        </div>
+
+        {/* Tags */}
+        {version.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 -mt-2">
+            {version.tags.map((tag) => (
               <span
                 key={tag}
                 className="text-xs uppercase tracking-wider text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full font-medium"
@@ -99,16 +107,6 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             ))}
           </div>
         )}
-
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-lg font-bold text-gray-900 leading-snug">{version.name}</h3>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            {version.is_archived && (
-              <Badge variant="secondary" className="text-xs">Archived</Badge>
-            )}
-          </div>
-        </div>
 
         {/* Description */}
         {version.description && (
@@ -143,19 +141,6 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             </div>
           </div>
 
-          {/* Low data warning */}
-          {isLowData && (
-            <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200 text-xs text-amber-700">
-              ⚠ Too few applications for reliable data
-            </div>
-          )}
-        </div>
-
-        {/* Overlapping avatar circles */}
-        <div className="flex items-center">
-          <div className="w-6 h-6 rounded-full bg-blue-200" />
-          <div className="w-6 h-6 rounded-full bg-green-200 -ml-1" />
-          <div className="w-6 h-6 rounded-full bg-purple-200 -ml-1" />
         </div>
 
         {/* Actions */}

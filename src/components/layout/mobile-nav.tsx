@@ -9,7 +9,7 @@ const navItems = [
   { href: '/pipeline', label: 'Pipeline', icon: '⬡' },
   { href: '/analytics', label: 'Analytics', icon: '▲' },
   { href: '/stories', label: 'Stories', icon: '✦' },
-  { href: '/cv-versions', label: 'CV Versions', icon: '📄' },
+  { href: '/cv-versions', label: 'Resume Builder', icon: '📄' },
   { href: '/settings', label: 'Settings', icon: '⚙' },
 ]
 
