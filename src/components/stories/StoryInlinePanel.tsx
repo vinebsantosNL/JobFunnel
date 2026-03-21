@@ -35,7 +35,7 @@ export function StoryInlinePanel() {
             {/* Panel header — only shown for form modes */}
             {isFormMode && (
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h2 className="font-semibold text-sm text-gray-900 uppercase tracking-wide">{panelTitle}</h2>
+                <h2 className="font-semibold text-sm text-gray-900">{panelTitle}</h2>
                 <button
                   type="button"
                   onClick={closeExpanded}

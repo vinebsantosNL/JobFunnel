@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Star } from 'lucide-react'
+import { Star, AlignLeft } from 'lucide-react'
 import { useUpdateStory, useDeleteStory } from '@/hooks/use-stories'
 import { useStoryLibrary } from '@/hooks/useStoryLibrary'
 import { Button } from '@/components/ui/button'
@@ -89,17 +89,9 @@ export function StoryDetail({ story }: StoryDetailProps) {
       {/* Top: breadcrumb + actions */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          {/* Breadcrumb */}
+          {/* Category label */}
           {category && (
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">{category}</span>
-              {story.competencies[0] && (
-                <>
-                  <span className="text-xs text-gray-300">›</span>
-                  <span className="text-xs text-gray-500">{story.competencies[0]}</span>
-                </>
-              )}
-            </div>
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1.5">{category}</p>
           )}
           {/* Title */}
           <h2 className="text-xl font-bold text-gray-900 leading-snug">{story.title}</h2>
@@ -164,8 +156,8 @@ export function StoryDetail({ story }: StoryDetailProps) {
       {story.full_content ? (
         <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 space-y-2.5">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 font-bold text-xs text-gray-500">
-              ¶
+            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+              <AlignLeft className="w-3 h-3 text-gray-400" />
             </div>
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Story</span>
           </div>
@@ -178,14 +170,11 @@ export function StoryDetail({ story }: StoryDetailProps) {
           <StarSection letter="A" label="Action" content={story.action} />
           <StarSection letter="R" label="Result" content={story.result} />
           {!story.situation && !story.task && !story.action && !story.result && (
-            <div className="text-center py-8">
-              <p className="text-sm text-gray-400 italic">No content yet.</p>
-              <button
-                onClick={() => editStory(story.id)}
-                className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                + Add your story
-              </button>
+            <div className="text-center py-8 space-y-3">
+              <p className="text-sm text-gray-400">No content yet.</p>
+              <Button variant="outline" size="sm" onClick={() => editStory(story.id)}>
+                Add your story
+              </Button>
             </div>
           )}
         </div>
