@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -80,16 +80,16 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-gray-900 leading-snug">{version.name}</h3>
+            <h3 className="text-base font-semibold text-gray-900 leading-snug truncate">{version.name}</h3>
             {version.is_default && (
-              <span className="text-xs uppercase tracking-wider text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full font-medium flex-shrink-0">
-                DEFAULT
+              <span className="text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full font-medium flex-shrink-0 leading-none">
+                Default
               </span>
             )}
-          </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
             {version.is_archived && (
-              <Badge variant="secondary" className="text-xs">Archived</Badge>
+              <span className="text-xs text-gray-400 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full font-medium flex-shrink-0 leading-none">
+                Archived
+              </span>
             )}
           </div>
         </div>
@@ -144,41 +144,52 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer">
-            View Full Stats →
-          </span>
-          <div className="flex items-center gap-3">
-            <button
+        <div className="flex items-center justify-between pt-1 gap-2">
+          <Link
+            href="/app/analytics"
+            className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            View stats →
+          </Link>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setEditOpen(true)}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="h-7 px-2.5 text-xs text-gray-500"
             >
               Edit
-            </button>
+            </Button>
             {!version.is_default && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleSetDefault}
                 disabled={updateMutation.isPending}
-                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                className="h-7 px-2.5 text-xs text-gray-500"
               >
-                Set Default
-              </button>
+                Set default
+              </Button>
             )}
             {hasNoApps ? (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setDeleteOpen(true)}
-                className="text-sm text-red-500 hover:text-red-600 transition-colors"
+                className="h-7 px-2.5 text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
               >
                 Delete
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleArchiveToggle}
                 disabled={updateMutation.isPending}
-                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                className="h-7 px-2.5 text-xs text-gray-500"
               >
                 {version.is_archived ? 'Unarchive' : 'Archive'}
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -192,7 +203,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent size="md">
           <DialogHeader>
-            <DialogTitle>Edit CV Version</DialogTitle>
+            <DialogTitle>Edit Resume Version</DialogTitle>
           </DialogHeader>
           <CVVersionForm
             version={version}
@@ -206,7 +217,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent size="sm">
           <DialogHeader>
-            <DialogTitle>Delete CV version?</DialogTitle>
+            <DialogTitle>Delete resume version?</DialogTitle>
             <DialogDescription>
               This will permanently delete &ldquo;{version.name}&rdquo;. This action cannot be
               undone.

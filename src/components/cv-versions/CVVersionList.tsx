@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FileText } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useCVVersions } from '@/hooks/useCVVersions'
 import { useSubscription } from '@/hooks/use-subscription'
@@ -61,13 +62,13 @@ export function CVVersionList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">
-          Create and manage different CV variants to find what works best
+          Create and compare resume variants to find what converts best.
         </p>
         <Button
           onClick={() => setCreateOpen(true)}
           disabled={atFreeLimit}
-          title={atFreeLimit ? 'Upgrade to Pro for unlimited CV versions' : undefined}
-          className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 ml-4"
+          title={atFreeLimit ? 'Upgrade to Pro for unlimited resume versions' : undefined}
+          className="flex-shrink-0 ml-4"
         >
           + New Version
         </Button>
@@ -84,10 +85,12 @@ export function CVVersionList() {
       {/* Active versions grid */}
       {active.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 py-16 text-center">
-          <span className="text-4xl mb-3">📄</span>
-          <p className="text-gray-600 font-medium">No CV versions yet</p>
-          <p className="text-sm text-gray-400 mt-1 mb-4">
-            Create your first version to start tracking which CV performs best.
+          <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+            <FileText className="w-6 h-6 text-gray-300" strokeWidth={1.5} />
+          </div>
+          <p className="text-gray-700 font-semibold mb-1">No resume versions yet</p>
+          <p className="text-sm text-gray-400 mb-5">
+            Create your first version to start tracking which resume performs best.
           </p>
           <Button onClick={() => setCreateOpen(true)}>+ New Version</Button>
         </div>
@@ -142,7 +145,7 @@ export function CVVersionList() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent size="md">
           <DialogHeader>
-            <DialogTitle>New CV Version</DialogTitle>
+            <DialogTitle>New Resume Version</DialogTitle>
           </DialogHeader>
           <CVVersionForm
             onSuccess={() => setCreateOpen(false)}
