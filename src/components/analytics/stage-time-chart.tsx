@@ -11,20 +11,40 @@ const STAGE_HEX: Partial<Record<Stage, string>> = {
   screening: '#7C3AED',
   interviewing: '#F59E0B',
   offer: '#10B981',
-  rejected: '#EF4444',
-  withdrawn: '#94A3B8',
 }
+
+// Enforce display order: saved → applied → screening → interviewing → offer
+const ORDERED_STAGES: Stage[] = ['saved', 'applied', 'screening', 'interviewing', 'offer']
 
 interface StageTimeChartProps {
   data: StageTimePoint[]
 }
 
 export function StageTimeChart({ data }: StageTimeChartProps) {
-  const chartData = data.map(d => ({
-    stage: STAGE_CONFIG[d.stage]?.label ?? d.stage,
-    avg_days: d.avg_days,
-    color: STAGE_HEX[d.stage] ?? '#94A3B8',
-  }))
+  // Sort by canonical order, suppress stages with 0 avg days
+  const stageMap = new Map(data.map(d => [d.stage, d]))
+
+  const chartData = ORDERED_STAGES
+    .filter(stage => {
+      const point = stageMap.get(stage)
+      return point && point.avg_days > 0
+    })
+    .map(stage => {
+      const point = stageMap.get(stage)!
+      return {
+        stage: STAGE_CONFIG[stage]?.label ?? stage,
+        avg_days: point.avg_days,
+        color: STAGE_HEX[stage] ?? '#94A3B8',
+      }
+    })
+
+  if (chartData.length === 0) {
+    return (
+      <div className="h-56 flex items-center justify-center text-gray-400 text-sm">
+        No stage data yet
+      </div>
+    )
+  }
 
   return (
     <div className="w-full h-56">

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { MetricCard } from '@/components/analytics/metric-card'
 import { FunnelChart } from '@/components/analytics/funnel-chart'
 import { TimelineChart } from '@/components/analytics/timeline-chart'
@@ -9,38 +8,52 @@ import { StageTimeChart } from '@/components/analytics/stage-time-chart'
 import { CVTestingPanel } from '@/components/analytics/CVTestingPanel'
 import { useFunnelData, useTimelineData, useStageTimeData } from '@/hooks/use-analytics'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Link from 'next/link'
 
 const DATE_PRESETS = [
-  { label: 'All time', days: undefined },
   { label: 'Last 30 days', days: 30 },
+  { label: 'Last 45 days', days: 45 },
   { label: 'Last 90 days', days: 90 },
-  { label: 'Last 6 months', days: 180 },
 ] as const
 
 type Tab = 'funnel' | 'timeline' | 'cv-testing'
 
-function getDateRange(days?: number): { from?: string; to?: string } {
-  if (!days) return {}
+function getDateRange(days: number): { from: string; to: string } {
+  const to = new Date()
   const from = new Date()
   from.setDate(from.getDate() - days)
-  return { from: from.toISOString() }
+  return { from: from.toISOString(), to: to.toISOString() }
+}
+
+function formatDateRangeLabel(days: number): string {
+  const to = new Date()
+  const from = new Date()
+  from.setDate(from.getDate() - days)
+  const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  return `${fmt(from)} – ${fmt(to)}`
 }
 
 export function AnalyticsDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('funnel')
   const [presetIndex, setPresetIndex] = useState(0)
-  const dateRange = getDateRange(DATE_PRESETS[presetIndex].days)
+
+  const preset = DATE_PRESETS[presetIndex]
+  const dateRange = getDateRange(preset.days)
 
   const { data: funnel, isLoading: funnelLoading } = useFunnelData(dateRange)
   const { data: timeline, isLoading: timelineLoading } = useTimelineData()
   const { data: stageTime, isLoading: stageTimeLoading } = useStageTimeData()
 
+  // Total Applied = jobs in Applied stage only
   const totalApplied = funnel?.stage_counts.applied ?? 0
+
+  // Active = Screening + Interviewing + Offer
   const activeApps = funnel
-    ? Object.entries(funnel.stage_counts)
-        .filter(([s]) => !['rejected', 'withdrawn', 'saved'].includes(s))
-        .reduce((acc, [, v]) => acc + v, 0)
+    ? (funnel.stage_counts.screening ?? 0) + (funnel.stage_counts.interviewing ?? 0) + (funnel.stage_counts.offer ?? 0)
     : 0
+
+  const offers = funnel?.stage_counts.offer ?? 0
+  const conversion = funnel?.overall_conversion ?? 0
 
   return (
     <div className="flex-1 p-6 overflow-auto">
@@ -70,35 +83,59 @@ export function AnalyticsDashboard() {
         </div>
 
         {(activeTab === 'funnel' || activeTab === 'timeline') && (
-          /* Date filter — tab-style */
-          <div className="border border-gray-200 rounded-lg overflow-hidden flex w-fit">
-            {DATE_PRESETS.map((preset, i) => (
-              <button
-                key={i}
-                onClick={() => setPresetIndex(i)}
-                className={`px-4 py-1.5 text-sm transition-colors ${
-                  presetIndex === i
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {preset.label}
-              </button>
-            ))}
+          <div className="flex flex-col gap-1 w-fit">
+            {/* Date filter pills */}
+            <div className="border border-gray-200 rounded-lg overflow-hidden flex">
+              {DATE_PRESETS.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPresetIndex(i)}
+                  className={`px-4 py-1.5 text-sm transition-colors ${
+                    presetIndex === i
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            {/* Active range subtitle */}
+            <p className="text-xs text-gray-400 pl-1">{formatDateRangeLabel(preset.days)}</p>
           </div>
         )}
 
         {activeTab === 'funnel' && (
           <>
-            {/* Metric cards */}
+            {/* Metric cards — Total Applied → Active → Offers → Conversion */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <MetricCard title="Total Applied" value={funnelLoading ? '—' : String(totalApplied)} subtitle="Applications submitted" borderColor="border-blue-500" />
-              <MetricCard title="Active" value={funnelLoading ? '—' : String(activeApps)} subtitle="In pipeline" borderColor="border-blue-400" />
-              <MetricCard title="Conversion" value={funnelLoading ? '—' : `${funnel?.overall_conversion ?? 0}%`} subtitle="Applied → Offer" borderColor="border-green-500" />
-              <MetricCard title="Offers" value={funnelLoading ? '—' : String(funnel?.stage_counts.offer ?? 0)} subtitle="Received" borderColor="border-amber-500" />
+              <MetricCard
+                title="Total Applied"
+                value={funnelLoading ? '—' : String(totalApplied)}
+                subtitle="Applications submitted"
+                borderColor="border-blue-500"
+              />
+              <MetricCard
+                title="Active"
+                value={funnelLoading ? '—' : String(activeApps)}
+                subtitle="Screening · Interview · Offer"
+                borderColor="border-blue-400"
+              />
+              <MetricCard
+                title="Offers"
+                value={funnelLoading ? '—' : String(offers)}
+                subtitle="Received"
+                borderColor="border-amber-500"
+              />
+              <MetricCard
+                title="Conversion"
+                value={funnelLoading ? '—' : `${conversion}%`}
+                subtitle="Applied → Offer"
+                borderColor="border-green-500"
+              />
             </div>
 
-            {/* Funnel + Sidebar layout */}
+            {/* Funnel + Stage Efficiency side-by-side */}
             <div className="flex gap-4">
               {/* Funnel chart */}
               <Card className="flex-1">
@@ -110,66 +147,78 @@ export function AnalyticsDashboard() {
                     <div className="h-64 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
                   ) : funnel ? (
                     <FunnelChart data={funnel} />
-                  ) : null}
-                  {funnel && (
-                    <div className="flex gap-4 flex-wrap mt-4 text-xs text-gray-500">
-                      <span>Applied → Screening: <strong>{funnel.applied_to_screening}%</strong></span>
-                      <span>Screening → Interview: <strong>{funnel.screening_to_interview}%</strong></span>
-                      <span>Interview → Offer: <strong>{funnel.interview_to_offer}%</strong></span>
-                    </div>
+                  ) : (
+                    <div className="h-64 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Right sidebar */}
-              <div className="w-64 flex-shrink-0 space-y-4 hidden lg:block">
-                {/* Key Insight blue card */}
-                <div className="bg-blue-600 text-white rounded-xl p-4">
-                  <h3 className="text-sm font-bold mb-2">Key Insight</h3>
-                  <p className="text-xs text-blue-100 leading-relaxed">
-                    Candidates with tagged CVs are getting higher screening rates. Tag all applications for better insights.
-                  </p>
-                  <Link
-                    href="/analytics/cv-testing"
-                    className="block border border-white text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 w-full mt-3 text-center transition-colors"
-                  >
-                    View CV Testing
-                  </Link>
-                </div>
+              {/* Stage Efficiency — anchored to funnel */}
+              <div className="w-60 flex-shrink-0 hidden lg:flex flex-col">
+                <Card className="flex-1">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold text-gray-900">Stage Efficiency</CardTitle>
+                    <p className="text-xs text-gray-400">Average days spent per stage</p>
+                  </CardHeader>
+                  <CardContent className="space-y-0 pt-0">
+                    {[
+                      {
+                        label: 'Applied → Screened',
+                        stage: 'applied' as const,
+                        color: 'bg-blue-500',
+                        link: '#funnel',
+                      },
+                      {
+                        label: 'Screening → Interview',
+                        stage: 'screening' as const,
+                        color: 'bg-purple-500',
+                        link: '#funnel',
+                      },
+                      {
+                        label: 'Interview → Offer',
+                        stage: 'interviewing' as const,
+                        color: 'bg-amber-500',
+                        link: '#funnel',
+                      },
+                    ].map(({ label, stage, color }) => {
+                      const days = stageTime?.find(s => s.stage === stage)?.avg_days
+                      return (
+                        <div key={stage} className="flex items-center gap-2 py-2.5 border-b border-gray-50 last:border-0">
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${color}`} />
+                          <span className="text-xs text-gray-500 flex-1 leading-tight">{label}</span>
+                          <span className="text-xs font-semibold text-gray-900 tabular-nums">
+                            {days != null ? `${days}d` : '—'}
+                          </span>
+                        </div>
+                      )
+                    })}
 
-                {/* Stage Efficiency card */}
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Stage Efficiency</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-                      <span className="text-xs text-gray-500 flex-1">Screening Speed</span>
-                      <span className="text-xs font-semibold text-gray-900">
-                        {stageTime && stageTime.length > 0
-                          ? `${stageTime.find(s => s.stage === 'applied')?.avg_days ?? '2.4'} days`
-                          : '2.4 days'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-                      <span className="text-xs text-gray-500 flex-1">Interview Lead Time</span>
-                      <span className="text-xs font-semibold text-gray-900">
-                        {stageTime && stageTime.length > 0
-                          ? `${stageTime.find(s => s.stage === 'screening')?.avg_days ?? '8.1'} days`
-                          : '8.1 days'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                      <span className="text-xs text-gray-500 flex-1">Avg Process Time</span>
-                      <span className="text-xs font-semibold text-gray-900">14 days</span>
-                    </div>
-                  </div>
-                </div>
+                    {/* Avg total process time */}
+                    {stageTime && stageTime.length > 0 && (() => {
+                      const total = stageTime
+                        .filter(s => ['applied', 'screening', 'interviewing'].includes(s.stage))
+                        .reduce((sum, s) => sum + s.avg_days, 0)
+                      return (
+                        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full flex-shrink-0 bg-gray-300" />
+                          <span className="text-xs text-gray-500 flex-1">Avg total process</span>
+                          <span className="text-xs font-semibold text-gray-900">{Math.round(total)}d</span>
+                        </div>
+                      )
+                    })()}
+
+                    <Link
+                      href="/pipeline"
+                      className="block mt-4 text-center text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                    >
+                      View Pipeline →
+                    </Link>
+                  </CardContent>
+                </Card>
               </div>
             </div>
 
-            {/* Stage time chart */}
+            {/* Average Days per Stage */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Average Days per Stage</CardTitle>
@@ -177,10 +226,8 @@ export function AnalyticsDashboard() {
               <CardContent>
                 {stageTimeLoading ? (
                   <div className="h-56 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
-                ) : stageTime && stageTime.length > 0 ? (
-                  <StageTimeChart data={stageTime} />
                 ) : (
-                  <div className="h-56 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
+                  <StageTimeChart data={stageTime ?? []} />
                 )}
               </CardContent>
             </Card>

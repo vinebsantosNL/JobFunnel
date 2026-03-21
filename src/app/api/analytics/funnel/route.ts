@@ -16,8 +16,9 @@ export async function GET(request: Request) {
     .select('stage')
     .eq('user_id', user.id)
 
-  if (from) query = query.gte('applied_at', from)
-  if (to) query = query.lte('applied_at', to)
+  // Use created_at for reliable date filtering (applied_at is optional and often null)
+  if (from) query = query.gte('created_at', from)
+  if (to) query = query.lte('created_at', to)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
