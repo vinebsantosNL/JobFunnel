@@ -1,38 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useDashboardStats } from '@/hooks/use-dashboard-stats'
-
-const TILE_CONFIG = [
-  {
-    label: 'TOTAL APPLICATIONS',
-    key: 'totalApplications' as const,
-    borderColor: 'border-blue-500',
-    descriptor: '+12%',
-    descriptorClass: 'text-green-500',
-  },
-  {
-    label: 'ACTIVE PIPELINE',
-    key: 'activeApplications' as const,
-    borderColor: 'border-blue-400',
-    descriptor: '↑ Active',
-    descriptorClass: 'text-gray-400',
-  },
-  {
-    label: 'INTERVIEWS',
-    key: 'interviews' as const,
-    borderColor: 'border-purple-500',
-    descriptor: 'This month',
-    descriptorClass: 'text-gray-400',
-  },
-  {
-    label: 'STORIES CREATED',
-    key: 'storiesCreated' as const,
-    borderColor: 'border-amber-500',
-    descriptor: 'Total',
-    descriptorClass: 'text-gray-400',
-  },
-]
 
 function StatTile({
   label,
@@ -41,6 +16,8 @@ function StatTile({
   borderColor,
   descriptor,
   descriptorClass,
+  href,
+  tooltip,
 }: {
   label: string
   value: number
@@ -48,11 +25,13 @@ function StatTile({
   borderColor: string
   descriptor: string
   descriptorClass: string
+  href: string
+  tooltip?: React.ReactNode
 }) {
-  return (
+  const inner = (
     <Link
-      href="/pipeline"
-      className={`bg-white rounded-xl border border-gray-200 border-l-4 ${borderColor} p-5 hover:shadow-sm transition-all group`}
+      href={href}
+      className={`bg-white rounded-xl border border-gray-200 border-l-4 ${borderColor} p-5 hover:shadow-sm transition-all group block`}
     >
       {loading ? (
         <div className="space-y-2">
@@ -67,31 +46,75 @@ function StatTile({
           <p className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
             {value}
           </p>
-          {value > 0 && (
-            <p className={`text-xs mt-1 ${descriptorClass}`}>{descriptor}</p>
-          )}
+          <p className={`text-xs mt-1 ${descriptorClass}`}>{descriptor}</p>
         </>
       )}
     </Link>
   )
+
+  if (tooltip) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{inner}</TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">{tooltip}</TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return inner
 }
 
 export function DashboardStatsBlock() {
   const { data, isLoading } = useDashboardStats()
 
+  const breakdown = data?.activeBreakdown
+  const breakdownTooltip = breakdown ? (
+    <span>
+      {breakdown.screening} Screening · {breakdown.interviewing} Interviewing · {breakdown.offer} Offer
+    </span>
+  ) : undefined
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {TILE_CONFIG.map((tile) => (
+    <TooltipProvider delayDuration={200}>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatTile
-          key={tile.label}
-          label={tile.label}
-          value={data?.[tile.key] ?? 0}
+          label="TOTAL APPLICATIONS"
+          value={data?.totalApplications ?? 0}
           loading={isLoading}
-          borderColor={tile.borderColor}
-          descriptor={tile.descriptor}
-          descriptorClass={tile.descriptorClass}
+          borderColor="border-blue-500"
+          descriptor="Last 30 days"
+          descriptorClass="text-gray-400"
+          href="/pipeline"
         />
-      ))}
-    </div>
+        <StatTile
+          label="ACTIVE PIPELINE"
+          value={data?.activeApplications ?? 0}
+          loading={isLoading}
+          borderColor="border-blue-400"
+          descriptor="Screening · Interviewing · Offer"
+          descriptorClass="text-gray-400"
+          href="/pipeline"
+          tooltip={breakdownTooltip}
+        />
+        <StatTile
+          label="INTERVIEWS"
+          value={data?.interviews ?? 0}
+          loading={isLoading}
+          borderColor="border-purple-500"
+          descriptor="Active now"
+          descriptorClass="text-gray-400"
+          href="/pipeline"
+        />
+        <StatTile
+          label="STAR STORIES"
+          value={data?.storiesCreated ?? 0}
+          loading={isLoading}
+          borderColor="border-amber-500"
+          descriptor="All time"
+          descriptorClass="text-gray-400"
+          href="/stories"
+        />
+      </div>
+    </TooltipProvider>
   )
 }

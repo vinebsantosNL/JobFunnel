@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 export interface DashboardStats {
   totalApplications: number
   activeApplications: number
+  activeBreakdown: { screening: number; interviewing: number; offer: number }
   interviews: number
   storiesCreated: number
   hasFirstJob: boolean

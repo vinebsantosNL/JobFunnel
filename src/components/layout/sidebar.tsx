@@ -59,10 +59,13 @@ export function Sidebar() {
   return (
     <aside className="flex flex-col w-60 h-full bg-[#f0f2f8] border-r border-gray-200">
       {/* Logo */}
-      <div className="flex items-center h-16 px-5">
+      <Link
+        href="/dashboard"
+        className="flex items-center h-16 px-5 cursor-pointer hover:opacity-80 transition-opacity"
+      >
         <span className="text-lg font-bold text-blue-600">Job</span>
-        <span className="text-lg font-bold text-gray-900">Funnel</span>
-      </div>
+        <span className="text-lg font-bold text-gray-900">&nbsp;Funnel</span>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-0.5">
