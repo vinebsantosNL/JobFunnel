@@ -44,15 +44,16 @@ export function AnalyticsDashboard() {
   const { data: timeline, isLoading: timelineLoading } = useTimelineData()
   const { data: stageTime, isLoading: stageTimeLoading } = useStageTimeData(dateRange)
 
-  // Total Applied = jobs in Applied stage only
-  const totalApplied = funnel?.stage_counts.applied ?? 0
+  // Total Applied = all jobs that ever reached the Applied stage (funnel cumulative count)
+  const totalApplied = funnel?.funnel_counts.applied ?? 0
 
-  // Active = Screening + Interviewing + Offer
+  // Active = currently in Screening, Interviewing, or Offer (current stage distribution)
   const activeApps = funnel
     ? (funnel.stage_counts.screening ?? 0) + (funnel.stage_counts.interviewing ?? 0) + (funnel.stage_counts.offer ?? 0)
     : 0
 
-  const offers = funnel?.stage_counts.offer ?? 0
+  // Offers = currently in Offer or Hired (received an offer)
+  const offers = funnel ? (funnel.stage_counts.offer ?? 0) + (funnel.stage_counts.hired ?? 0) : 0
   const conversion = funnel?.overall_conversion ?? 0
 
   return (

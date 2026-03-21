@@ -31,7 +31,9 @@ interface FunnelChartProps {
 }
 
 export function FunnelChart({ data }: FunnelChartProps) {
-  const maxCount = Math.max(data.stage_counts.applied ?? 0, 1)
+  // Use cumulative funnel_counts so bars show "ever reached this stage"
+  const counts = data.funnel_counts
+  const maxCount = Math.max(counts.applied ?? 0, 1)
 
   const conversionRates: Partial<Record<Stage, number>> = {
     screening: data.applied_to_screening,
@@ -42,7 +44,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
   return (
     <div className="space-y-0">
       {FUNNEL_STAGES.map((stage, idx) => {
-        const count = data.stage_counts[stage] ?? 0
+        const count = counts[stage as keyof typeof counts] ?? 0
         const pct = Math.round((count / maxCount) * 100)
         const color = STAGE_COLORS[stage]!
         const convRate = conversionRates[stage]
@@ -94,7 +96,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
         {FUNNEL_STAGES.map((stage) => (
           <div key={stage} className="text-center">
             <p className="text-2xl font-bold tabular-nums" style={{ color: STAGE_COLORS[stage] }}>
-              {String(data.stage_counts[stage] ?? 0).padStart(2, '0')}
+              {String(counts[stage as keyof typeof counts] ?? 0).padStart(2, '0')}
             </p>
             <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">
               {STAGE_LABELS[stage]}
