@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { Star } from 'lucide-react'
 import { useUpdateStory, useDeleteStory } from '@/hooks/use-stories'
 import { useStoryLibrary } from '@/hooks/useStoryLibrary'
+import { Button } from '@/components/ui/button'
 import type { InterviewStory } from '@/types/database'
 import { cn } from '@/lib/utils'
 
@@ -105,36 +107,34 @@ export function StoryDetail({ story }: StoryDetailProps) {
 
         {/* Action buttons */}
         <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={handleToggleFavorite}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-amber-400 transition-colors"
             title={story.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+            className={story.is_favorite ? 'text-amber-400 hover:text-amber-500' : 'text-gray-400 hover:text-amber-400'}
           >
-            <svg className="w-4 h-4" fill={story.is_favorite ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-          </button>
-          <button
+            <Star className="w-4 h-4" fill={story.is_favorite ? 'currentColor' : 'none'} />
+          </Button>
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => editStory(story.id)}
-            className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Edit
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant={confirmDelete ? 'destructive' : 'outline'}
+            size="sm"
             onClick={handleDelete}
             disabled={deleting}
-            className={cn(
-              'px-3 py-1.5 text-sm font-medium rounded-lg transition-colors',
-              confirmDelete
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'text-red-500 border border-red-200 hover:bg-red-50'
-            )}
+            className={cn(!confirmDelete && 'text-red-500 border-red-200 hover:bg-red-50')}
           >
-            {deleting ? '...' : confirmDelete ? 'Confirm' : 'Delete'}
-          </button>
+            {deleting ? '…' : confirmDelete ? 'Confirm delete' : 'Delete'}
+          </Button>
         </div>
       </div>
 

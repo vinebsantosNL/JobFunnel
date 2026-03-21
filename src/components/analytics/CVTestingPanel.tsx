@@ -88,7 +88,7 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
   const bestIsLowSample = best ? best.total_applied < LOW_SAMPLE_THRESHOLD : false
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {/* Best Performing Version */}
       <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-blue-500 p-5">
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Best Performing Version</p>
@@ -110,15 +110,6 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
         ) : (
           <p className="text-sm text-gray-400">No data yet</p>
         )}
-      </div>
-
-      {/* Total Tracked Applications */}
-      <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-purple-500 p-5">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Total Tracked Applications</p>
-        <p className="text-2xl font-bold text-gray-900">{totalTracked}</p>
-        <p className="text-xs text-gray-400 mt-1">
-          across {versionCount} version{versionCount !== 1 ? 's' : ''}
-        </p>
       </div>
 
       {/* Screening Rate All Versions */}

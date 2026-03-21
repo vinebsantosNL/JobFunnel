@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -189,8 +190,8 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
 
       {/* Submit */}
       <div className="flex gap-2 pt-1">
-        <Button type="submit" disabled={isPending} className="flex-1 bg-blue-600 hover:bg-blue-700">
-          {isPending ? 'Saving...' : 'Save Story'}
+        <Button type="submit" disabled={isPending} className="flex-1 gap-1.5">
+          {isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving…</> : 'Save Story'}
         </Button>
         <Button type="button" variant="outline" onClick={closeExpanded}>
           Cancel

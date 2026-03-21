@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { StoryInlinePanel } from './StoryInlinePanel'
@@ -65,8 +65,8 @@ function StoryListItem({
     <div
       onClick={onClick}
       className={cn(
-        'px-4 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors',
-        isActive && 'bg-blue-50 border-l-4 border-l-blue-500'
+        'px-4 py-3 border-b border-gray-100 cursor-pointer transition-colors',
+        isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
       )}
     >
       {category && (
@@ -183,16 +183,34 @@ export function StoriesPageClient() {
           {isLoading ? (
             <div className="p-4 text-sm text-gray-400">Loading stories...</div>
           ) : stories && stories.length > 0 ? (
-            stories.map((story) => (
-              <StoryListItem
-                key={story.id}
-                story={story}
-                isActive={story.id === activeStoryId}
-                onClick={() => openStory(story.id)}
-              />
-            ))
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
+            >
+              {stories.map((story) => (
+                <motion.div
+                  key={story.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 4 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
+                  }}
+                >
+                  <StoryListItem
+                    story={story}
+                    isActive={story.id === activeStoryId}
+                    onClick={() => openStory(story.id)}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
           ) : (
-            <div className="p-6 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="p-6 text-center"
+            >
               <p className="text-sm font-medium text-gray-900 mb-1">No stories yet</p>
               <p className="text-xs text-gray-500 mb-4">
                 {search || competencyFilter
@@ -204,7 +222,7 @@ export function StoriesPageClient() {
                   Add your first story
                 </Button>
               )}
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
