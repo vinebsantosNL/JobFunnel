@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 interface ApplicationCardProps {
   job: JobApplication
   onClick: (job: JobApplication) => void
+  isOverlay?: boolean
 }
 
 const AVATAR_COLORS = ['#2563EB', '#7C3AED', '#059669', '#D97706', '#DC2626']
@@ -27,7 +28,7 @@ const STALE_THRESHOLDS: Partial<Record<Stage, number>> = {
   offer: 5,
 }
 
-export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
+export function ApplicationCard({ job, onClick, isOverlay = false }: ApplicationCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
     id: job.id,
     data: { job },
@@ -48,9 +49,10 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
   // Outer div: dnd-kit positional transform only — no Framer Motion interference
   const dndStyle = {
     transform: CSS.Transform.toString(transform),
-    // Fast spring curve instead of dnd-kit default (which is slow)
     transition: isDragging ? undefined : 'transform 120ms cubic-bezier(0.16, 1, 0.3, 1)',
-    opacity: isDragging ? 0.3 : 1,
+    // isOverlay = the card rendered inside DragOverlay — always full opacity
+    // isDragging = the source placeholder left behind in the column — faded
+    opacity: !isOverlay && isDragging ? 0.3 : 1,
   }
 
   const days = getDaysInStage(job.stage_updated_at)
@@ -77,7 +79,7 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
       onClick={() => onClick(job)}
       animate={justDropped ? { scale: [1, 1.02, 1] } : { scale: 1 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 transition-[box-shadow,border-color,translate] duration-150 select-none${isDragging ? ' shadow-xl ring-1 ring-blue-200' : ''}${isStale ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
+      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm select-none transition-[box-shadow,border-color,translate] duration-150${isOverlay ? ' shadow-xl ring-1 ring-blue-200 rotate-1 cursor-grabbing' : ' hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 cursor-grab active:cursor-grabbing'}${isStale && !isDragging ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
     >
       {/* Top row: avatar + company + priority dot + days */}
       <div className="flex items-center gap-2">

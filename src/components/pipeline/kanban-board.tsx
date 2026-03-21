@@ -55,7 +55,7 @@ export function KanbanBoard() {
   const deleteJob = useDeleteJob()
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 3 } })
   )
 
   const jobsByStage = useMemo(() => {
@@ -145,9 +145,9 @@ export function KanbanBoard() {
           ))}
         </div>
 
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {activeJob && (
-            <ApplicationCard job={activeJob} onClick={() => {}} />
+            <ApplicationCard job={activeJob} onClick={() => {}} isOverlay />
           )}
         </DragOverlay>
       </DndContext>
