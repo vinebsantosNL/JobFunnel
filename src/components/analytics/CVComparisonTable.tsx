@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
 
-const LOW_DATA_THRESHOLD = 10
-
 type SortKey = keyof Pick<
   CVComparisonRow,
   | 'version_name'
@@ -13,7 +11,6 @@ type SortKey = keyof Pick<
   | 'screening_rate'
   | 'interview_rate'
   | 'overall_conversion'
-  | 'avg_days_in_applied'
 >
 
 interface CVComparisonTableProps {
@@ -29,42 +26,6 @@ function fmt(value: number | null, suffix = '%'): string {
 
 const ROW_BORDER_COLORS = ['#2563EB', '#64748B', '#93C5FD', '#7C3AED', '#059669']
 
-function ConfidenceBadge({ count, isUntagged, screeningRate }: { count: number; isUntagged: boolean; screeningRate: number | null }) {
-  if (isUntagged) {
-    return (
-      <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-orange-100 text-orange-700">
-        UNTRACKED
-      </span>
-    )
-  }
-  if (count < 5) {
-    return (
-      <span className="inline-flex items-center gap-1 px-3 py-1 rounded text-xs font-bold bg-amber-100 text-amber-700">
-        LOW
-      </span>
-    )
-  }
-  if (count < LOW_DATA_THRESHOLD) {
-    return (
-      <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700">
-        MEDIUM
-      </span>
-    )
-  }
-  if (count >= LOW_DATA_THRESHOLD && (screeningRate ?? 0) >= 25) {
-    return (
-      <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-green-500 text-white">
-        HIGH
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-gray-200 text-gray-700">
-      STABLE
-    </span>
-  )
-}
-
 export function CVComparisonTable({
   rows,
   cvVersionDefaults,
@@ -72,7 +33,6 @@ export function CVComparisonTable({
 }: CVComparisonTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('total_applied')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
-  const [showArchived, setShowArchived] = useState(false)
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -91,12 +51,11 @@ export function CVComparisonTable({
       .map((r) => r.screening_rate ?? 0)
   )
 
-  const filtered = showArchived
-    ? rows
-    : rows.filter((r) => {
-        if (r.version_id === null) return true
-        return !cvVersionArchived[r.version_id]
-      })
+  // Always exclude archived versions
+  const filtered = rows.filter((r) => {
+    if (r.version_id === null) return true
+    return !cvVersionArchived[r.version_id]
+  })
 
   const sorted = [...filtered].sort((a, b) => {
     const av = a[sortKey]
@@ -125,117 +84,88 @@ export function CVComparisonTable({
     { key: 'screening_rate', label: 'Applied → Screen' },
     { key: 'interview_rate', label: 'Screen → Interview' },
     { key: 'overall_conversion', label: 'Overall (Applied → Offer)' },
-    { key: 'avg_days_in_applied', label: 'Avg Days in Applied' },
   ]
 
   return (
-    <div className="space-y-3">
-      {/* Show archived checkbox — top right */}
-      <div className="flex justify-end">
-        <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={showArchived}
-            onChange={(e) => setShowArchived(e.target.checked)}
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          Show archived versions
-        </label>
-      </div>
-
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              {columns.map(({ key, label }) => (
-                <th
-                  key={key}
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap"
-                  onClick={() => handleSort(key)}
-                >
-                  {label}
-                  <SortIndicator col={key} />
-                </th>
-              ))}
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
-                Confidence
+    <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <table className="w-full text-sm">
+        <thead className="bg-gray-50 border-b border-gray-200">
+          <tr>
+            {columns.map(({ key, label }) => (
+              <th
+                key={key}
+                className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap"
+                onClick={() => handleSort(key)}
+              >
+                {label}
+                <SortIndicator col={key} />
               </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {sorted.length === 0 ? (
+            <tr>
+              <td colSpan={5} className="px-4 py-8 text-center text-gray-400 text-sm">
+                No data available
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {sorted.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-sm">
-                  No data available
-                </td>
-              </tr>
-            ) : (
-              sorted.map((row, rowIndex) => {
-                const isUntagged = row.version_id === null
-                const isDefault = row.version_id ? cvVersionDefaults[row.version_id] : false
-                const isBestScreening =
-                  !isUntagged &&
-                  bestScreeningRate > 0 &&
-                  row.screening_rate === bestScreeningRate
-                const borderColor = ROW_BORDER_COLORS[rowIndex % ROW_BORDER_COLORS.length]
+          ) : (
+            sorted.map((row, rowIndex) => {
+              const isUntagged = row.version_id === null
+              const isDefault = row.version_id ? cvVersionDefaults[row.version_id] : false
+              const isBestScreening =
+                !isUntagged &&
+                bestScreeningRate > 0 &&
+                row.screening_rate === bestScreeningRate
+              const borderColor = ROW_BORDER_COLORS[rowIndex % ROW_BORDER_COLORS.length]
 
-                return (
-                  <tr
-                    key={row.version_id ?? 'untagged'}
-                    className={`transition-colors ${isUntagged ? 'bg-gray-50/50' : 'hover:bg-gray-50'}`}
-                  >
-                    {/* Version name with colored left border */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div
-                          className="w-[3px] h-6 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: borderColor }}
-                        />
-                        {isUntagged ? (
-                          <span className="text-gray-400 italic text-sm">Untagged</span>
-                        ) : (
-                          <span className="font-semibold text-gray-900">{row.version_name}</span>
-                        )}
-                        {isDefault && (
-                          <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                            DEFAULT
-                          </Badge>
-                        )}
-                      </div>
-                    </td>
+              return (
+                <tr
+                  key={row.version_id ?? 'untagged'}
+                  className={`transition-colors ${isUntagged ? 'bg-gray-50/50' : 'hover:bg-gray-50'}`}
+                >
+                  {/* Version name with colored left border */}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div
+                        className="w-[3px] h-6 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: borderColor }}
+                      />
+                      {isUntagged ? (
+                        <span className="text-gray-400 italic text-sm">Untagged</span>
+                      ) : (
+                        <span className="font-semibold text-gray-900">{row.version_name}</span>
+                      )}
+                      {isDefault && (
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                          DEFAULT
+                        </Badge>
+                      )}
+                    </div>
+                  </td>
 
-                    {/* Applications */}
-                    <td className="px-4 py-3 text-gray-700">{row.total_applied}</td>
+                  {/* Applications */}
+                  <td className="px-4 py-3 text-gray-700">{row.total_applied}</td>
 
-                    {/* Applied → Screen */}
-                    <td className={`px-4 py-3 font-medium ${isBestScreening ? 'text-green-600' : 'text-gray-700'}`}>
-                      {fmt(row.screening_rate)}
-                    </td>
+                  {/* Applied → Screen */}
+                  <td className={`px-4 py-3 font-medium ${isBestScreening ? 'text-green-600' : 'text-gray-700'}`}>
+                    {fmt(row.screening_rate)}
+                  </td>
 
-                    {/* Screen → Interview */}
-                    <td className={`px-4 py-3 font-medium ${isBestScreening && row.interview_rate ? 'text-green-600' : 'text-gray-700'}`}>
-                      {fmt(row.interview_rate)}
-                    </td>
+                  {/* Screen → Interview */}
+                  <td className={`px-4 py-3 font-medium ${isBestScreening && row.interview_rate ? 'text-green-600' : 'text-gray-700'}`}>
+                    {fmt(row.interview_rate)}
+                  </td>
 
-                    {/* Overall conversion */}
-                    <td className="px-4 py-3 text-gray-700">{fmt(row.overall_conversion)}</td>
-
-                    {/* Avg days */}
-                    <td className="px-4 py-3 text-gray-700">
-                      {row.avg_days_in_applied !== null ? `${row.avg_days_in_applied} days` : '—'}
-                    </td>
-
-                    {/* Confidence */}
-                    <td className="px-4 py-3">
-                      <ConfidenceBadge count={row.total_applied} isUntagged={isUntagged} screeningRate={row.screening_rate} />
-                    </td>
-                  </tr>
-                )
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                  {/* Overall conversion */}
+                  <td className="px-4 py-3 text-gray-700">{fmt(row.overall_conversion)}</td>
+                </tr>
+              )
+            })
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }

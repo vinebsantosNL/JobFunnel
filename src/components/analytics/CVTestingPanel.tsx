@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
@@ -9,7 +10,29 @@ import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
 import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
 import type { CVVersion, Profile } from '@/types/database'
 
-const INDUSTRY_AVG_SCREENING = 15 // %
+const EU_AVG_SCREENING_LABEL = '2–4%'
+const LOW_SAMPLE_THRESHOLD = 10
+
+const DATE_PRESETS = [
+  { label: 'Last 30 days', days: 30 },
+  { label: 'Last 45 days', days: 45 },
+  { label: 'Last 90 days', days: 90 },
+] as const
+
+function getDateRange(days: number): { from: string; to: string } {
+  const to = new Date()
+  const from = new Date()
+  from.setDate(from.getDate() - days)
+  return { from: from.toISOString(), to: to.toISOString() }
+}
+
+function formatDateRangeLabel(days: number): string {
+  const to = new Date()
+  const from = new Date()
+  from.setDate(from.getDate() - days)
+  const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  return `${fmt(from)} – ${fmt(to)}`
+}
 
 async function fetchProfile(): Promise<Profile> {
   const res = await fetch('/api/auth/me')
@@ -38,12 +61,14 @@ async function fetchAllCVVersions(): Promise<CVVersion[]> {
 }
 
 function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
+  // Only tagged (non-untagged) versions that actually reached screening
   const tagged = rows.filter((r) => r.version_id !== null)
+  const withScreening = tagged.filter((r) => (r.reached_screening ?? 0) > 0)
   const untagged = rows.find((r) => r.version_id === null)
   const untaggedCount = untagged?.total_applied ?? 0
 
-  // Best performer by screening rate
-  const best = tagged.reduce<CVComparisonRow | null>((acc, r) => {
+  // Best performer — only among versions that reached screening
+  const best = withScreening.reduce<CVComparisonRow | null>((acc, r) => {
     if ((r.screening_rate ?? 0) > (acc?.screening_rate ?? 0)) return r
     return acc
   }, null)
@@ -56,11 +81,11 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
   const totalReachedScreening = tagged.reduce((acc, r) => acc + r.reached_screening, 0)
   const overallScreening =
     totalTracked > 0 ? Math.round((totalReachedScreening / totalTracked) * 100) : 0
-  const vsIndustry = overallScreening - INDUSTRY_AVG_SCREENING
 
-  // Compute best version's advantage vs average
+  // Advantage of best vs average
   const avgScreeningRate = totalTracked > 0 ? (totalReachedScreening / totalTracked) * 100 : 0
   const bestAdvantage = best ? ((best.screening_rate ?? 0) - avgScreeningRate).toFixed(1) : '0.0'
+  const bestIsLowSample = best ? best.total_applied < LOW_SAMPLE_THRESHOLD : false
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -70,10 +95,15 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
         {best ? (
           <>
             <p className="text-xl font-bold text-gray-900 leading-tight">{best.version_name}</p>
-            <div className="mt-1.5">
+            <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
               <span className="inline-flex items-center bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5 rounded-full">
                 +{bestAdvantage}% vs Avg
               </span>
+              {bestIsLowSample && (
+                <span className="inline-flex items-center gap-0.5 text-amber-600 text-xs">
+                  ⚠ Low sample
+                </span>
+              )}
             </div>
             <p className="text-xs text-gray-500 mt-1">{best.screening_rate ?? 0}% screening rate</p>
           </>
@@ -96,8 +126,8 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Screening Rate (All Versions)</p>
         <p className="text-2xl font-bold text-gray-900">{overallScreening}%</p>
         {totalTracked > 0 && (
-          <p className={`text-xs mt-1 ${vsIndustry >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-            {vsIndustry >= 0 ? '↑' : '↓'} {Math.abs(vsIndustry)}% vs. industry avg ({INDUSTRY_AVG_SCREENING}%)
+          <p className="text-xs mt-1 text-green-600">
+            {overallScreening}% vs. EU avg. {EU_AVG_SCREENING_LABEL}
           </p>
         )}
       </div>
@@ -122,8 +152,10 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
 }
 
 export function CVTestingPanel() {
-  const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState('')
+  const [presetIndex, setPresetIndex] = useState(0)
+
+  const preset = DATE_PRESETS[presetIndex]
+  const dateRange = useMemo(() => getDateRange(preset.days), [preset.days])
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile'],
@@ -135,20 +167,15 @@ export function CVTestingPanel() {
     queryFn: fetchAllCVVersions,
   })
 
-  const dateParams = {
-    from: fromDate || undefined,
-    to: toDate || undefined,
-  }
-
   const { data: comparisonRows, isLoading: comparisonLoading } = useQuery({
-    queryKey: ['cv-comparison', dateParams],
-    queryFn: () => fetchCVComparison(dateParams),
+    queryKey: ['cv-comparison', dateRange],
+    queryFn: () => fetchCVComparison(dateRange),
   })
 
   const isPro = profile?.subscription_tier === 'pro'
   const isLoading = profileLoading || versionsLoading || comparisonLoading
 
-  // Build lookup maps from versions list
+  // Build archived lookup for table
   const cvVersionDefaults: Record<string, boolean> = {}
   const cvVersionArchived: Record<string, boolean> = {}
   for (const v of cvVersions ?? []) {
@@ -161,53 +188,24 @@ export function CVTestingPanel() {
 
   const dataSection = (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">CV Testing Optimization</h2>
-          <p className="text-sm text-gray-500 mt-1">Comparing performance across your resume iterations.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Date range picker */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-600 font-medium" htmlFor="cv-from-date">
-              From
-            </label>
-            <input
-              id="cv-from-date"
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-600 font-medium" htmlFor="cv-to-date">
-              To
-            </label>
-            <input
-              id="cv-to-date"
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          {(fromDate || toDate) && (
+      {/* Time filter header — same as Funnel Overview */}
+      <div className="flex flex-col gap-1 w-fit">
+        <div className="border border-gray-200 rounded-lg overflow-hidden flex">
+          {DATE_PRESETS.map((p, i) => (
             <button
-              onClick={() => {
-                setFromDate('')
-                setToDate('')
-              }}
-              className="text-xs text-gray-500 hover:text-gray-700 underline underline-offset-2"
+              key={i}
+              onClick={() => setPresetIndex(i)}
+              className={`px-4 py-1.5 text-sm transition-colors ${
+                presetIndex === i
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
             >
-              Clear
+              {p.label}
             </button>
-          )}
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-            ↓ Export
-          </button>
+          ))}
         </div>
+        <p className="text-xs text-gray-400 pl-1">{formatDateRangeLabel(preset.days)}</p>
       </div>
 
       {/* Summary cards */}
@@ -255,8 +253,8 @@ export function CVTestingPanel() {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-base">Detailed Comparison</CardTitle>
+            <CardHeader>
+              <CardTitle className="text-base">CV Performance Comparison</CardTitle>
             </CardHeader>
             <CardContent>
               <CVComparisonTable
@@ -283,12 +281,9 @@ export function CVTestingPanel() {
     return (
       <div className="space-y-4">
         <div className="relative">
-          {/* Blurred preview */}
           <div className="pointer-events-none select-none blur-sm opacity-60">
             {dataSection}
           </div>
-
-          {/* Upgrade overlay */}
           <div className="absolute inset-0 backdrop-blur-sm bg-white/50 z-10 flex items-center justify-center">
             <Card className="max-w-sm w-full mx-4 shadow-xl border-blue-100">
               <CardContent className="pt-8 pb-8 text-center space-y-4">
