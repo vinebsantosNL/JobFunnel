@@ -55,7 +55,7 @@ function StatTile({
   if (tooltip) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{inner}</TooltipTrigger>
+        <TooltipTrigger render={<div />}>{inner}</TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">{tooltip}</TooltipContent>
       </Tooltip>
     )
@@ -75,7 +75,7 @@ export function DashboardStatsBlock() {
   ) : undefined
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delay={200}>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatTile
           label="TOTAL APPLICATIONS"
