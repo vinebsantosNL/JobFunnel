@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { MetricCard } from '@/components/analytics/metric-card'
 import { FunnelChart } from '@/components/analytics/funnel-chart'
 import { TimelineChart } from '@/components/analytics/timeline-chart'
@@ -38,7 +38,9 @@ export function AnalyticsDashboard() {
   const [presetIndex, setPresetIndex] = useState(0)
 
   const preset = DATE_PRESETS[presetIndex]
-  const dateRange = getDateRange(preset.days)
+  // useMemo prevents new Date() from running on every render (which changes milliseconds
+  // → different query key → infinite refetch loop stuck on Loading...)
+  const dateRange = useMemo(() => getDateRange(preset.days), [preset.days])
 
   const { data: funnel, isLoading: funnelLoading } = useFunnelData(dateRange)
   const { data: timeline, isLoading: timelineLoading } = useTimelineData()
