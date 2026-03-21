@@ -9,6 +9,8 @@ const STAGE_COLORS: Partial<Record<Stage, string>> = {
   screening: '#7C3AED',
   interviewing: '#F59E0B',
   offer: '#10B981',
+  hired: '#059669',
+  rejected: '#EF4444',
 }
 
 const STAGE_LABELS: Partial<Record<Stage, string>> = {
@@ -16,9 +18,15 @@ const STAGE_LABELS: Partial<Record<Stage, string>> = {
   screening: 'Screening',
   interviewing: 'Interviewing',
   offer: 'Offer',
+  hired: 'Hired',
+  rejected: 'Rejected',
 }
 
+// Funnel bars: current stage only (matches what user sees in pipeline)
 const FUNNEL_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer']
+
+// Bottom summary: all outcome stages so they sum to Total Applied
+const SUMMARY_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected']
 
 const CONVERSION_LABELS: Partial<Record<Stage, string>> = {
   screening: 'Applied → Screening',
@@ -31,9 +39,9 @@ interface FunnelChartProps {
 }
 
 export function FunnelChart({ data }: FunnelChartProps) {
-  // Use cumulative funnel_counts so bars show "ever reached this stage"
-  const counts = data.funnel_counts
-  const maxCount = Math.max(counts.applied ?? 0, 1)
+  // Bars use current stage_counts — matches pipeline columns exactly
+  const stageCounts = data.stage_counts
+  const maxCount = Math.max(stageCounts.applied ?? 0, 1)
 
   const conversionRates: Partial<Record<Stage, number>> = {
     screening: data.applied_to_screening,
@@ -44,7 +52,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
   return (
     <div className="space-y-0">
       {FUNNEL_STAGES.map((stage, idx) => {
-        const count = counts[stage as keyof typeof counts] ?? 0
+        const count = stageCounts[stage] ?? 0
         const pct = Math.round((count / maxCount) * 100)
         const color = STAGE_COLORS[stage]!
         const convRate = conversionRates[stage]
@@ -52,7 +60,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
 
         return (
           <div key={stage}>
-            {/* Conversion arrow between stages */}
+            {/* Conversion rate arrow between stages (from funnel_counts — cumulative) */}
             {idx > 0 && (
               <div className="flex items-center gap-2 py-1.5 pl-1">
                 <ArrowDown className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
@@ -80,8 +88,10 @@ export function FunnelChart({ data }: FunnelChartProps) {
                   )}
                 </div>
                 {pct < 15 && pct > 0 && (
-                  <span className="absolute left-[calc(var(--w)+6px)] top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600"
-                    style={{ '--w': `${pct}%` } as React.CSSProperties}>
+                  <span
+                    className="absolute top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600"
+                    style={{ left: `calc(${pct}% + 8px)` }}
+                  >
                     {pct}%
                   </span>
                 )}
@@ -91,12 +101,12 @@ export function FunnelChart({ data }: FunnelChartProps) {
         )
       })}
 
-      {/* Summary bottom row */}
+      {/* Summary row — 6 stages so they sum to Total Applied */}
       <div className="flex items-end justify-between mt-5 pt-4 border-t border-gray-100">
-        {FUNNEL_STAGES.map((stage) => (
+        {SUMMARY_STAGES.map((stage) => (
           <div key={stage} className="text-center">
             <p className="text-2xl font-bold tabular-nums" style={{ color: STAGE_COLORS[stage] }}>
-              {String(counts[stage as keyof typeof counts] ?? 0).padStart(2, '0')}
+              {String(stageCounts[stage] ?? 0).padStart(2, '0')}
             </p>
             <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">
               {STAGE_LABELS[stage]}
