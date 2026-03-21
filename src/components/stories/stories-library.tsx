@@ -51,7 +51,7 @@ export function StoriesLibrary() {
 
   return (
     <main className="flex-1 p-6 overflow-auto">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <Input

@@ -1,7 +1,7 @@
 export default function StoriesLoading() {
   return (
     <main className="flex-1 p-6 overflow-auto">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* Search bar skeleton */}
         <div className="flex items-center justify-between gap-3">
           <div className="h-8 w-64 bg-gray-100 rounded-lg animate-pulse" />
