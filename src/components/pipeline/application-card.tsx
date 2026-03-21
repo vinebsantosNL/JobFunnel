@@ -54,7 +54,7 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
       {...attributes}
       {...listeners}
       onClick={() => onClick(job)}
-      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-gray-200 transition-all cursor-grab active:cursor-grabbing select-none${isStale ? ' ring-1 ring-amber-300' : ''}`}
+      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 transition-all duration-150 cursor-grab active:cursor-grabbing active:scale-[0.98] select-none${isStale ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
     >
       {/* Top row: avatar + company + priority dot + days */}
       <div className="flex items-center gap-2">

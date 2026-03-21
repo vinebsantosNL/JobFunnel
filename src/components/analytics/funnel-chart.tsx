@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import type { FunnelData } from '@/types/analytics'
 import type { Stage } from '@/types/database'
 
@@ -24,6 +25,9 @@ interface FunnelChartProps {
 }
 
 export function FunnelChart({ data }: FunnelChartProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const funnelCounts = data.funnel_counts
 
   // Bar width = step-over-step conversion rate (Applied is baseline at 100%)
@@ -48,12 +52,14 @@ export function FunnelChart({ data }: FunnelChartProps) {
 
   return (
     <div className="space-y-3">
-      {FUNNEL_STAGES.map((stage) => {
+      {FUNNEL_STAGES.map((stage, index) => {
         const width = barWidths[stage] ?? 0
         const count = getCount(stage)
         const color = STAGE_COLORS[stage]!
         const convRate = conversionRates[stage]
         const isApplied = stage === 'applied'
+        const targetWidth = Math.max(width, width > 0 ? 4 : 0)
+        const staggerDelay = `${index * 120}ms`
 
         return (
           <div key={stage} className="flex items-center gap-3">
@@ -70,18 +76,25 @@ export function FunnelChart({ data }: FunnelChartProps) {
               )}
             </div>
 
-            {/* Bar — width equals the step-over-step conversion rate, % label inside */}
+            {/* Bar — staggered entrance, width = step-over-step conversion rate */}
             <div className="flex-1 bg-gray-100 rounded-full h-7 relative overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-700 flex items-center justify-end pr-3"
+                className="h-full rounded-full flex items-center justify-end pr-3"
                 style={{
-                  width: `${Math.max(width, width > 0 ? 4 : 0)}%`,
+                  width: mounted ? `${targetWidth}%` : '0%',
                   backgroundColor: color,
                   opacity: isApplied ? 1 : 0.85,
+                  transition: `width 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${staggerDelay}`,
                 }}
               >
                 {convRate !== undefined && convRate > 0 && (
-                  <span className="text-xs font-semibold text-white/90 leading-none">
+                  <span
+                    className="text-xs font-semibold text-white/90 leading-none"
+                    style={{
+                      opacity: mounted ? 1 : 0,
+                      transition: `opacity 0.3s ease ${index * 120 + 400}ms`,
+                    }}
+                  >
                     {convRate}%
                   </span>
                 )}

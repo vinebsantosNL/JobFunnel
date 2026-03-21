@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   Tooltip,
@@ -8,6 +9,30 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useDashboardStats } from '@/hooks/use-dashboard-stats'
+
+function useCountUp(target: number, loading: boolean): number {
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    if (loading) return
+    if (target === 0) { setCount(0); return }
+
+    const duration = 600
+    const start = performance.now()
+
+    function tick(now: number) {
+      const elapsed = now - start
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setCount(Math.round(eased * target))
+      if (progress < 1) requestAnimationFrame(tick)
+    }
+
+    requestAnimationFrame(tick)
+  }, [target, loading])
+
+  return count
+}
 
 function StatTile({
   label,
@@ -28,10 +53,12 @@ function StatTile({
   href: string
   tooltip?: React.ReactNode
 }) {
+  const displayValue = useCountUp(value, loading)
+
   const inner = (
     <Link
       href={href}
-      className={`bg-white rounded-xl border border-gray-200 border-l-4 ${borderColor} p-5 hover:shadow-sm transition-all group block`}
+      className={`bg-white rounded-xl border border-gray-200 border-l-4 ${borderColor} p-5 hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-150 group block`}
     >
       {loading ? (
         <div className="space-y-2">
@@ -44,7 +71,7 @@ function StatTile({
             {label}
           </p>
           <p className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-            {value}
+            {displayValue}
           </p>
           <p className={`text-xs mt-1 ${descriptorClass}`}>{descriptor}</p>
         </>
