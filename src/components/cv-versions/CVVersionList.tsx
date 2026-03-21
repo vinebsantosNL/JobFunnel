@@ -8,11 +8,11 @@ import { CVVersionCard } from './CVVersionCard'
 import { CVVersionForm } from './CVVersionForm'
 import { Button } from '@/components/ui/button'
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
 
 const FREE_TIER_LIMIT = 2
@@ -171,20 +171,18 @@ export function CVVersionList() {
         </div>
       )}
 
-      {/* Create Sheet */}
-      <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>New CV Version</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            <CVVersionForm
-              onSuccess={() => setCreateOpen(false)}
-              onCancel={() => setCreateOpen(false)}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+      {/* Create Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent size="md">
+          <DialogHeader>
+            <DialogTitle>New CV Version</DialogTitle>
+          </DialogHeader>
+          <CVVersionForm
+            onSuccess={() => setCreateOpen(false)}
+            onCancel={() => setCreateOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

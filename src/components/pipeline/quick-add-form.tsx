@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { Stage } from '@/types/database'
@@ -62,8 +63,8 @@ export function QuickAddForm({ stage, onAdd }: QuickAddFormProps) {
         className="text-sm h-8"
       />
       <div className="flex gap-2">
-        <Button type="submit" size="sm" className="flex-1 h-7 text-xs" disabled={loading}>
-          {loading ? '...' : 'Add'}
+        <Button type="submit" size="sm" className="flex-1 h-7 text-xs gap-1" disabled={loading}>
+          {loading ? <><Loader2 className="w-3 h-3 animate-spin" />Adding…</> : 'Add'}
         </Button>
         <Button
           type="button"

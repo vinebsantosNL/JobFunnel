@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { Loader2, Check } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -78,6 +79,7 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
 
   const [role, setRole] = useState(initialValues?.target_role ?? '')
   const [date, setDate] = useState(initialValues?.target_date?.slice(0, 7) ?? '') // YYYY-MM
+  const [justSaved, setJustSaved] = useState(false)
   const [salaryKey, setSalaryKey] = useState(
     salaryRangeKey(initialValues?.target_salary_min ?? null, initialValues?.target_salary_max)
   )
@@ -110,7 +112,8 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
       toast.success('Career goal saved')
       queryClient.invalidateQueries({ queryKey: ['profile'] })
       queryClient.invalidateQueries({ queryKey: ['career-goal'] })
-      onOpenChange(false)
+      setJustSaved(true)
+      setTimeout(() => { setJustSaved(false); onOpenChange(false) }, 1000)
     },
     onError: (err: Error) => toast.error(err.message),
   })
@@ -180,8 +183,12 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-              {mutation.isPending ? 'Saving…' : 'Save Goal'}
+            <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || justSaved} className="gap-1.5">
+              {mutation.isPending ? (
+                <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving…</>
+              ) : justSaved ? (
+                <><Check className="w-3.5 h-3.5" />Saved!</>
+              ) : 'Save Goal'}
             </Button>
           </DialogFooter>
         </div>

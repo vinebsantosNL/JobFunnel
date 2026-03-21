@@ -4,17 +4,12 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { CVVersionForm } from './CVVersionForm'
 import { useUpdateCVVersion, useDeleteCVVersion } from '@/hooks/useCVVersions'
@@ -208,25 +203,23 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
         )}
       </div>
 
-      {/* Edit Sheet */}
-      <Sheet open={editOpen} onOpenChange={setEditOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Edit CV Version</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            <CVVersionForm
-              version={version}
-              onSuccess={() => setEditOpen(false)}
-              onCancel={() => setEditOpen(false)}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+      {/* Edit Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent size="md">
+          <DialogHeader>
+            <DialogTitle>Edit CV Version</DialogTitle>
+          </DialogHeader>
+          <CVVersionForm
+            version={version}
+            onSuccess={() => setEditOpen(false)}
+            onCancel={() => setEditOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent>
+        <DialogContent size="sm">
           <DialogHeader>
             <DialogTitle>Delete CV version?</DialogTitle>
             <DialogDescription>
@@ -234,7 +227,10 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
               undone.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex gap-2 justify-end mt-4">
+          {deleteMutation.error && (
+            <p className="text-sm text-red-500">{deleteMutation.error.message}</p>
+          )}
+          <DialogFooter>
             <Button variant="ghost" onClick={() => setDeleteOpen(false)}>Cancel</Button>
             <Button
               variant="destructive"
@@ -243,10 +239,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             >
               {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
             </Button>
-          </div>
-          {deleteMutation.error && (
-            <p className="text-sm text-red-500 mt-2">{deleteMutation.error.message}</p>
-          )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

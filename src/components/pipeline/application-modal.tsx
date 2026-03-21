@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from '@/components/ui/sheet'
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -119,13 +119,13 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
   ]
 
   return (
-    <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
-      <SheetContent
-        side="right"
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <DialogContent
+        size="2xl"
         showCloseButton={false}
-        className="sm:max-w-2xl p-0 gap-0 flex flex-col"
+        className="p-0 gap-0"
       >
-        <SheetTitle className="sr-only">{job.job_title} at {job.company_name}</SheetTitle>
+        <DialogTitle className="sr-only">{job.job_title} at {job.company_name}</DialogTitle>
 
         {/* Header bar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-white">
@@ -163,7 +163,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 bg-white">
+        <div className="overflow-y-auto max-h-[80vh] bg-white">
           <div className="px-6 pt-6 pb-4">
             {/* Company row + stage badge */}
             <div className="flex items-start justify-between gap-4 mb-4">
@@ -411,7 +411,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
             )}
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }

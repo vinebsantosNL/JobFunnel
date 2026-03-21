@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -74,19 +75,26 @@ export function Sidebar() {
             key={href}
             href={href}
             className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              'relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
               isActive(href)
-                ? 'bg-white text-blue-700 shadow-sm border-l-4 border-blue-600'
+                ? 'text-blue-700'
                 : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
             )}
           >
+            {isActive(href) && (
+              <motion.div
+                layoutId="nav-indicator"
+                className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              />
+            )}
             <Icon
               className={cn(
-                'w-4 h-4 flex-shrink-0',
+                'relative z-10 w-4 h-4 flex-shrink-0',
                 isActive(href) ? 'text-blue-600' : 'text-gray-400'
               )}
             />
-            {label}
+            <span className="relative z-10">{label}</span>
           </Link>
         ))}
       </nav>
@@ -116,19 +124,26 @@ export function Sidebar() {
             key={href}
             href={href}
             className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              'relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
               isActive(href)
-                ? 'bg-white text-blue-700 shadow-sm border-l-4 border-blue-600'
+                ? 'text-blue-700'
                 : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
             )}
           >
+            {isActive(href) && (
+              <motion.div
+                layoutId="nav-indicator"
+                className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              />
+            )}
             <Icon
               className={cn(
-                'w-4 h-4 flex-shrink-0',
+                'relative z-10 w-4 h-4 flex-shrink-0',
                 isActive(href) ? 'text-blue-600' : 'text-gray-400'
               )}
             />
-            {label}
+            <span className="relative z-10">{label}</span>
           </Link>
         ))}
 

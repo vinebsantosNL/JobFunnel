@@ -21,6 +21,7 @@ import type { CreateJobInput, UpdateJobInput } from '@/lib/validations/job'
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 
@@ -162,8 +163,10 @@ export function KanbanBoard() {
       {/* Skip Stage Confirmation Modal */}
       {pendingMove && (
         <Dialog open onOpenChange={(open) => { if (!open) setPendingMove(null) }}>
-          <DialogContent className="max-w-md">
-            <DialogTitle className="text-base font-semibold">Confirm Stage Jump</DialogTitle>
+          <DialogContent size="md">
+            <DialogHeader>
+              <DialogTitle>Confirm Stage Jump</DialogTitle>
+            </DialogHeader>
             <div className="text-sm text-gray-600 space-y-1 mt-1">
               {(() => {
                 const fromLabel = STAGE_CONFIG[pendingMove.job.stage].label
