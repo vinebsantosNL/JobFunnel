@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { useDashboardStats } from '@/hooks/use-dashboard-stats'
 
 interface ChecklistItem {
@@ -151,11 +152,26 @@ export function GettingStartedBlock() {
           ))}
         </div>
       ) : (
-        <div>
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+          }}
+        >
           {items.map((item) => (
-            <CheckItem key={item.label} item={item} />
+            <motion.div
+              key={item.label}
+              variants={{
+                hidden: { opacity: 0, y: 6 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
+              }}
+            >
+              <CheckItem item={item} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   )

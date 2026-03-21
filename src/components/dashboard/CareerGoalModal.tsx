@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -116,7 +117,7 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent size="md">
         <DialogHeader>
           <DialogTitle>Edit Career Goal</DialogTitle>
         </DialogHeader>
@@ -175,14 +176,14 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-2">
+          <DialogFooter>
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
               {mutation.isPending ? 'Saving…' : 'Save Goal'}
             </Button>
-          </div>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>

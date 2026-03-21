@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { MapPin, DollarSign, ExternalLink, BookOpen, FileText, ArrowRight, Share2, Pencil, Trash2, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import type { JobApplication, Stage, Priority } from '@/types/database'
 import { STAGE_CONFIG, STAGES, PRIORITY_CONFIG } from '@/lib/stages'
 import type { UpdateJobInput } from '@/lib/validations/job'
@@ -118,12 +119,13 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
   ]
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
-      <DialogContent
+    <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <SheetContent
+        side="right"
         showCloseButton={false}
-        className="!max-w-2xl w-full p-0 gap-0 overflow-hidden rounded-2xl sm:!max-w-2xl"
+        className="sm:max-w-2xl p-0 gap-0 flex flex-col"
       >
-        <DialogTitle className="sr-only">{job.job_title} at {job.company_name}</DialogTitle>
+        <SheetTitle className="sr-only">{job.job_title} at {job.company_name}</SheetTitle>
 
         {/* Header bar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-white">
@@ -161,7 +163,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto max-h-[80vh] bg-white">
+        <div className="overflow-y-auto flex-1 bg-white">
           <div className="px-6 pt-6 pb-4">
             {/* Company row + stage badge */}
             <div className="flex items-start justify-between gap-4 mb-4">
@@ -174,12 +176,21 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                   <p className="text-xs text-gray-400">Updated {timeAgo(job.updated_at)}</p>
                 </div>
               </div>
-              <span className={cn(
-                'px-3 py-1 rounded-full text-xs font-semibold border flex-shrink-0',
-                stageConfig.bgColor, stageConfig.color, stageConfig.borderColor
-              )}>
-                {stageConfig.label.toUpperCase()}
-              </span>
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={job.stage}
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.15 }}
+                  className={cn(
+                    'px-3 py-1 rounded-full text-xs font-semibold border flex-shrink-0',
+                    stageConfig.bgColor, stageConfig.color, stageConfig.borderColor
+                  )}
+                >
+                  {stageConfig.label.toUpperCase()}
+                </motion.span>
+              </AnimatePresence>
             </div>
 
             {/* Job title */}
@@ -400,7 +411,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

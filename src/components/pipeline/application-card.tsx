@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
 import type { JobApplication, Stage } from '@/types/database'
 import { PRIORITY_CONFIG } from '@/lib/stages'
@@ -31,10 +33,22 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
     data: { job },
   })
 
+  const prevIsDragging = useRef(false)
+  const [justDropped, setJustDropped] = useState(false)
+
+  useEffect(() => {
+    if (prevIsDragging.current && !isDragging) {
+      setJustDropped(true)
+      const t = setTimeout(() => setJustDropped(false), 300)
+      return () => clearTimeout(t)
+    }
+    prevIsDragging.current = isDragging
+  }, [isDragging])
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.4 : 1,
   }
 
   const days = getDaysInStage(job.stage_updated_at)
@@ -48,13 +62,15 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
   const firstLetter = job.company_name.charAt(0).toUpperCase()
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
       onClick={() => onClick(job)}
-      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 transition-all duration-150 cursor-grab active:cursor-grabbing active:scale-[0.98] select-none${isStale ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
+      animate={justDropped ? { scale: [1, 1.03, 1] } : { scale: 1 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 transition-[box-shadow,border-color,translate] duration-150 cursor-grab active:cursor-grabbing select-none${isDragging ? ' shadow-xl ring-1 ring-blue-200' : ''}${isStale ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
     >
       {/* Top row: avatar + company + priority dot + days */}
       <div className="flex items-center gap-2">
@@ -103,6 +119,6 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
           <div className="bg-blue-500 h-full rounded-full" style={{ width: '66%' }} />
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
