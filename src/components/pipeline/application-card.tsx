@@ -28,7 +28,7 @@ const STALE_THRESHOLDS: Partial<Record<Stage, number>> = {
 }
 
 export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
     id: job.id,
     data: { job },
   })
@@ -39,16 +39,18 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
   useEffect(() => {
     if (prevIsDragging.current && !isDragging) {
       setJustDropped(true)
-      const t = setTimeout(() => setJustDropped(false), 300)
+      const t = setTimeout(() => setJustDropped(false), 250)
       return () => clearTimeout(t)
     }
     prevIsDragging.current = isDragging
   }, [isDragging])
 
-  const style = {
+  // Outer div: dnd-kit positional transform only — no Framer Motion interference
+  const dndStyle = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
+    // Fast spring curve instead of dnd-kit default (which is slow)
+    transition: isDragging ? undefined : 'transform 120ms cubic-bezier(0.16, 1, 0.3, 1)',
+    opacity: isDragging ? 0.3 : 1,
   }
 
   const days = getDaysInStage(job.stage_updated_at)
@@ -62,15 +64,20 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
   const firstLetter = job.company_name.charAt(0).toUpperCase()
 
   return (
-    <motion.div
+    // Outer: dnd-kit handles position — plain div, no animation library
+    <div
       ref={setNodeRef}
-      style={style}
+      style={dndStyle}
       {...attributes}
       {...listeners}
+      className="cursor-grab active:cursor-grabbing"
+    >
+    {/* Inner: Framer Motion handles visual micro-interactions only */}
+    <motion.div
       onClick={() => onClick(job)}
-      animate={justDropped ? { scale: [1, 1.03, 1] } : { scale: 1 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 transition-[box-shadow,border-color,translate] duration-150 cursor-grab active:cursor-grabbing select-none${isDragging ? ' shadow-xl ring-1 ring-blue-200' : ''}${isStale ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
+      animate={justDropped ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 transition-[box-shadow,border-color,translate] duration-150 select-none${isDragging ? ' shadow-xl ring-1 ring-blue-200' : ''}${isStale ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
     >
       {/* Top row: avatar + company + priority dot + days */}
       <div className="flex items-center gap-2">
@@ -120,5 +127,6 @@ export function ApplicationCard({ job, onClick }: ApplicationCardProps) {
         </div>
       )}
     </motion.div>
+    </div>
   )
 }

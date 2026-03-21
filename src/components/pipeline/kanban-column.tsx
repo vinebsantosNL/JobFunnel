@@ -35,7 +35,7 @@ export function KanbanColumn({ stage, jobs, onCardClick, onAddJob }: KanbanColum
       {/* Drop zone */}
       <div
         ref={setNodeRef}
-        className={`flex-1 min-h-[200px] p-2 space-y-2 rounded-b-xl border-x border-b transition-colors ${
+        className={`flex-1 min-h-[200px] p-2 space-y-2 rounded-b-xl border-x border-b transition-colors duration-100 ${
           isOver ? 'bg-blue-50 border-blue-200' : 'bg-gray-50/80 border-gray-200'
         }`}
       >
