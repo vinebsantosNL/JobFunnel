@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { CVVersion, JobApplication, Stage } from '@/types/database'
 
-const APPLIED_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn']
-const SCREENING_STAGES: Stage[] = ['screening', 'interviewing', 'offer', 'hired']
-const INTERVIEWING_STAGES: Stage[] = ['interviewing', 'offer', 'hired']
+const FUNNEL_INDEX: Record<string, number> = {
+  applied: 0, screening: 1, interviewing: 2, offer: 3, hired: 4,
+}
 
 export interface CVComparisonRow {
   version_id: string | null
@@ -28,18 +28,42 @@ export async function GET(request: Request) {
   const from = searchParams.get('from')
   const to = searchParams.get('to')
 
-  // Fetch job applications (exclude 'saved' stage)
+  // Fetch job applications (exclude 'saved'), filtered by created_at
   let appsQuery = supabase
     .from('job_applications')
     .select('*')
     .eq('user_id', user.id)
     .not('stage', 'eq', 'saved')
 
-  if (from) appsQuery = appsQuery.gte('applied_at', from)
-  if (to) appsQuery = appsQuery.lte('applied_at', to)
+  if (from) appsQuery = appsQuery.gte('created_at', from)
+  if (to) appsQuery = appsQuery.lte('created_at', to)
 
   const { data: applications, error: appsError } = await appsQuery
   if (appsError) return NextResponse.json({ error: appsError.message }, { status: 500 })
+
+  const apps = (applications ?? []) as JobApplication[]
+
+  if (apps.length === 0) return NextResponse.json([])
+
+  const jobIds = apps.map((a) => a.id)
+
+  // Fetch stage_history to determine highest stage each job ever reached
+  const { data: history } = await supabase
+    .from('stage_history')
+    .select('job_id, to_stage')
+    .in('job_id', jobIds)
+
+  // Build map: job_id → highest funnel index ever reached
+  const jobHighest = new Map<string, number>()
+  for (const app of apps) {
+    const idx = FUNNEL_INDEX[app.stage] ?? -1
+    jobHighest.set(app.id, idx)
+  }
+  for (const h of history ?? []) {
+    const idx = FUNNEL_INDEX[h.to_stage] ?? -1
+    const current = jobHighest.get(h.job_id) ?? -1
+    if (idx > current) jobHighest.set(h.job_id, idx)
+  }
 
   // Fetch all cv_versions for the user
   const { data: cvVersions, error: cvError } = await supabase
@@ -49,14 +73,11 @@ export async function GET(request: Request) {
 
   if (cvError) return NextResponse.json({ error: cvError.message }, { status: 500 })
 
-  const apps = (applications ?? []) as JobApplication[]
   const versions = (cvVersions ?? []) as CVVersion[]
 
   // Group applications by cv_version_id
   const grouped = new Map<string | null, JobApplication[]>()
-
   for (const app of apps) {
-    if (!APPLIED_STAGES.includes(app.stage)) continue
     const key = app.cv_version_id ?? null
     if (!grouped.has(key)) grouped.set(key, [])
     grouped.get(key)!.push(app)
@@ -69,13 +90,21 @@ export async function GET(request: Request) {
     const versionName = version?.name ?? 'Untagged'
 
     const totalApplied = groupApps.length
-    const reachedScreening = groupApps.filter((a) => SCREENING_STAGES.includes(a.stage)).length
-    const reachedInterviewing = groupApps.filter((a) => INTERVIEWING_STAGES.includes(a.stage)).length
-    const reachedOffer = groupApps.filter((a) => a.stage === 'offer' || a.stage === 'hired').length
 
-    // avg days from applied_at to stage_updated_at (for non-applied stages)
+    // Use cumulative highest-stage-ever-reached for conversion counts
+    let reachedScreening = 0
+    let reachedInterviewing = 0
+    let reachedOffer = 0
+    for (const app of groupApps) {
+      const highest = jobHighest.get(app.id) ?? 0
+      if (highest >= FUNNEL_INDEX.screening) reachedScreening++
+      if (highest >= FUNNEL_INDEX.interviewing) reachedInterviewing++
+      if (highest >= FUNNEL_INDEX.offer) reachedOffer++
+    }
+
+    // avg days from applied_at to stage_updated_at (for jobs that moved beyond applied)
     const daysValues = groupApps
-      .filter((a) => a.applied_at !== null && a.stage !== 'applied')
+      .filter((a) => a.applied_at !== null && (jobHighest.get(a.id) ?? 0) > FUNNEL_INDEX.applied)
       .map((a) => {
         const appliedMs = new Date(a.applied_at!).getTime()
         const updatedMs = new Date(a.stage_updated_at).getTime()
