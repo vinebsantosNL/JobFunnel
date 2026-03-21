@@ -2,15 +2,32 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { Stage } from '@/types/database'
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { searchParams } = new URL(request.url)
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
+
+  // Filter job_applications by created_at within the date window first
+  let jobQuery = supabase
+    .from('job_applications')
+    .select('id')
+    .eq('user_id', user.id)
+  if (from) jobQuery = jobQuery.gte('created_at', from)
+  if (to) jobQuery = jobQuery.lte('created_at', to)
+
+  const { data: filteredJobs } = await jobQuery
+  const jobIds = (filteredJobs ?? []).map(j => j.id)
+
+  if (jobIds.length === 0) return NextResponse.json([])
+
   const { data, error } = await supabase
     .from('stage_history')
-    .select('job_id, from_stage, to_stage, transitioned_at, job_applications!inner(user_id)')
-    .eq('job_applications.user_id', user.id)
+    .select('job_id, from_stage, to_stage, transitioned_at')
+    .in('job_id', jobIds)
     .order('transitioned_at', { ascending: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

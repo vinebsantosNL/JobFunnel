@@ -42,7 +42,7 @@ export function AnalyticsDashboard() {
 
   const { data: funnel, isLoading: funnelLoading } = useFunnelData(dateRange)
   const { data: timeline, isLoading: timelineLoading } = useTimelineData()
-  const { data: stageTime, isLoading: stageTimeLoading } = useStageTimeData()
+  const { data: stageTime, isLoading: stageTimeLoading } = useStageTimeData(dateRange)
 
   // Total Applied = jobs in Applied stage only
   const totalApplied = funnel?.stage_counts.applied ?? 0

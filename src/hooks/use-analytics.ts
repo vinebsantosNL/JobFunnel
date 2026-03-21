@@ -18,8 +18,11 @@ async function fetchTimeline(): Promise<TimelinePoint[]> {
   return res.json()
 }
 
-async function fetchStageTime(): Promise<StageTimePoint[]> {
-  const res = await fetch('/api/analytics/stage-time')
+async function fetchStageTime(params?: { from?: string; to?: string }): Promise<StageTimePoint[]> {
+  const url = new URL('/api/analytics/stage-time', window.location.origin)
+  if (params?.from) url.searchParams.set('from', params.from)
+  if (params?.to) url.searchParams.set('to', params.to)
+  const res = await fetch(url.toString())
   if (!res.ok) throw new Error('Failed to fetch stage time data')
   return res.json()
 }
@@ -38,9 +41,9 @@ export function useTimelineData() {
   })
 }
 
-export function useStageTimeData() {
+export function useStageTimeData(params?: { from?: string; to?: string }) {
   return useQuery({
-    queryKey: ['analytics', 'stage-time'],
-    queryFn: fetchStageTime,
+    queryKey: ['analytics', 'stage-time', params],
+    queryFn: () => fetchStageTime(params),
   })
 }
