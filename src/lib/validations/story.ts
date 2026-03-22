@@ -7,8 +7,8 @@ export const createStorySchema = z.object({
   action: z.string().max(5000).optional(),
   result: z.string().max(5000).optional(),
   full_content: z.string().max(10000).optional(),
-  competencies: z.array(z.string()).default([]),
-  is_favorite: z.boolean().default(false),
+  competencies: z.array(z.string()).optional(),
+  is_favorite: z.boolean().optional(),
 })
 
 export const updateStorySchema = createStorySchema.partial()

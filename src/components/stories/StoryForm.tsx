@@ -92,8 +92,8 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
       action: formMode === 'star' ? data.action || undefined : undefined,
       result: formMode === 'star' ? data.result || undefined : undefined,
       full_content: formMode === 'freeform' ? data.full_content || undefined : undefined,
-      competencies: data.competencies,
-      is_favorite: data.is_favorite,
+      competencies: data.competencies ?? [],
+      is_favorite: data.is_favorite ?? false,
     }
 
     if (mode === 'create') {
