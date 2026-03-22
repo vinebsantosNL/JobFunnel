@@ -46,10 +46,35 @@ async function deleteCVVersion(id: string): Promise<void> {
   }
 }
 
+async function duplicateCVVersion(id: string, name: string): Promise<CVVersion> {
+  const res = await fetch(`/api/cv-versions/${id}/duplicate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.error ?? 'Failed to duplicate CV version')
+  }
+  return res.json()
+}
+
 export function useCVVersions(includeArchived = false) {
   return useQuery({
     queryKey: ['cv-versions', { includeArchived }],
     queryFn: () => fetchCVVersions(includeArchived),
+  })
+}
+
+export function useCVVersion(id: string) {
+  return useQuery({
+    queryKey: ['cv-versions', id],
+    queryFn: async (): Promise<CVVersion> => {
+      const res = await fetch(`/api/cv-versions/${id}`)
+      if (!res.ok) throw new Error('CV version not found')
+      return res.json()
+    },
+    enabled: !!id,
   })
 }
 
@@ -74,6 +99,14 @@ export function useDeleteCVVersion() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: deleteCVVersion,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cv-versions'] }),
+  })
+}
+
+export function useDuplicateCVVersion() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => duplicateCVVersion(id, name),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cv-versions'] }),
   })
 }

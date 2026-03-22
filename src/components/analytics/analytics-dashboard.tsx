@@ -116,30 +116,30 @@ export function AnalyticsDashboard() {
                 title="Total Applied"
                 value={funnelLoading ? '—' : String(totalApplied)}
                 subtitle="Applications submitted"
-                borderColor="border-blue-500"
+                accentColor="border-l-blue-500"
               />
               <MetricCard
                 title="Active"
                 value={funnelLoading ? '—' : String(activeApps)}
                 subtitle="Screening · Interview · Offer"
-                borderColor="border-blue-400"
+                accentColor="border-l-blue-400"
               />
               <MetricCard
                 title="Offers"
                 value={funnelLoading ? '—' : String(offers)}
                 subtitle="Received"
-                borderColor="border-amber-500"
+                accentColor="border-l-amber-500"
               />
               <MetricCard
                 title="Conversion"
                 value={funnelLoading ? '—' : `${conversion}%`}
                 subtitle="Applied → Offer"
-                borderColor="border-green-500"
+                accentColor="border-l-green-500"
               />
             </div>
 
             {/* Funnel + Stage Efficiency side-by-side */}
-            <div className="flex gap-4">
+            <div className="flex flex-col lg:flex-row gap-4">
               {/* Funnel chart */}
               <Card className="flex-1">
                 <CardHeader>
@@ -147,7 +147,14 @@ export function AnalyticsDashboard() {
                 </CardHeader>
                 <CardContent>
                   {funnelLoading ? (
-                    <div className="h-64 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
+                    <div className="space-y-3 py-2">
+                      {[100, 75, 50, 30].map((w, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <div className="w-36 h-4 bg-gray-100 rounded animate-pulse" />
+                          <div className="flex-1 bg-gray-100 rounded-full h-7 animate-pulse" style={{ maxWidth: `${w}%` }} />
+                        </div>
+                      ))}
+                    </div>
                   ) : funnel ? (
                     <FunnelChart data={funnel} />
                   ) : (
@@ -234,7 +241,11 @@ export function AnalyticsDashboard() {
               </CardHeader>
               <CardContent>
                 {stageTimeLoading ? (
-                  <div className="h-56 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
+                  <div className="h-56 flex items-end gap-3 px-4 pb-6 animate-pulse">
+                    {[60, 40, 80, 50, 70].map((h, i) => (
+                      <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+                    ))}
+                  </div>
                 ) : (
                   <StageTimeChart data={stageTime ?? []} />
                 )}
@@ -250,7 +261,11 @@ export function AnalyticsDashboard() {
             </CardHeader>
             <CardContent>
               {timelineLoading ? (
-                <div className="h-56 flex items-center justify-center text-gray-400 text-sm">Loading...</div>
+                <div className="h-56 flex items-end gap-2 px-4 pb-4 animate-pulse">
+                  {[30, 50, 40, 70, 55, 80, 60, 75, 45, 90, 65, 50].map((h, i) => (
+                    <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+                  ))}
+                </div>
               ) : timeline && timeline.length > 0 ? (
                 <TimelineChart data={timeline} />
               ) : (

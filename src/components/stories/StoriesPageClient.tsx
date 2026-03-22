@@ -171,7 +171,7 @@ export function StoriesPageClient() {
             <button
               onClick={() => setCompetencyFilter(undefined)}
               className={cn(
-                'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors flex-shrink-0',
+                'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex-shrink-0 min-h-[32px]',
                 !competencyFilter
                   ? 'bg-gray-900 text-white border-gray-900'
                   : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
@@ -184,7 +184,7 @@ export function StoriesPageClient() {
                 key={c}
                 onClick={() => setCompetencyFilter(competencyFilter === c ? undefined : c)}
                 className={cn(
-                  'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors flex-shrink-0',
+                  'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex-shrink-0 min-h-[32px]',
                   competencyFilter === c
                     ? 'bg-gray-900 text-white border-gray-900'
                     : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
@@ -256,11 +256,11 @@ export function StoriesPageClient() {
       {/* Right panel — story detail */}
       <div className={cn(
         'flex-1 overflow-y-auto bg-gray-50',
-        isDetailOpen ? 'flex flex-col' : 'hidden md:block'
+        isDetailOpen ? 'flex flex-col' : 'hidden sm:block'
       )}>
         {/* Mobile back button */}
         {isDetailOpen && (
-          <div className="md:hidden flex items-center px-4 py-2 border-b border-gray-100 bg-white sticky top-0 z-10">
+          <div className="sm:hidden flex items-center px-4 py-2 border-b border-gray-100 bg-white sticky top-0 z-10">
             <button
               onClick={closeExpanded}
               className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] pr-4"

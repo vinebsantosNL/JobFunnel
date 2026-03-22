@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Story Library — Redesign Prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { font-family: 'Inter', sans-serif; }
+  body { background: #FAFAFA; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 9999px; }
+
+  /* Active nav */
+  .nav-active { background: #EFF6FF; color: #2563EB; font-weight: 600; }
+
+  /* Story card hover */
+  .story-card { transition: all 150ms ease-out; cursor: pointer; }
+  .story-card:hover { background: #F8FAFC; }
+  .story-card.active { border-left: 3px solid #2563EB; background: #EFF6FF; }
+
+  /* Competency pill */
+  .pill { transition: all 150ms ease-out; cursor: pointer; }
+  .pill.active { background: #1E293B; color: white; }
+  .pill:not(.active):hover { background: #F1F5F9; }
+
+  /* STAR badge colors */
+  .badge-s { background: #DBEAFE; color: #1D4ED8; }
+  .badge-t { background: #EDE9FE; color: #6D28D9; }
+  .badge-a { background: #FEF3C7; color: #B45309; }
+  .badge-r { background: #D1FAE5; color: #065F46; }
+
+  /* Coverage bars */
+  .bar-fill { transition: width 600ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+  /* Completeness ring */
+  .ring-complete { color: #10B981; }
+  .ring-partial { color: #F59E0B; }
+  .ring-empty { color: #E2E8F0; }
+
+  /* View toggle */
+  .view-btn.active { background: #F1F5F9; }
+
+  /* Tab underline */
+  .tab-active { border-bottom: 2px solid #2563EB; color: #2563EB; font-weight: 600; }
+
+  /* Card grid */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  /* Tooltip */
+  [data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1E293B;
+    color: white;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-bottom: 4px;
+    pointer-events: none;
+    z-index: 50;
+  }
+  [data-tooltip] { position: relative; }
+
+  /* Animated entrance */
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeSlideIn 200ms ease-out both; }
+
+  /* Gap highlight */
+  .gap-badge { background: #FEF9C3; color: #854D0E; border: 1px solid #FDE68A; }
+
+  /* Quality score ring SVG */
+  .quality-ring { transform: rotate(-90deg); transform-origin: center; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ============================================================
+     LAYOUT SHELL
+     ============================================================ -->
+<div class="flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="w-[220px] flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
+    <!-- Logo -->
+    <div class="px-5 py-4 border-b border-gray-100">
+      <span class="font-bold text-lg"><span class="text-blue-600">Job</span>Funnel</span>
+    </div>
+    <!-- Nav -->
+    <nav class="flex-1 px-3 py-3 space-y-0.5 text-sm text-slate-600">
+      <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.5"/></svg>
+        Home
+      </a>
+      <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        Pipeline
+      </a>
+      <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Analytics
+      </a>
+      <a href="#" class="nav-active flex items-center gap-2.5 px-3 py-2 rounded-lg">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        STAR Stories
+      </a>
+      <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Resume Builder
+      </a>
+    </nav>
+    <!-- User -->
+    <div class="p-3 border-t border-gray-100">
+      <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+        <div class="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center text-xs font-semibold text-amber-700">VB</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-medium text-slate-800 truncate">Vinicius Barbosa</p>
+          <p class="text-[10px] text-blue-600 font-medium uppercase tracking-wide">Pro</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- LEFT PANEL: Library -->
+    <div class="w-[340px] flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
+
+      <!-- Panel Header -->
+      <div class="px-4 pt-4 pb-3 border-b border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h1 class="font-semibold text-slate-900 text-base">Story Library</h1>
+            <p class="text-xs text-slate-400 mt-0.5">7 stories · 3 competency gaps</p>
+          </div>
+          <button onclick="showPanel('new')" class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            New
+          </button>
+        </div>
+
+        <!-- Search -->
+        <div class="relative">
+          <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search stories…" class="w-full pl-8 pr-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 placeholder-slate-400" />
+        </div>
+      </div>
+
+      <!-- View Toggle + Sort -->
+      <div class="px-4 py-2 flex items-center justify-between border-b border-gray-100">
+        <!-- View toggle -->
+        <div class="flex items-center gap-1 bg-gray-100 rounded-md p-0.5">
+          <button onclick="setView('list')" id="btn-list" class="view-btn active p-1.5 rounded" title="List view">
+            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <button onclick="setView('grid')" id="btn-grid" class="view-btn p-1.5 rounded" title="Card view">
+            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>
+          </button>
+          <button onclick="setView('matrix')" id="btn-matrix" class="view-btn p-1.5 rounded" title="Coverage matrix">
+            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </button>
+        </div>
+
+        <!-- Sort -->
+        <select class="text-xs text-slate-500 bg-transparent border-none outline-none cursor-pointer">
+          <option>Most recent</option>
+          <option>Favorites first</option>
+          <option>By competency</option>
+          <option>Completeness</option>
+        </select>
+      </div>
+
+      <!-- Competency Filter Tabs -->
+      <div class="px-4 py-2.5 border-b border-gray-100 overflow-x-auto">
+        <div class="flex items-center gap-1.5 text-xs whitespace-nowrap">
+          <button class="pill active px-2.5 py-1 rounded-full border border-gray-200 text-slate-700 font-medium">All</button>
+          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>Leadership
+            <span class="text-[10px] text-slate-400">2</span>
+          </button>
+          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-violet-500 inline-block"></span>Technical
+            <span class="text-[10px] text-slate-400">3</span>
+          </button>
+          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>Execution
+            <span class="text-[10px] text-slate-400">1</span>
+          </button>
+          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1 gap-badge rounded-full px-2.5 py-1" style="background:#FEF9C3;border-color:#FDE68A;color:#854D0E;">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Growth · gap
+          </button>
+          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1 gap-badge rounded-full px-2.5 py-1" style="background:#FEF9C3;border-color:#FDE68A;color:#854D0E;">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Collaboration · gap
+          </button>
+        </div>
+      </div>
+
+      <!-- Story List / Grid -->
+      <div class="flex-1 overflow-y-auto" id="list-area">
+
+        <!-- === LIST VIEW === -->
+        <div id="view-list" class="py-1">
+
+          <!-- Story Item 1 — Active -->
+          <div class="story-card active px-4 py-3 border-b border-gray-50" onclick="showPanel('detail')">
+            <div class="flex items-start gap-2.5">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Execution</span>
+                  <!-- STAR completeness -->
+                  <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 rounded-full">4/4 ★</span>
+                </div>
+                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">KYC — Onboarding redesign</p>
+                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Led the complete redesign of KYC flow, reducing drop-off by 34% in 6 weeks…</p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[10px] text-slate-400">17 Mar</span>
+                  <span class="text-[10px] text-slate-300">·</span>
+                  <span class="text-[10px] text-slate-400">~320 words</span>
+                </div>
+              </div>
+              <button class="text-amber-400 hover:text-amber-500 flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Story Item 2 -->
+          <div class="story-card px-4 py-3 border-b border-gray-50" onclick="showPanel('detail2')">
+            <div class="flex items-start gap-2.5">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span class="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></span>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Technical</span>
+                  <span class="ml-auto text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 rounded-full">2/4 ★</span>
+                </div>
+                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Migrating to microservices at scale</p>
+                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Architected and led the migration of a monolith to microservices, handling…</p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[10px] text-slate-400">12 Mar</span>
+                  <span class="text-[10px] text-slate-300">·</span>
+                  <span class="text-[10px] text-amber-500 font-medium">Incomplete</span>
+                </div>
+              </div>
+              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Story Item 3 -->
+          <div class="story-card px-4 py-3 border-b border-gray-50">
+            <div class="flex items-start gap-2.5">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Leadership</span>
+                  <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 rounded-full">4/4 ★</span>
+                </div>
+                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Turning around an underperforming team</p>
+                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Inherited a team with low morale and missed deadlines. Within 3 months…</p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[10px] text-slate-400">5 Mar</span>
+                  <span class="text-[10px] text-slate-300">·</span>
+                  <span class="text-[10px] text-slate-400">~450 words</span>
+                </div>
+              </div>
+              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Story Item 4 -->
+          <div class="story-card px-4 py-3 border-b border-gray-50">
+            <div class="flex items-start gap-2.5">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span class="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></span>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Technical</span>
+                  <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 rounded-full">4/4 ★</span>
+                </div>
+                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Building real-time event pipeline</p>
+                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Designed and shipped a Kafka-based event pipeline processing 50k events/sec…</p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[10px] text-slate-400">28 Feb</span>
+                  <span class="text-[10px] text-slate-300">·</span>
+                  <span class="text-[10px] text-slate-400">~280 words</span>
+                </div>
+              </div>
+              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Story Item 5 -->
+          <div class="story-card px-4 py-3 border-b border-gray-50">
+            <div class="flex items-start gap-2.5">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Leadership</span>
+                  <span class="ml-auto text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 rounded-full">3/4 ★</span>
+                </div>
+                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Stakeholder alignment on roadmap pivot</p>
+                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Navigated competing priorities from 4 senior stakeholders to align on a quarterly…</p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[10px] text-slate-400">20 Feb</span>
+                  <span class="text-[10px] text-slate-300">·</span>
+                  <span class="text-[10px] text-amber-500 font-medium">Incomplete</span>
+                </div>
+              </div>
+              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- GAP PROMPT — inline CTA -->
+          <div class="mx-3 my-3 px-3 py-2.5 rounded-xl border border-amber-200 bg-amber-50 flex items-start gap-2.5">
+            <svg class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="flex-1">
+              <p class="text-xs font-medium text-amber-800">No Growth stories yet</p>
+              <p class="text-[11px] text-amber-600 mt-0.5">Senior roles often ask about learning agility.</p>
+              <button class="mt-1.5 text-[11px] font-medium text-amber-700 underline underline-offset-2">+ Add a Growth story</button>
+            </div>
+          </div>
+
+          <!-- Story 6 -->
+          <div class="story-card px-4 py-3 border-b border-gray-50">
+            <div class="flex items-start gap-2.5">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span class="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></span>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Technical</span>
+                  <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 rounded-full">4/4 ★</span>
+                </div>
+                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Reducing API latency by 60%</p>
+                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Diagnosed a performance bottleneck in our critical checkout path. Implemented…</p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="text-[10px] text-slate-400">10 Feb</span>
+                  <span class="text-[10px] text-slate-300">·</span>
+                  <span class="text-[10px] text-slate-400">~190 words</span>
+                </div>
+              </div>
+              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </button>
+            </div>
+          </div>
+
+        </div><!-- /view-list -->
+
+        <!-- === GRID VIEW === (hidden by default) -->
+        <div id="view-grid" class="hidden p-4">
+          <div class="card-grid">
+            <!-- Card 1 -->
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onclick="showPanel('detail')">
+              <div class="h-1.5 bg-amber-500 w-full"></div>
+              <div class="p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-medium text-amber-600 uppercase tracking-wide">Execution</span>
+                  <span class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">4/4 STAR</span>
+                </div>
+                <p class="text-sm font-semibold text-slate-800 mb-2">KYC — Onboarding redesign</p>
+                <p class="text-xs text-slate-400 line-clamp-3">Led the complete redesign of KYC flow, reducing drop-off by 34% in 6 weeks at Fintech startup…</p>
+                <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <span class="text-[10px] text-slate-400">~320 words · 17 Mar</span>
+                  <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 — incomplete -->
+            <div class="bg-white rounded-xl border border-amber-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+              <div class="h-1.5 bg-violet-500 w-full"></div>
+              <div class="p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-medium text-violet-600 uppercase tracking-wide">Technical</span>
+                  <span class="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">2/4 STAR</span>
+                </div>
+                <p class="text-sm font-semibold text-slate-800 mb-2">Migrating to microservices at scale</p>
+                <p class="text-xs text-slate-400 line-clamp-3">Architected and led migration of monolith to microservices…</p>
+                <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <span class="text-[10px] text-amber-500 font-medium">Missing: Action, Result</span>
+                  <button class="text-[10px] font-medium text-blue-600 hover:underline">Complete →</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+              <div class="h-1.5 bg-blue-500 w-full"></div>
+              <div class="p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Leadership</span>
+                  <span class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">4/4 STAR</span>
+                </div>
+                <p class="text-sm font-semibold text-slate-800 mb-2">Turning around an underperforming team</p>
+                <p class="text-xs text-slate-400 line-clamp-3">Inherited a team with low morale and missed deadlines. Within 3 months…</p>
+                <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <span class="text-[10px] text-slate-400">~450 words · 5 Mar</span>
+                  <svg class="w-3.5 h-3.5 text-slate-200 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gap CTA Card -->
+            <div class="bg-amber-50 rounded-xl border border-amber-200 border-dashed overflow-hidden hover:shadow-sm transition-shadow cursor-pointer flex flex-col items-center justify-center p-6 text-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <p class="text-xs font-semibold text-amber-800">Growth gap</p>
+              <p class="text-[11px] text-amber-600">You have 0 Growth stories. Senior roles ask about learning agility.</p>
+              <button class="mt-1 text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1 rounded-full transition-colors">+ Add story</button>
+            </div>
+          </div>
+        </div><!-- /view-grid -->
+
+        <!-- === MATRIX VIEW === (hidden by default) -->
+        <div id="view-matrix" class="hidden p-4 space-y-4">
+          <p class="text-xs text-slate-500 mb-1">Your interview coverage across all 5 competency areas:</p>
+
+          <!-- Leadership -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                <span class="text-xs font-medium text-slate-700">Leadership</span>
+              </div>
+              <span class="text-xs text-slate-400">2 stories</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-blue-500 rounded-full bar-fill" style="width:50%"></div>
+            </div>
+            <div class="flex gap-1 mt-1.5">
+              <span class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Team Mgmt ✓</span>
+              <span class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Decision Making ✓</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Mentoring</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Conflict Res.</span>
+            </div>
+          </div>
+
+          <!-- Technical -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                <span class="text-xs font-medium text-slate-700">Technical</span>
+              </div>
+              <span class="text-xs text-slate-400">3 stories</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-violet-500 rounded-full bar-fill" style="width:75%"></div>
+            </div>
+            <div class="flex gap-1 mt-1.5 flex-wrap">
+              <span class="text-[10px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded">Problem Solving ✓</span>
+              <span class="text-[10px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded">System Design ✓</span>
+              <span class="text-[10px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded">Innovation ✓</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Tech Excellence</span>
+            </div>
+          </div>
+
+          <!-- Collaboration — gap -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span class="text-xs font-medium text-slate-700">Collaboration</span>
+                <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">gap</span>
+              </div>
+              <span class="text-xs text-slate-400">0 stories</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-500 rounded-full bar-fill" style="width:0%"></div>
+            </div>
+            <div class="flex gap-1 mt-1.5 flex-wrap">
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Cross-functional</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Stakeholder Mgmt</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Communication</span>
+            </div>
+            <button class="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Add a Collaboration story
+            </button>
+          </div>
+
+          <!-- Execution -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span class="text-xs font-medium text-slate-700">Execution</span>
+              </div>
+              <span class="text-xs text-slate-400">1 story</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-amber-500 rounded-full bar-fill" style="width:25%"></div>
+            </div>
+            <div class="flex gap-1 mt-1.5 flex-wrap">
+              <span class="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">Project Delivery ✓</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Prioritization</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Under Pressure</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Adaptability</span>
+            </div>
+          </div>
+
+          <!-- Growth — gap -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                <span class="text-xs font-medium text-slate-700">Growth</span>
+                <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">gap</span>
+              </div>
+              <span class="text-xs text-slate-400">0 stories</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-rose-500 rounded-full bar-fill" style="width:0%"></div>
+            </div>
+            <div class="flex gap-1 mt-1.5 flex-wrap">
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Learning Agility</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Feedback Reception</span>
+              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Self-improvement</span>
+            </div>
+            <button class="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Add a Growth story
+            </button>
+          </div>
+
+          <!-- Summary score -->
+          <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-gray-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-700">Library completeness</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Cover all 5 areas to be interview-ready</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xl font-bold text-amber-600">48%</p>
+                <p class="text-[10px] text-slate-400">interview ready</p>
+              </div>
+            </div>
+            <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-amber-500 rounded-full" style="width:48%"></div>
+            </div>
+          </div>
+        </div><!-- /view-matrix -->
+
+      </div><!-- /list-area -->
+
+    </div><!-- /LEFT PANEL -->
+
+    <!-- RIGHT PANEL: Detail / Editor -->
+    <div class="flex-1 overflow-y-auto bg-white" id="right-panel">
+
+      <!-- DEFAULT: Story Detail -->
+      <div id="panel-detail" class="h-full flex flex-col">
+
+        <!-- Detail header -->
+        <div class="px-8 py-5 border-b border-gray-100 flex items-start justify-between">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-wide">Execution</span>
+              <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">Complete — 4/4 STAR</span>
+            </div>
+            <h2 class="text-2xl font-semibold text-slate-900">KYC — Onboarding redesign</h2>
+          </div>
+          <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+            <button class="p-2 rounded-lg text-amber-400 hover:bg-amber-50 transition-colors" title="Favorite">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+            </button>
+            <button onclick="showPanel('edit')" class="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              Edit
+            </button>
+            <button class="flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-600 border border-red-100 hover:border-red-200 px-3 py-1.5 rounded-lg transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              Delete
+            </button>
+          </div>
+        </div>
+
+        <!-- Competency tags -->
+        <div class="px-8 py-3 border-b border-gray-100 flex items-center gap-2">
+          <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wide mr-1">Tags</span>
+          <span class="text-xs bg-amber-500 text-white px-2.5 py-0.5 rounded-full font-medium">Project Delivery</span>
+          <span class="text-xs bg-gray-100 text-slate-600 px-2.5 py-0.5 rounded-full">Prioritization</span>
+          <span class="text-xs bg-gray-100 text-slate-600 px-2.5 py-0.5 rounded-full">Stakeholder Mgmt</span>
+          <span class="ml-auto text-[11px] text-slate-400">~320 words · Created 17 Mar 2026</span>
+        </div>
+
+        <!-- STAR content -->
+        <div class="flex-1 px-8 py-6 space-y-6 overflow-y-auto">
+
+          <!-- S -->
+          <div class="animate-in" style="animation-delay:0ms">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 rounded-md badge-s flex items-center justify-center text-xs font-bold">S</span>
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Situation</span>
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed pl-8">At my previous fintech company, we had a 68% drop-off rate during the KYC (Know Your Customer) onboarding flow. Users were abandoning the identity verification step because it required too many document uploads and had confusing error states. This was directly impacting our activation rate and costing us approximately €40k/month in lost conversions.</p>
+          </div>
+
+          <!-- T -->
+          <div class="animate-in" style="animation-delay:50ms">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 rounded-md badge-t flex items-center justify-center text-xs font-bold">T</span>
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Task</span>
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed pl-8">As the PM owning onboarding, I was tasked with redesigning the KYC flow to reduce drop-off by at least 20% within one quarter, without compromising compliance requirements or adding engineering scope beyond 2 sprints.</p>
+          </div>
+
+          <!-- A -->
+          <div class="animate-in" style="animation-delay:100ms">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 rounded-md badge-a flex items-center justify-center text-xs font-bold">A</span>
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Action</span>
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed pl-8">I ran 8 moderated user sessions to map where confusion occurred, then partnered with our compliance team to understand the minimum viable document requirements. I redesigned the flow in Figma with three key changes: progressive disclosure (step-by-step instead of all-at-once), clearer error recovery states, and a "save and continue later" option. I also wrote the PRD, led the 2-sprint build, and tracked daily drop-off metrics via Amplitude to catch regressions early.</p>
+          </div>
+
+          <!-- R -->
+          <div class="animate-in" style="animation-delay:150ms">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 rounded-md badge-r flex items-center justify-center text-xs font-bold">R</span>
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Result</span>
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed pl-8">KYC drop-off fell from 68% to 34% within 6 weeks of launch — a 50% improvement, double our target. Monthly revenue recovered approximately €22k of the previously lost conversions. The "save and continue" feature alone accounted for 18% of completions. The redesign became the template for our subsequent market expansion flows in Germany and the Netherlands.</p>
+          </div>
+
+        </div><!-- /STAR content -->
+
+      </div><!-- /panel-detail -->
+
+      <!-- EDITOR VIEW (hidden) -->
+      <div id="panel-edit" class="hidden h-full flex flex-col">
+        <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between">
+          <h2 class="text-base font-semibold text-slate-900">Edit Story</h2>
+          <div class="flex items-center gap-2">
+            <button onclick="showPanel('detail')" class="text-xs font-medium text-slate-500 hover:text-slate-700 border border-gray-200 px-3 py-1.5 rounded-lg">Cancel</button>
+            <button onclick="showPanel('detail')" class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition-colors">Save changes</button>
+          </div>
+        </div>
+        <div class="flex-1 px-8 py-6 overflow-y-auto space-y-4">
+          <!-- Mode toggle -->
+          <div class="flex items-center gap-2 mb-4">
+            <div class="flex bg-gray-100 rounded-lg p-0.5 text-xs">
+              <button class="px-3 py-1.5 rounded-md bg-white shadow-sm font-medium text-slate-800">STAR Format</button>
+              <button class="px-3 py-1.5 rounded-md text-slate-500">Free Form</button>
+            </div>
+          </div>
+          <!-- Title -->
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1.5">Title <span class="text-red-400">*</span></label>
+            <input type="text" value="KYC — Onboarding redesign" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400" />
+          </div>
+          <!-- S field -->
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="w-5 h-5 rounded badge-s flex items-center justify-center text-[10px] font-bold">S</span>
+              <label class="text-xs font-medium text-slate-600">Situation</label>
+              <span class="ml-auto text-[10px] text-slate-400">284 words</span>
+            </div>
+            <textarea rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none leading-relaxed">At my previous fintech company, we had a 68% drop-off rate during the KYC onboarding flow...</textarea>
+          </div>
+          <!-- T field -->
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="w-5 h-5 rounded badge-t flex items-center justify-center text-[10px] font-bold">T</span>
+              <label class="text-xs font-medium text-slate-600">Task</label>
+            </div>
+            <textarea rows="2" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none leading-relaxed">As the PM owning onboarding, I was tasked with redesigning the KYC flow...</textarea>
+          </div>
+          <!-- Competency -->
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-2">Competency tags</label>
+            <div class="flex flex-wrap gap-1.5">
+              <button class="text-xs px-2.5 py-1 rounded-full bg-amber-500 text-white font-medium">Project Delivery</button>
+              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500">Prioritization</button>
+              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500">Stakeholder Mgmt</button>
+              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add tag
+              </button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /panel-edit -->
+
+      <!-- NEW STORY (hidden) -->
+      <div id="panel-new" class="hidden h-full flex flex-col">
+        <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-semibold text-slate-900">New story</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Use STAR format to structure your story for interviews</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="showPanel('empty')" class="text-xs font-medium text-slate-500 hover:text-slate-700 border border-gray-200 px-3 py-1.5 rounded-lg">Cancel</button>
+            <button class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition-colors">Save story</button>
+          </div>
+        </div>
+
+        <!-- Guided prompt bar -->
+        <div class="px-8 py-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+          <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="text-xs text-blue-700">You have no <strong>Collaboration</strong> or <strong>Growth</strong> stories. Consider adding one to cover interview gaps.</p>
+        </div>
+
+        <div class="flex-1 px-8 py-6 overflow-y-auto space-y-4">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="flex bg-gray-100 rounded-lg p-0.5 text-xs">
+              <button class="px-3 py-1.5 rounded-md bg-white shadow-sm font-medium text-slate-800">STAR Format</button>
+              <button class="px-3 py-1.5 rounded-md text-slate-500">Free Form</button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1.5">Title <span class="text-red-400">*</span></label>
+            <input type="text" placeholder="e.g. Launching the growth experiment that 10x'd signups" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 placeholder-slate-300" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="w-5 h-5 rounded badge-s flex items-center justify-center text-[10px] font-bold">S</span>
+              <label class="text-xs font-medium text-slate-600">Situation</label>
+            </div>
+            <textarea rows="3" placeholder="Set the scene. What was happening? What was the context or problem?" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none placeholder-slate-300 leading-relaxed"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="w-5 h-5 rounded badge-t flex items-center justify-center text-[10px] font-bold">T</span>
+                <label class="text-xs font-medium text-slate-600">Task</label>
+              </div>
+              <textarea rows="3" placeholder="What was your specific responsibility?" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none placeholder-slate-300 leading-relaxed"></textarea>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="w-5 h-5 rounded badge-a flex items-center justify-center text-[10px] font-bold">A</span>
+                <label class="text-xs font-medium text-slate-600">Action</label>
+              </div>
+              <textarea rows="3" placeholder="What did you specifically do?" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none placeholder-slate-300 leading-relaxed"></textarea>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="w-5 h-5 rounded badge-r flex items-center justify-center text-[10px] font-bold">R</span>
+              <label class="text-xs font-medium text-slate-600">Result</label>
+            </div>
+            <textarea rows="2" placeholder="What was the measurable outcome? Numbers = credibility." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none placeholder-slate-300 leading-relaxed"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-2">Competency tags</label>
+            <div class="flex flex-wrap gap-1.5">
+              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 hover:bg-gray-50">Team Management</button>
+              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 hover:bg-gray-50">Decision Making</button>
+              <button class="text-xs px-2.5 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100">Project Delivery</button>
+              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 hover:bg-gray-50">Problem Solving</button>
+              <button class="text-xs px-2.5 py-1 rounded-full border border-dashed border-gray-300 text-slate-400 hover:bg-gray-50 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                More tags
+              </button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /panel-new -->
+
+      <!-- EMPTY STATE (shown when nothing selected) -->
+      <div id="panel-empty" class="hidden h-full flex items-center justify-center">
+        <div class="text-center max-w-xs">
+          <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <p class="text-sm font-semibold text-slate-700 mb-1">Select a story</p>
+          <p class="text-xs text-slate-400">Choose from the list, or press <kbd class="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] font-mono">N</kbd> to create a new one</p>
+        </div>
+      </div>
+
+    </div><!-- /RIGHT PANEL -->
+
+  </div><!-- /MAIN CONTENT -->
+</div><!-- /LAYOUT SHELL -->
+
+<!-- ============================================================
+     ANALYSIS OVERLAY — shown on load
+     ============================================================ -->
+<div id="analysis-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="closeAnalysis(event)">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onclick="e => e.stopPropagation()">
+
+    <!-- Modal header -->
+    <div class="sticky top-0 bg-white border-b border-gray-100 px-8 py-5 flex items-center justify-between rounded-t-2xl z-10">
+      <div>
+        <h2 class="text-lg font-bold text-slate-900">Story Library — Product Analysis</h2>
+        <p class="text-sm text-slate-400 mt-0.5">Market analysis · Problem framing · UI prototype · PRD</p>
+      </div>
+      <button onclick="document.getElementById('analysis-modal').remove()" class="p-2 rounded-lg hover:bg-gray-100 text-slate-400 hover:text-slate-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="px-8 py-6 space-y-10">
+
+      <!-- ========== SECTION 1: MARKET ANALYSIS ========== -->
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-md bg-blue-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+          <h3 class="text-base font-bold text-slate-900">Market Analysis — How Outstanding SaaS Manage Content Libraries</h3>
+        </div>
+
+        <p class="text-sm text-slate-600 mb-4 leading-relaxed">The core problem of Story Library is a <strong>gallery management + coverage tracking</strong> challenge. The closest analogues in the SaaS world are knowledge base tools, content libraries, and portfolio managers. Here's how the best solve it:</p>
+
+        <!-- Competitor table -->
+        <div class="grid grid-cols-1 gap-3 mb-6">
+
+          <div class="border border-gray-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">N</div>
+                <span class="font-semibold text-sm text-slate-800">Notion — Database Views</span>
+              </div>
+              <span class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">Most relevant</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-2">Notion solves gallery management by offering <strong>multiple views of the same dataset</strong>: List, Table, Board (Kanban), Gallery, Calendar, and Timeline. Users choose the mental model that fits their use case. The Gallery view shows rich card previews with cover images and key properties visible. The Filter + Group-By system lets users slice any way they need.</p>
+            <div class="flex flex-wrap gap-1">
+              <span class="text-[11px] bg-green-50 text-green-700 px-2 py-0.5 rounded">Multi-view (list/grid/board)</span>
+              <span class="text-[11px] bg-green-50 text-green-700 px-2 py-0.5 rounded">Property filters</span>
+              <span class="text-[11px] bg-green-50 text-green-700 px-2 py-0.5 rounded">Group-by any field</span>
+              <span class="text-[11px] bg-green-50 text-green-700 px-2 py-0.5 rounded">Card previews</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel steal:</strong> Multi-view toggle (List / Card / Coverage Matrix)</p>
+          </div>
+
+          <div class="border border-gray-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-violet-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">L</div>
+                <span class="font-semibold text-sm text-slate-800">Linear — Issue Library</span>
+              </div>
+              <span class="text-xs text-slate-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">UI patterns</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-2">Linear's issue list excels at <strong>richness without noise</strong>: each list item shows status, priority, assignee, labels, and a one-line description — all scannable in a single row. Keyboard-first navigation (J/K to move, N to create), instant search, and label-based grouping make it feel fast even with hundreds of items. The completeness of a ticket (has description? has estimate?) is visible via subtle icons.</p>
+            <div class="flex flex-wrap gap-1">
+              <span class="text-[11px] bg-violet-50 text-violet-700 px-2 py-0.5 rounded">Rich list items</span>
+              <span class="text-[11px] bg-violet-50 text-violet-700 px-2 py-0.5 rounded">Keyboard-first</span>
+              <span class="text-[11px] bg-violet-50 text-violet-700 px-2 py-0.5 rounded">Completeness signals</span>
+              <span class="text-[11px] bg-violet-50 text-violet-700 px-2 py-0.5 rounded">Instant filter</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel steal:</strong> STAR completeness badge (4/4), incomplete warning inline</p>
+          </div>
+
+          <div class="border border-gray-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">A</div>
+                <span class="font-semibold text-sm text-slate-800">Airtable — Gallery Base</span>
+              </div>
+              <span class="text-xs text-slate-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">Layout</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-2">Airtable's Gallery view renders records as visual cards with an image or color header, making the content scannable at a glance. The grouping feature (Group by field) is the key insight: users can view all records grouped by category, seeing the distribution. An empty group explicitly shows "0 records" — which is a gap signal.</p>
+            <div class="flex flex-wrap gap-1">
+              <span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-0.5 rounded">Color-coded headers</span>
+              <span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-0.5 rounded">Group-by category</span>
+              <span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-0.5 rounded">Empty group = gap signal</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel steal:</strong> Coverage Matrix view with explicit 0-story gap prompts</p>
+          </div>
+
+          <div class="border border-gray-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-pink-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">P</div>
+                <span class="font-semibold text-sm text-slate-800">Pitch — Slide Library</span>
+              </div>
+              <span class="text-xs text-slate-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">Gallery UX</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-2">Pitch manages a gallery of reusable slide templates and decks. Key patterns: visual thumbnail preview (user understands content without clicking), tag-based organization, and <strong>usage count</strong> on each template ("used 12 times"). This usage signal tells users what's proven vs. untested.</p>
+            <div class="flex flex-wrap gap-1">
+              <span class="text-[11px] bg-pink-50 text-pink-700 px-2 py-0.5 rounded">Usage count</span>
+              <span class="text-[11px] bg-pink-50 text-pink-700 px-2 py-0.5 rounded">Rich preview</span>
+              <span class="text-[11px] bg-pink-50 text-pink-700 px-2 py-0.5 rounded">Tag organization</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel steal (Phase 2):</strong> "Used in 3 interviews" badge when linked to applications</p>
+          </div>
+
+          <div class="border border-gray-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-teal-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">I</div>
+                <span class="font-semibold text-sm text-slate-800">Interviewing.io / Exponent — Story Banks</span>
+              </div>
+              <span class="text-xs text-slate-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">Direct competitor</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-2">Interview coaching tools like Exponent have "story banks" where users save STAR answers by question type. Their approach: <strong>question-first</strong> (e.g., "Tell me about a conflict you resolved") → link to saved stories. The gap here: they don't tell users <em>which competency areas are uncovered</em>, they just list stories linearly. No coverage analytics.</p>
+            <div class="flex flex-wrap gap-1">
+              <span class="text-[11px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded">Question-linked stories</span>
+              <span class="text-[11px] bg-red-50 text-red-600 px-2 py-0.5 rounded">No coverage analytics ✗</span>
+              <span class="text-[11px] bg-red-50 text-red-600 px-2 py-0.5 rounded">No gap detection ✗</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel advantage:</strong> Coverage matrix + gap detection is a genuine differentiator</p>
+          </div>
+
+        </div>
+
+        <!-- Key insight box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <p class="text-xs font-bold text-blue-800 mb-1">Key insight from market analysis:</p>
+          <p class="text-xs text-blue-700 leading-relaxed">No tool at the intersection of <strong>interview prep + content management</strong> currently offers <strong>competency coverage analytics</strong>. Notion-style multi-view + Linear-style completeness signals + Airtable-style gap visibility = a story library that actively coaches the user toward interview readiness, not just stores content.</p>
+        </div>
+      </section>
+
+      <!-- ========== SECTION 2: HOW TO SOLVE IT ========== -->
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-md bg-violet-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+          <h3 class="text-base font-bold text-slate-900">How This Problem Can Be Solved — 6 Design Bets</h3>
+        </div>
+
+        <div class="space-y-4">
+
+          <div class="flex gap-3">
+            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">1</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">Multi-view: List / Card / Coverage Matrix</p>
+              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Different users need different mental models. List = scan quickly. Card = rich preview for low volume. Coverage Matrix = the strategic view that tells you "am I interview-ready?" — something completely absent today. The view should be persistable per user.</p>
+              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: M · Impact: H</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">2</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">STAR Completeness Indicators</p>
+              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Every story should surface how complete it is (0/4, 1/4, 2/4, 3/4, 4/4 STAR sections filled). Incomplete stories are interview liabilities. The indicator should appear in every view, and incomplete stories should have a "Complete this story →" CTA in the detail panel. This is a Linear-inspired UX pattern applied to interview prep.</p>
+              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: S · Impact: H</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">3</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">Inline Gap Prompts — Coaching in Context</p>
+              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">When a user has 0 stories in a competency, surface a contextual prompt inside the list ("No Growth stories yet — senior roles often ask about learning agility") with a direct "+ Add story" CTA. This turns the library from passive storage to an active interview prep coach. The prompt should be dismissable but reappear after 7 days.</p>
+              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: S · Impact: H (retention + engagement)</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">4</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">Richer Story List Items (Information Density Upgrade)</p>
+              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Current list items show: title, 1 tag, date. This is too sparse for a library. Add: category (colored dot + label), excerpt (2 lines), STAR completeness badge, word count (proxy for story depth), favorite. This gives the user enough signal to pick the right story without opening it.</p>
+              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: S · Impact: M</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">5</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">New Story Form: Guided Prompt + Gap Awareness</p>
+              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">When creating a new story, show a banner if the user has uncovered gaps: "You have no Collaboration stories — consider adding one." The competency picker should visually highlight uncovered categories. Field labels should include contextual hints ("Situation: Set the scene. What was happening?") to scaffold good writing.</p>
+              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: S · Impact: M</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">6</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">(Phase 2) Usage Tracking — "Used in X interviews"</p>
+              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Once stories can be linked to job applications, surface a "Used in 3 interviews" badge on each story. This tells the user which stories are battle-tested vs. untested. Proven stories get a subtle green highlight. Stories never used get a "Never used — try it in your next interview" nudge.</p>
+              <p class="text-xs text-violet-600 mt-1 font-medium">Effort: M · Impact: H · Phase 2</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========== SECTION 3: PRD ========== -->
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-md bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+          <h3 class="text-base font-bold text-slate-900">PRD — Story Library v2</h3>
+        </div>
+
+        <div class="space-y-5">
+
+          <!-- Problem statement -->
+          <div class="bg-slate-50 rounded-xl p-4 border border-gray-200">
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Problem Statement</p>
+            <p class="text-sm text-slate-600 leading-relaxed">The Story Library currently functions as passive storage — users can add and retrieve stories, but the product does not help them understand <em>whether they are interview-ready</em>. There is no signal for story completeness (partial STAR vs. full STAR), no coverage visibility (which competency areas are missing), and no coaching prompts. The result: users store 1–3 stories and stop adding more because the product does not show them the value of a comprehensive library.</p>
+          </div>
+
+          <!-- Goals -->
+          <div>
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Goals</p>
+            <ul class="text-sm text-slate-600 space-y-1.5">
+              <li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>Increase average stories per user from ~2 to 5+ within first 30 days</li>
+              <li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>Increase story completeness rate (4/4 STAR) from unknown to measurable baseline &gt;60%</li>
+              <li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>Create a coverage matrix that becomes a Pro feature differentiator</li>
+              <li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>Reduce time to find the right story before an interview (&lt;10 seconds)</li>
+            </ul>
+          </div>
+
+          <!-- Features -->
+          <div>
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Features — Prioritized</p>
+            <table class="w-full text-xs border-collapse">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="text-left px-3 py-2 text-slate-600 font-semibold border-b border-gray-200">Feature</th>
+                  <th class="text-left px-3 py-2 text-slate-600 font-semibold border-b border-gray-200">Priority</th>
+                  <th class="text-left px-3 py-2 text-slate-600 font-semibold border-b border-gray-200">Tier</th>
+                  <th class="text-left px-3 py-2 text-slate-600 font-semibold border-b border-gray-200">Effort</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2.5 text-slate-700">STAR completeness badge on list items</td>
+                  <td class="px-3 py-2.5"><span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">P0</span></td>
+                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
+                  <td class="px-3 py-2.5 text-slate-500">XS (1d)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2.5 text-slate-700">Richer list item (category dot, excerpt, word count)</td>
+                  <td class="px-3 py-2.5"><span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">P0</span></td>
+                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
+                  <td class="px-3 py-2.5 text-slate-500">S (2d)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2.5 text-slate-700">Inline gap prompts in list (per missing competency)</td>
+                  <td class="px-3 py-2.5"><span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">P0</span></td>
+                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
+                  <td class="px-3 py-2.5 text-slate-500">S (2d)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2.5 text-slate-700">Card / Gallery view mode</td>
+                  <td class="px-3 py-2.5"><span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">P1</span></td>
+                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
+                  <td class="px-3 py-2.5 text-slate-500">M (3d)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2.5 text-slate-700">Coverage Matrix view (bar chart per category)</td>
+                  <td class="px-3 py-2.5"><span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">P1</span></td>
+                  <td class="px-3 py-2.5 text-slate-500">Pro only</td>
+                  <td class="px-3 py-2.5 text-slate-500">M (3d)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2.5 text-slate-700">New story form: gap awareness banner + field hints</td>
+                  <td class="px-3 py-2.5"><span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">P1</span></td>
+                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
+                  <td class="px-3 py-2.5 text-slate-500">S (1d)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2.5 text-slate-700">View preference persistence (Zustand + localStorage)</td>
+                  <td class="px-3 py-2.5"><span class="bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium">P2</span></td>
+                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
+                  <td class="px-3 py-2.5 text-slate-500">XS (0.5d)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2.5 text-slate-700">Story interview usage tracking (Phase 2)</td>
+                  <td class="px-3 py-2.5"><span class="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-medium">P3</span></td>
+                  <td class="px-3 py-2.5 text-slate-500">Pro only</td>
+                  <td class="px-3 py-2.5 text-slate-500">L (requires schema)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Schema changes -->
+          <div>
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Schema Changes Required</p>
+            <div class="bg-gray-950 rounded-xl p-4 text-xs font-mono text-gray-300 overflow-x-auto">
+              <p class="text-slate-500 mb-1">-- No schema change for P0 features</p>
+              <p class="text-slate-500 mb-1">-- Completeness is computed from existing columns (situation, task, action, result)</p>
+              <p class="text-slate-500 mb-3">-- Gap detection is derived from competencies[] array and user's full story set</p>
+              <p class="text-green-400">-- Phase 2: story_usages table (links story_id → job_application_id)</p>
+              <p class="text-slate-400">CREATE TABLE story_usages (</p>
+              <p class="text-slate-400 pl-4">id UUID PRIMARY KEY,</p>
+              <p class="text-slate-400 pl-4">story_id UUID REFERENCES interview_stories(id) ON DELETE CASCADE,</p>
+              <p class="text-slate-400 pl-4">job_application_id UUID REFERENCES job_applications(id) ON DELETE CASCADE,</p>
+              <p class="text-slate-400 pl-4">user_id UUID REFERENCES profiles(id),</p>
+              <p class="text-slate-400 pl-4">used_at TIMESTAMPTZ DEFAULT now()</p>
+              <p class="text-slate-400">);</p>
+            </div>
+          </div>
+
+          <!-- Acceptance criteria -->
+          <div>
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Acceptance Criteria (P0 + P1)</p>
+            <ul class="text-xs text-slate-600 space-y-1.5">
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Each story item in the list displays: category dot + label, excerpt (2 lines), STAR completeness badge (n/4), word count, date, favorite toggle</li>
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Completeness badge: green "4/4 ✓" for complete, amber "n/4" for partial, red "0/4" for empty (freeform stories show "Full" badge)</li>
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> At most 1 gap prompt visible in list at a time (for the highest-priority missing competency). Dismissable, reappears after 7 days.</li>
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> View toggle (List / Card / Matrix) persists to localStorage via Zustand middleware</li>
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Card view: renders color-coded top border (category color), title, excerpt, completeness, word count, date. Click opens detail panel.</li>
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Coverage Matrix: 1 bar per competency, filled proportionally, shows covered sub-tags (✓) and uncovered sub-tags (gray). Overall completeness score shown at bottom.</li>
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Coverage Matrix is behind <code class="bg-gray-100 px-1 rounded">ProGate</code> for free users — shows blurred preview + upgrade CTA</li>
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> New story form shows blue banner with uncovered gaps when user has ≥1 gap</li>
+              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> All views are mobile-responsive: Card view wraps to 1 column at &lt;640px, Coverage Matrix scrolls horizontally never — stacks vertically</li>
+            </ul>
+          </div>
+
+          <!-- Metrics -->
+          <div>
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Success Metrics (4 weeks post-launch)</p>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <p class="text-lg font-bold text-blue-600">5+</p>
+                <p class="text-xs text-slate-500">avg stories/user (vs. ~2 baseline)</p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <p class="text-lg font-bold text-blue-600">60%</p>
+                <p class="text-xs text-slate-500">stories with 4/4 STAR complete</p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <p class="text-lg font-bold text-blue-600">25%</p>
+                <p class="text-xs text-slate-500">gap prompt CTR (click → new story)</p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <p class="text-lg font-bold text-blue-600">40%</p>
+                <p class="text-xs text-slate-500">users using Coverage Matrix (Pro)</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="border-t border-gray-100 pt-6 flex items-center justify-between">
+        <p class="text-xs text-slate-400">Prototype below: interact with the list, toggle views (List / Card / Coverage Matrix), click stories to see detail, try the New button</p>
+        <button onclick="document.getElementById('analysis-modal').remove()" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+          View prototype
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </div>
+
+    </div><!-- /modal content -->
+  </div>
+</div>
+
+<script>
+  // Panel switching
+  function showPanel(name) {
+    const panels = ['detail', 'edit', 'new', 'empty', 'detail2'];
+    panels.forEach(p => {
+      const el = document.getElementById('panel-' + p);
+      if (el) el.classList.add('hidden');
+    });
+    const target = document.getElementById('panel-' + name);
+    if (target) target.classList.remove('hidden');
+  }
+
+  // View switching
+  function setView(view) {
+    ['list', 'grid', 'matrix'].forEach(v => {
+      document.getElementById('view-' + v).classList.add('hidden');
+      document.getElementById('btn-' + v).classList.remove('active');
+    });
+    document.getElementById('view-' + view).classList.remove('hidden');
+    document.getElementById('btn-' + view).classList.add('active');
+  }
+
+  function closeAnalysis(e) {
+    if (e.target === document.getElementById('analysis-modal')) {
+      document.getElementById('analysis-modal').remove();
+    }
+  }
+
+  // Start on detail view
+  showPanel('detail');
+</script>
+</body>
+</html>

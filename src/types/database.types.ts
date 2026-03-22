@@ -69,6 +69,8 @@ export interface StageHistory {
 
 export type FileType = 'pdf' | 'docx' | 'external_link'
 
+export type TemplateId = 'precision' | 'modern_tech' | 'compact_eu' | 'europass' | 'senior_ic'
+
 export interface CVVersion {
   id: string
   user_id: string
@@ -77,7 +79,13 @@ export interface CVVersion {
   tags: string[]
   is_default: boolean
   is_archived: boolean
+  is_locked: boolean
+  template_id: TemplateId
+  resume_data: Json
+  target_country: string | null
+  /** @deprecated kept for schema stability, never written to */
   file_url: string | null
+  /** @deprecated kept for schema stability, never written to */
   file_type: FileType | null
   created_at: string
   updated_at: string

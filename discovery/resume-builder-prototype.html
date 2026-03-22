@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobFunnel OS — Resume Builder Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #2563EB;
+    --primary-hover: #1D4ED8;
+    --purple: #8B5CF6;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --neutral: #64748B;
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --n900: #0F172A;
+    --n800: #1E293B;
+    --n600: #475569;
+    --n400: #94A3B8;
+    --n200: #E2E8F0;
+    --n100: #F1F5F9;
+    --n50: #F8FAFC;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+  }
+
+  html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--n900); font-size: 14px; line-height: 20px; }
+
+  /* ── Layout shell ── */
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 220px; min-width: 220px; background: var(--n900); display: flex; flex-direction: column;
+    padding: 0; overflow: hidden; flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo-mark {
+    width: 28px; height: 28px; background: var(--primary); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sidebar-logo-mark svg { color: white; }
+  .sidebar-logo-text { font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+  .sidebar-logo-sub { font-size: 10px; font-weight: 500; color: var(--n400); letter-spacing: 0.5px; text-transform: uppercase; }
+  .sidebar-nav { padding: 12px 0; flex: 1; }
+  .nav-group-label { font-size: 10px; font-weight: 600; color: var(--n400); letter-spacing: 0.8px; text-transform: uppercase; padding: 12px 20px 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 20px;
+    color: var(--n400); font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all 150ms ease; border-left: 3px solid transparent; text-decoration: none;
+  }
+  .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: white; background: rgba(37,99,235,0.15); border-left-color: var(--primary); }
+  .nav-item svg { flex-shrink: 0; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-footer {
+    padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar-sm { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+  .sidebar-user { flex: 1; min-width: 0; }
+  .sidebar-user-name { font-size: 12px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-user-tier { font-size: 10px; color: var(--warning); font-weight: 500; }
+
+  /* ── Main area ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+  /* ── Screen tabs ── */
+  .screen-tabs {
+    background: var(--card); border-bottom: 1px solid var(--n200);
+    display: flex; align-items: center; padding: 0 24px; gap: 0; flex-shrink: 0;
+  }
+  .screen-tab {
+    padding: 14px 16px; font-size: 13px; font-weight: 500; color: var(--n400);
+    cursor: pointer; border-bottom: 2px solid transparent; transition: all 150ms ease;
+    white-space: nowrap; display: flex; align-items: center; gap: 6px;
+  }
+  .screen-tab:hover { color: var(--n900); }
+  .screen-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+  .screen-tab .tab-badge {
+    background: var(--error); color: white; font-size: 10px; font-weight: 700;
+    padding: 1px 5px; border-radius: 10px; line-height: 14px;
+  }
+  .screen-tab .tab-badge.warn { background: var(--warning); }
+
+  /* ── Screen content ── */
+  .screen-content { flex: 1; overflow-y: auto; padding: 32px; display: none; }
+  .screen-content.active { display: block; }
+
+  /* ────────────────────────────────────────────
+     SCREEN 1 — My CVs
+  ──────────────────────────────────────────── */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; }
+  .page-title { font-size: 24px; font-weight: 700; color: var(--n900); letter-spacing: -0.5px; }
+  .page-subtitle { font-size: 14px; color: var(--n600); margin-top: 4px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 150ms ease; text-decoration: none; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-ghost { background: transparent; color: var(--n600); border: 1px solid var(--n200); }
+  .btn-ghost:hover { background: var(--n100); color: var(--n900); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+  .filter-pill {
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--n200); background: white; color: var(--n600);
+    transition: all 150ms ease;
+  }
+  .filter-pill:hover { border-color: var(--primary); color: var(--primary); }
+  .filter-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* CV card grid */
+  .cv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+  .cv-card {
+    background: var(--card); border: 1px solid var(--n200); border-radius: var(--radius-lg);
+    padding: 20px; cursor: pointer; transition: all 200ms ease; position: relative;
+  }
+  .cv-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+  .cv-card-new {
+    border: 2px dashed var(--n200); background: var(--n50); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; min-height: 200px; gap: 10px;
+    color: var(--n400); transition: all 200ms ease;
+  }
+  .cv-card-new:hover { border-color: var(--primary); color: var(--primary); background: #EFF6FF; }
+  .cv-card-new-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--n100); display: flex; align-items: center; justify-content: center; }
+  .cv-card-new:hover .cv-card-new-icon { background: #DBEAFE; }
+  .cv-card-new-label { font-size: 13px; font-weight: 600; }
+
+  .cv-card-thumb {
+    width: 100%; height: 100px; background: var(--n50); border-radius: var(--radius-md);
+    margin-bottom: 14px; overflow: hidden; position: relative; border: 1px solid var(--n100);
+  }
+  .cv-thumb-lines { padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .cv-thumb-line { height: 5px; background: var(--n200); border-radius: 2px; }
+  .cv-thumb-line.thick { height: 8px; background: var(--n300, #CBD5E1); width: 50%; }
+  .cv-thumb-line.short { width: 40%; }
+  .cv-thumb-line.medium { width: 65%; }
+  .cv-thumb-line.long { width: 90%; }
+  .cv-thumb-twoCol { display: flex; gap: 6px; }
+  .cv-thumb-twoCol .col-main { flex: 2; display: flex; flex-direction: column; gap: 4px; }
+  .cv-thumb-twoCol .col-side { flex: 1; background: var(--n100); border-radius: 3px; padding: 5px; display: flex; flex-direction: column; gap: 3px; }
+  .cv-thumb-twoCol .col-side .cv-thumb-line { background: var(--n200); }
+
+  .cv-card-name { font-size: 14px; font-weight: 700; color: var(--n900); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cv-card-meta { font-size: 11px; color: var(--n400); margin-bottom: 12px; }
+
+  .cv-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 600; line-height: 16px;
+  }
+  .badge-success { background: #D1FAE5; color: #065F46; }
+  .badge-warning { background: #FEF3C7; color: #92400E; }
+  .badge-error { background: #FEE2E2; color: #991B1B; }
+  .badge-neutral { background: var(--n100); color: var(--n600); }
+  .badge-purple { background: #EDE9FE; color: #5B21B6; }
+  .badge-blue { background: #DBEAFE; color: #1E40AF; }
+
+  .cv-card-actions { display: flex; gap: 6px; border-top: 1px solid var(--n100); padding-top: 12px; }
+  .icon-btn {
+    width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--n200);
+    background: white; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 150ms ease; color: var(--n400);
+  }
+  .icon-btn:hover { background: var(--n100); color: var(--n900); border-color: var(--n300, #CBD5E1); }
+  .icon-btn.danger:hover { background: #FEE2E2; color: var(--error); border-color: #FECACA; }
+
+  /* pro lock overlay */
+  .cv-card-locked {
+    filter: blur(2px); pointer-events: none; opacity: 0.5;
+    user-select: none;
+  }
+  .cv-card-pro-wrapper { position: relative; }
+  .cv-card-pro-overlay {
+    position: absolute; inset: 0; z-index: 10; background: rgba(255,255,255,0.85);
+    border-radius: var(--radius-lg); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px; padding: 20px; text-align: center;
+    border: 1px solid var(--n200);
+  }
+  .pro-lock-icon { color: var(--n400); }
+  .pro-lock-title { font-size: 13px; font-weight: 700; color: var(--n800); }
+  .pro-lock-sub { font-size: 12px; color: var(--n600); }
+
+  /* ────────────────────────────────────────────
+     SCREEN 2 — Template Gallery
+  ──────────────────────────────────────────── */
+  .tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
+
+  .tpl-card {
+    background: var(--card); border: 2px solid var(--n200); border-radius: var(--radius-lg);
+    overflow: hidden; cursor: pointer; transition: all 200ms ease; position: relative;
+  }
+  .tpl-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+
+  .tpl-preview {
+    height: 150px; background: var(--n50); padding: 12px; border-bottom: 1px solid var(--n100);
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .tpl-preview-header { display: flex; flex-direction: column; gap: 3px; margin-bottom: 6px; }
+  .tpl-preview-name { height: 10px; width: 55%; background: var(--n800); border-radius: 2px; }
+  .tpl-preview-title { height: 6px; width: 35%; background: var(--n400); border-radius: 2px; }
+  .tpl-preview-divider { height: 1px; background: var(--n200); margin: 4px 0; }
+  .tpl-preview-section-label { height: 5px; width: 25%; background: var(--primary); border-radius: 2px; margin-bottom: 4px; }
+  .tpl-preview-line { height: 4px; background: var(--n200); border-radius: 2px; }
+
+  /* Two-column thumb */
+  .tpl-preview-2col { display: flex; gap: 8px; flex: 1; }
+  .tpl-preview-2col-main { flex: 3; display: flex; flex-direction: column; gap: 4px; }
+  .tpl-preview-2col-side { flex: 2; background: var(--n100); border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 3px; }
+  .tpl-preview-2col-side .tpl-preview-line { background: var(--n300, #CBD5E1); }
+
+  .tpl-info { padding: 14px; }
+  .tpl-name { font-size: 14px; font-weight: 700; color: var(--n900); margin-bottom: 4px; }
+  .tpl-desc { font-size: 11px; color: var(--n600); margin-bottom: 10px; line-height: 16px; }
+  .tpl-ats-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+  .tpl-ats-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+  }
+  .tpl-ats-pass { background: #D1FAE5; color: #065F46; }
+  .tpl-ats-warn { background: #FEF3C7; color: #92400E; }
+  .tpl-use-btn {
+    width: 100%; padding: 8px; background: var(--primary); color: white;
+    border: none; border-radius: var(--radius-md); font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: background 150ms ease; display: none;
+  }
+  .tpl-card:hover .tpl-use-btn { display: block; }
+  .tpl-use-btn:hover { background: var(--primary-hover); }
+
+  .tpl-recommended-banner {
+    background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
+    border: 1px solid #BFDBFE; border-radius: var(--radius-md);
+    padding: 12px 16px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .tpl-recommended-icon { color: var(--primary); flex-shrink: 0; }
+  .tpl-recommended-text { font-size: 13px; color: var(--n800); }
+  .tpl-recommended-text strong { color: var(--primary); }
+
+  /* ────────────────────────────────────────────
+     SCREEN 3 — Editor
+  ──────────────────────────────────────────── */
+  .editor-shell { display: flex; height: calc(100vh - 57px - 45px); overflow: hidden; margin: -32px; }
+
+  /* Editor top bar */
+  .editor-topbar {
+    display: flex; align-items: center; gap: 12px; padding: 10px 20px;
+    background: white; border-bottom: 1px solid var(--n200); flex-shrink: 0;
+  }
+  .editor-cv-name { font-size: 15px; font-weight: 700; color: var(--n900); flex: 1; }
+  .editor-cv-name input {
+    border: none; outline: none; font-size: 15px; font-weight: 700; color: var(--n900);
+    background: transparent; width: 100%; font-family: inherit;
+  }
+  .editor-cv-name input:hover { background: var(--n50); border-radius: 4px; padding: 2px 4px; }
+  .editor-tpl-badge { background: var(--n100); color: var(--n600); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  /* Editor tabs */
+  .editor-tabs {
+    display: flex; background: white; border-bottom: 1px solid var(--n200); flex-shrink: 0;
+  }
+  .editor-tab {
+    padding: 10px 18px; font-size: 12px; font-weight: 600; color: var(--n400);
+    cursor: pointer; border-bottom: 2px solid transparent; transition: all 150ms;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .editor-tab:hover { color: var(--n900); }
+  .editor-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .editor-tab-badge {
+    font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 10px;
+    background: var(--error); color: white; line-height: 14px;
+  }
+  .editor-tab-badge.ok { background: var(--success); }
+
+  /* Editor panes */
+  .editor-left {
+    width: 420px; min-width: 420px; border-right: 1px solid var(--n200);
+    overflow-y: auto; background: var(--n50); flex-shrink: 0;
+  }
+  .editor-right { flex: 1; background: var(--n200); display: flex; align-items: flex-start; justify-content: center; padding: 24px; overflow-y: auto; }
+
+  /* Form sections */
+  .form-section { background: white; border-bottom: 1px solid var(--n100); }
+  .form-section-header {
+    display: flex; align-items: center; padding: 14px 20px; cursor: pointer;
+    gap: 10px; user-select: none;
+  }
+  .form-section-header:hover { background: var(--n50); }
+  .section-chevron { color: var(--n400); transition: transform 200ms ease; flex-shrink: 0; }
+  .section-chevron.open { transform: rotate(90deg); }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--n800); flex: 1; }
+  .section-body { display: none; padding: 0 20px 16px; }
+  .section-body.open { display: block; }
+
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 11px; font-weight: 600; color: var(--n600); margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.4px; }
+  .form-input {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--n200); border-radius: var(--radius-md);
+    font-size: 13px; color: var(--n900); font-family: inherit; outline: none; background: white;
+    transition: border-color 150ms ease;
+  }
+  .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .bullet-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--n100); }
+  .bullet-item:last-of-type { border-bottom: none; }
+  .bullet-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--n400); flex-shrink: 0; margin-top: 7px; }
+  .bullet-text { flex: 1; font-size: 12px; color: var(--n800); line-height: 18px; }
+  .bullet-action { color: var(--n400); cursor: pointer; flex-shrink: 0; }
+  .bullet-action:hover { color: var(--error); }
+
+  .add-btn-sm {
+    display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px;
+    border: 1px dashed var(--n200); border-radius: var(--radius-sm); background: transparent;
+    font-size: 11px; font-weight: 600; color: var(--n400); cursor: pointer; margin-top: 8px;
+    transition: all 150ms;
+  }
+  .add-btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* ATS score chip */
+  .ats-chip {
+    position: sticky; bottom: 16px; left: 50%; transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px;
+    background: white; border: 1.5px solid var(--success); border-radius: 24px;
+    box-shadow: var(--shadow-md); cursor: pointer; font-size: 12px; font-weight: 700;
+    color: var(--success); white-space: nowrap; margin: 16px auto 0;
+    transition: all 150ms;
+  }
+  .ats-chip:hover { background: #D1FAE5; }
+  .ats-chip.warn { border-color: var(--warning); color: var(--warning); }
+
+  /* CV Preview */
+  .cv-preview-paper {
+    background: white; width: 595px; min-height: 842px; box-shadow: var(--shadow-lg);
+    border-radius: 2px; padding: 48px 52px; font-family: Arial, sans-serif;
+  }
+  .cv-preview-name { font-size: 22px; font-weight: 700; color: var(--n900); letter-spacing: -0.5px; }
+  .cv-preview-title { font-size: 13px; color: var(--primary); font-weight: 600; margin-top: 2px; }
+  .cv-preview-contact { font-size: 11px; color: var(--n600); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .cv-preview-divider { height: 1.5px; background: var(--primary); margin: 14px 0 10px; }
+  .cv-section-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--primary); margin-bottom: 8px; }
+  .cv-job { margin-bottom: 14px; }
+  .cv-job-header { display: flex; justify-content: space-between; align-items: baseline; }
+  .cv-job-title { font-size: 12px; font-weight: 700; color: var(--n900); }
+  .cv-job-company { font-size: 11px; color: var(--n600); font-weight: 600; }
+  .cv-job-dates { font-size: 10px; color: var(--n400); }
+  .cv-job-bullets { margin-top: 5px; padding-left: 14px; }
+  .cv-job-bullets li { font-size: 11px; color: var(--n700, #374151); line-height: 17px; margin-bottom: 3px; }
+  .cv-skills-row { display: flex; flex-wrap: wrap; gap: 5px; }
+  .cv-skill-tag { font-size: 10px; background: var(--n100); color: var(--n800); padding: 2px 8px; border-radius: 3px; }
+
+  /* Download bar */
+  .download-bar {
+    position: sticky; bottom: 0; background: white; border-top: 1px solid var(--n200);
+    padding: 12px 24px; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+  }
+
+  /* ────────────────────────────────────────────
+     SCREEN 4 — ATS Scanner
+  ──────────────────────────────────────────── */
+  .ats-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
+
+  .ats-score-card { background: white; border-radius: var(--radius-lg); border: 1px solid var(--n200); padding: 28px; text-align: center; }
+  .ats-gauge { position: relative; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .ats-gauge-ring { transform: rotate(-90deg); }
+  .ats-gauge-bg { fill: none; stroke: var(--n100); stroke-width: 8; }
+  .ats-gauge-fill { fill: none; stroke: var(--success); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 251.2; stroke-dashoffset: 32.6; transition: stroke-dashoffset 1s ease; }
+  .ats-gauge-label { position: absolute; display: flex; flex-direction: column; align-items: center; }
+  .ats-gauge-score { font-size: 36px; font-weight: 800; color: var(--n900); letter-spacing: -2px; }
+  .ats-gauge-max { font-size: 12px; color: var(--n400); font-weight: 500; }
+  .ats-grade { font-size: 13px; font-weight: 700; color: var(--success); background: #D1FAE5; padding: 4px 12px; border-radius: 20px; margin-bottom: 8px; display: inline-block; }
+  .ats-grade-sub { font-size: 12px; color: var(--n600); }
+
+  .ats-breakdown { background: white; border-radius: var(--radius-lg); border: 1px solid var(--n200); overflow: hidden; }
+  .ats-breakdown-title { padding: 16px 20px; border-bottom: 1px solid var(--n100); font-size: 13px; font-weight: 700; color: var(--n900); }
+  .ats-check { display: flex; align-items: flex-start; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--n100); }
+  .ats-check:last-child { border-bottom: none; }
+  .ats-check-icon { flex-shrink: 0; margin-top: 2px; }
+  .ats-check-body { flex: 1; min-width: 0; }
+  .ats-check-label { font-size: 13px; font-weight: 600; color: var(--n900); }
+  .ats-check-detail { font-size: 12px; color: var(--n600); margin-top: 2px; }
+  .ats-check-score { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .check-pass { color: var(--success); }
+  .check-warn { color: var(--warning); }
+
+  .ats-right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  .keyword-card { background: white; border-radius: var(--radius-lg); border: 1px solid var(--n200); overflow: hidden; }
+  .keyword-card-header { padding: 16px 20px; border-bottom: 1px solid var(--n100); }
+  .keyword-card-title { font-size: 13px; font-weight: 700; color: var(--n900); }
+  .keyword-card-sub { font-size: 12px; color: var(--n600); margin-top: 2px; }
+  .keyword-card-body { padding: 16px 20px; }
+  .keyword-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .keyword-tag {
+    display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px;
+    background: var(--n50); border: 1px solid var(--n200); border-radius: 6px;
+    font-size: 12px; font-weight: 500; color: var(--n800); cursor: pointer;
+    transition: all 150ms;
+  }
+  .keyword-tag:hover { border-color: var(--primary); color: var(--primary); background: #EFF6FF; }
+  .keyword-count { font-size: 10px; font-weight: 700; background: var(--warning); color: white; padding: 1px 5px; border-radius: 10px; }
+
+  .export-guide { background: white; border-radius: var(--radius-lg); border: 1px solid var(--n200); overflow: hidden; }
+  .export-guide-header { padding: 16px 20px; border-bottom: 1px solid var(--n100); font-size: 13px; font-weight: 700; color: var(--n900); }
+  .export-table { width: 100%; border-collapse: collapse; }
+  .export-table th { padding: 10px 20px; text-align: left; font-size: 11px; font-weight: 700; color: var(--n400); letter-spacing: 0.5px; text-transform: uppercase; background: var(--n50); }
+  .export-table td { padding: 10px 20px; font-size: 12px; color: var(--n800); border-top: 1px solid var(--n100); }
+  .export-table tr:hover td { background: var(--n50); }
+  .ats-pass-dot { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; }
+  .dot-green { color: var(--success); }
+  .dot-red { color: var(--error); }
+  .dot-warn { color: var(--warning); }
+  .rec-tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; background: var(--primary); color: white; }
+
+  /* ────────────────────────────────────────────
+     SCREEN 5 — Performance
+  ──────────────────────────────────────────── */
+  .perf-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .perf-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .perf-card { background: white; border-radius: var(--radius-lg); border: 1px solid var(--n200); padding: 24px; position: relative; overflow: hidden; }
+  .perf-card.best { border-color: var(--success); }
+  .perf-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .perf-cv-name { font-size: 15px; font-weight: 700; color: var(--n900); }
+  .perf-cv-meta { font-size: 12px; color: var(--n400); margin-top: 2px; }
+  .perf-best-badge { background: #D1FAE5; color: #065F46; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+  .perf-low-badge { background: var(--n100); color: var(--n600); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+  .perf-stat-row { display: flex; gap: 24px; margin-bottom: 16px; }
+  .perf-stat { }
+  .perf-stat-value { font-size: 28px; font-weight: 800; color: var(--n900); letter-spacing: -1px; }
+  .perf-stat-label { font-size: 11px; color: var(--n400); margin-top: 1px; }
+  .perf-rate { font-size: 22px; font-weight: 800; letter-spacing: -1px; }
+  .perf-rate.high { color: var(--success); }
+  .perf-rate.low { color: var(--error); }
+  .perf-trend { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; }
+  .perf-trend.up { color: var(--success); }
+  .perf-trend.flat { color: var(--n400); }
+  .perf-companies { font-size: 11px; color: var(--n600); padding-top: 12px; border-top: 1px solid var(--n100); }
+  .perf-companies strong { color: var(--n800); }
+
+  /* Bar chart */
+  .chart-card { background: white; border-radius: var(--radius-lg); border: 1px solid var(--n200); padding: 24px; margin-bottom: 20px; }
+  .chart-title { font-size: 14px; font-weight: 700; color: var(--n900); margin-bottom: 20px; }
+  .chart-bars { display: flex; flex-direction: column; gap: 16px; }
+  .chart-row { display: flex; align-items: center; gap: 12px; }
+  .chart-row-label { font-size: 12px; font-weight: 600; color: var(--n800); width: 160px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chart-bar-track { flex: 1; height: 28px; background: var(--n100); border-radius: 4px; overflow: hidden; position: relative; }
+  .chart-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1); }
+  .chart-bar-fill span { font-size: 11px; font-weight: 700; color: white; }
+  .chart-row-pct { font-size: 13px; font-weight: 700; width: 50px; text-align: right; flex-shrink: 0; }
+  .chart-row-pct.high { color: var(--success); }
+  .chart-row-pct.low { color: var(--error); }
+  .chart-legend { display: flex; gap: 16px; margin-top: 16px; }
+  .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--n600); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Insight card */
+  .insight-card {
+    background: white; border-radius: var(--radius-lg); border: 1px solid var(--n200);
+    border-left: 4px solid var(--primary); padding: 18px 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .insight-icon { font-size: 18px; flex-shrink: 0; }
+  .insight-body { flex: 1; }
+  .insight-title { font-size: 13px; font-weight: 700; color: var(--n900); margin-bottom: 4px; }
+  .insight-text { font-size: 13px; color: var(--n600); line-height: 20px; }
+
+  /* ── Responsive: mobile blocker for non-library screens ── */
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .editor-shell { flex-direction: column; height: auto; }
+    .editor-left { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--n200); }
+    .editor-right { display: none; }
+    .cv-grid { grid-template-columns: 1fr; }
+    .tpl-grid { grid-template-columns: 1fr; }
+    .ats-layout { grid-template-columns: 1fr; }
+    .perf-cards { grid-template-columns: 1fr; }
+    .mobile-note { display: flex !important; }
+  }
+  .mobile-note {
+    display: none; padding: 16px; background: #FEF3C7; border-radius: var(--radius-md);
+    border: 1px solid #FDE68A; align-items: center; gap: 10px;
+    font-size: 13px; color: #92400E; margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h6" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="sidebar-logo-text">JobFunnel</div>
+        <div class="sidebar-logo-sub">OS</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group-label">Workspace</div>
+      <a class="nav-item" onclick="void(0)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" onclick="void(0)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8M4 18h6"/></svg>
+        Pipeline
+      </a>
+      <a class="nav-item" onclick="void(0)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+      <div class="nav-group-label" style="margin-top:8px;">Tools</div>
+      <a class="nav-item active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Resume Builder
+      </a>
+      <a class="nav-item" onclick="void(0)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Stories
+      </a>
+      <a class="nav-item" onclick="void(0)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        Settings
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar-sm">VB</div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name">Vinicius B.</div>
+        <div class="sidebar-user-tier">Free · 2/2 CVs</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Screen tabs -->
+    <div class="screen-tabs">
+      <div class="screen-tab active" onclick="showScreen('library', this)">My CVs</div>
+      <div class="screen-tab" onclick="showScreen('gallery', this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New CV
+      </div>
+      <div class="screen-tab" onclick="showScreen('editor', this)">Editor</div>
+      <div class="screen-tab" onclick="showScreen('ats', this)">
+        ATS Score
+        <span class="tab-badge warn">3</span>
+      </div>
+      <div class="screen-tab" onclick="showScreen('performance', this)">Performance</div>
+    </div>
+
+    <!-- ─────── SCREEN 1: My CVs ─────── -->
+    <div id="screen-library" class="screen-content active">
+      <div class="page-header">
+        <div>
+          <div class="page-title">My Resumes</div>
+          <div class="page-subtitle">Track which CV version performs best across your applications</div>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('gallery', document.querySelectorAll('.screen-tab')[1])">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Resume
+        </button>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-pill active">All</div>
+        <div class="filter-pill">Active</div>
+        <div class="filter-pill">Archived</div>
+      </div>
+
+      <div class="cv-grid">
+
+        <!-- New CV card -->
+        <div class="cv-card cv-card-new" onclick="showScreen('gallery', document.querySelectorAll('.screen-tab')[1])">
+          <div class="cv-card-new-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div class="cv-card-new-label">New Resume</div>
+          <div style="font-size:11px;color:var(--n400);">Start from template or scratch</div>
+        </div>
+
+        <!-- CV Card 1 — Best performer -->
+        <div class="cv-card" onclick="showScreen('editor', document.querySelectorAll('.screen-tab')[2])">
+          <div class="cv-card-thumb">
+            <div class="cv-thumb-lines">
+              <div class="cv-thumb-line thick"></div>
+              <div class="cv-thumb-line short" style="background:var(--primary);opacity:.4;"></div>
+              <div style="height:1px;background:var(--n200);margin:3px 0;"></div>
+              <div class="cv-thumb-line long"></div>
+              <div class="cv-thumb-line medium"></div>
+              <div class="cv-thumb-line long"></div>
+              <div class="cv-thumb-line medium"></div>
+              <div style="height:1px;background:var(--n200);margin:3px 0;"></div>
+              <div class="cv-thumb-line long"></div>
+              <div class="cv-thumb-line short"></div>
+            </div>
+          </div>
+          <div class="cv-card-name">PM Berlin – Q1 2026</div>
+          <div class="cv-card-meta">Edited 2 days ago · Precision template</div>
+          <div class="cv-badges">
+            <span class="badge badge-success">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              21% screening rate
+            </span>
+            <span class="badge badge-success">ATS Safe</span>
+            <span class="badge badge-neutral">🇩🇪 DE</span>
+          </div>
+          <div class="cv-card-actions">
+            <div class="icon-btn" title="Edit">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <div class="icon-btn" title="Duplicate">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </div>
+            <div class="icon-btn danger" title="Archive">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- CV Card 2 — Below avg -->
+        <div class="cv-card">
+          <div class="cv-card-thumb">
+            <div class="cv-thumb-twoCol" style="padding:10px;">
+              <div class="col-main">
+                <div class="cv-thumb-line thick" style="background:var(--n700,#374151);width:70%;height:7px;"></div>
+                <div class="cv-thumb-line short" style="background:var(--n400);height:4px;width:45%;"></div>
+                <div style="height:1px;background:var(--n200);margin:4px 0;"></div>
+                <div class="cv-thumb-line long"></div>
+                <div class="cv-thumb-line medium"></div>
+                <div class="cv-thumb-line long"></div>
+              </div>
+              <div class="col-side">
+                <div class="cv-thumb-line" style="width:80%;"></div>
+                <div class="cv-thumb-line" style="width:60%;"></div>
+                <div class="cv-thumb-line" style="width:70%;"></div>
+                <div class="cv-thumb-line" style="width:50%;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="cv-card-name">Tech Lead NL – Compact</div>
+          <div class="cv-card-meta">Edited 5 days ago · Modern Tech template</div>
+          <div class="cv-badges">
+            <span class="badge badge-warning">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/><circle cx="12" cy="12" r="10"/></svg>
+              12% screening rate
+            </span>
+            <span class="badge badge-warning">ATS Review</span>
+            <span class="badge badge-neutral">🇳🇱 NL</span>
+          </div>
+          <div class="cv-card-actions">
+            <div class="icon-btn" title="Edit">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <div class="icon-btn" title="Duplicate">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </div>
+            <div class="icon-btn danger" title="Archive">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- CV Card 3 — Locked (Pro) -->
+        <div class="cv-card-pro-wrapper">
+          <div class="cv-card cv-card-locked">
+            <div class="cv-card-thumb"><div class="cv-thumb-lines"><div class="cv-thumb-line thick"></div><div class="cv-thumb-line medium"></div><div class="cv-thumb-line long"></div></div></div>
+            <div class="cv-card-name">Senior IC – Cross-border</div>
+            <div class="cv-card-meta">3 applications · Europass template</div>
+            <div class="cv-badges"><span class="badge badge-neutral">🇩🇪 DE 🇬🇧 UK</span></div>
+          </div>
+          <div class="cv-card-pro-overlay">
+            <div class="pro-lock-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="pro-lock-title">Unlimited CVs on Pro</div>
+            <div class="pro-lock-sub">Free tier includes 2 CV versions</div>
+            <button class="btn btn-primary btn-sm" style="margin-top:4px;">Upgrade to Pro · €15/mo</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─────── SCREEN 2: Template Gallery ─────── -->
+    <div id="screen-gallery" class="screen-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Choose a template</div>
+          <div class="page-subtitle">All templates are ATS-validated. We recommend based on your pipeline.</div>
+        </div>
+        <a style="font-size:13px;color:var(--primary);font-weight:500;cursor:pointer;text-decoration:underline;" onclick="showScreen('editor', document.querySelectorAll('.screen-tab')[2])">or start from scratch →</a>
+      </div>
+
+      <div class="tpl-recommended-banner">
+        <div class="tpl-recommended-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="tpl-recommended-text">
+          You have <strong>6 companies using Greenhouse/Lever</strong> in your pipeline. The <strong>Precision</strong> and <strong>Modern Tech</strong> templates are compatible with all of them.
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-pill active">All templates</div>
+        <div class="filter-pill">ATS-Safe (all)</div>
+        <div class="filter-pill">EU / A4</div>
+        <div class="filter-pill">Compact</div>
+        <div class="filter-pill">Senior IC</div>
+      </div>
+
+      <div class="tpl-grid">
+
+        <!-- Template 1: Precision -->
+        <div class="tpl-card">
+          <div class="tpl-preview">
+            <div class="tpl-preview-header">
+              <div class="tpl-preview-name"></div>
+              <div class="tpl-preview-title"></div>
+            </div>
+            <div class="tpl-preview-divider"></div>
+            <div class="tpl-preview-section-label"></div>
+            <div class="tpl-preview-line long"></div>
+            <div class="tpl-preview-line medium"></div>
+            <div class="tpl-preview-line long"></div>
+            <div class="tpl-preview-divider"></div>
+            <div class="tpl-preview-section-label"></div>
+            <div class="tpl-preview-line medium"></div>
+            <div class="tpl-preview-line short"></div>
+          </div>
+          <div class="tpl-info">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+              <div class="tpl-name">Precision</div>
+              <span class="badge badge-blue" style="font-size:10px;">Recommended</span>
+            </div>
+            <div class="tpl-desc">Single-column, maximum ATS compatibility. Passes every major ATS including Taleo and SAP.</div>
+            <div class="tpl-ats-row">
+              <span class="tpl-ats-badge tpl-ats-pass">Workday ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Greenhouse ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Lever ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">SAP ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Taleo ✓</span>
+            </div>
+            <button class="tpl-use-btn" onclick="showScreen('editor', document.querySelectorAll('.screen-tab')[2])">Use Precision →</button>
+          </div>
+        </div>
+
+        <!-- Template 2: Modern Tech -->
+        <div class="tpl-card">
+          <div class="tpl-preview">
+            <div class="tpl-preview-2col">
+              <div class="tpl-preview-2col-main">
+                <div class="tpl-preview-header">
+                  <div class="tpl-preview-name"></div>
+                  <div class="tpl-preview-title"></div>
+                </div>
+                <div class="tpl-preview-divider"></div>
+                <div class="tpl-preview-section-label"></div>
+                <div class="tpl-preview-line long"></div>
+                <div class="tpl-preview-line medium"></div>
+                <div class="tpl-preview-line long"></div>
+              </div>
+              <div class="tpl-preview-2col-side">
+                <div class="tpl-preview-line" style="width:80%;"></div>
+                <div class="tpl-preview-line" style="width:60%;"></div>
+                <div class="tpl-preview-line" style="width:70%;"></div>
+                <div class="tpl-preview-line" style="width:55%;"></div>
+                <div class="tpl-preview-line" style="width:80%;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="tpl-info">
+            <div class="tpl-name">Modern Tech</div>
+            <div class="tpl-desc">Skills sidebar, main content single-column. Clean visual hierarchy for SWE, PM, DS profiles.</div>
+            <div class="tpl-ats-row">
+              <span class="tpl-ats-badge tpl-ats-pass">Greenhouse ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Lever ✓</span>
+              <span class="tpl-ats-badge tpl-ats-warn">Workday ⚠</span>
+              <span class="tpl-ats-badge tpl-ats-warn">Taleo ⚠</span>
+            </div>
+            <button class="tpl-use-btn" onclick="showScreen('editor', document.querySelectorAll('.screen-tab')[2])">Use Modern Tech →</button>
+          </div>
+        </div>
+
+        <!-- Template 3: Compact EU -->
+        <div class="tpl-card">
+          <div class="tpl-preview">
+            <div class="tpl-preview-header">
+              <div class="tpl-preview-name" style="width:40%;"></div>
+              <div class="tpl-preview-title" style="width:25%;"></div>
+            </div>
+            <div class="tpl-preview-divider" style="background:var(--n400);"></div>
+            <div class="tpl-preview-section-label" style="background:var(--n400);"></div>
+            <div class="tpl-preview-line long"></div>
+            <div class="tpl-preview-line medium"></div>
+            <div class="tpl-preview-divider" style="background:var(--n100);"></div>
+            <div class="tpl-preview-section-label" style="background:var(--n400);"></div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;">
+              <div style="height:5px;width:25%;background:var(--n200);border-radius:2px;"></div>
+              <div style="height:5px;width:20%;background:var(--n200);border-radius:2px;"></div>
+              <div style="height:5px;width:22%;background:var(--n200);border-radius:2px;"></div>
+            </div>
+          </div>
+          <div class="tpl-info">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <div class="tpl-name">Compact EU</div>
+              <span class="badge badge-neutral" style="font-size:10px;">A4 · No photo</span>
+            </div>
+            <div class="tpl-desc">A4 format by default. CEFR language section. No-photo safe for DE, NL, UK conventions.</div>
+            <div class="tpl-ats-row">
+              <span class="tpl-ats-badge tpl-ats-pass">Workday ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">SAP ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Greenhouse ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Taleo ✓</span>
+            </div>
+            <button class="tpl-use-btn" onclick="showScreen('editor', document.querySelectorAll('.screen-tab')[2])">Use Compact EU →</button>
+          </div>
+        </div>
+
+        <!-- Template 4: Europass -->
+        <div class="tpl-card">
+          <div class="tpl-preview" style="background:var(--n100);">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <div style="width:24px;height:24px;background:#003399;border-radius:3px;flex-shrink:0;"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+                <div style="height:7px;background:var(--n400);border-radius:2px;width:55%;"></div>
+                <div style="height:5px;background:var(--n300,#CBD5E1);border-radius:2px;width:35%;"></div>
+              </div>
+            </div>
+            <div style="height:1px;background:#003399;opacity:.3;margin:4px 0;"></div>
+            <div class="tpl-preview-line long"></div>
+            <div class="tpl-preview-line medium"></div>
+            <div class="tpl-preview-line long"></div>
+            <div class="tpl-preview-line short"></div>
+          </div>
+          <div class="tpl-info">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <div class="tpl-name">Europass</div>
+              <span class="badge" style="background:#EEF2FF;color:#4338CA;font-size:10px;">EU Standard</span>
+            </div>
+            <div class="tpl-desc">EU official CV format. Required for public sector, EURES jobs, and some cross-border applications.</div>
+            <div class="tpl-ats-row">
+              <span class="tpl-ats-badge tpl-ats-pass">Workday ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">SAP ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Taleo ✓</span>
+            </div>
+            <button class="tpl-use-btn" onclick="showScreen('editor', document.querySelectorAll('.screen-tab')[2])">Use Europass →</button>
+          </div>
+        </div>
+
+        <!-- Template 5: Senior IC -->
+        <div class="tpl-card">
+          <div class="tpl-preview">
+            <div class="tpl-preview-header">
+              <div class="tpl-preview-name" style="height:11px;"></div>
+              <div class="tpl-preview-title" style="height:7px;"></div>
+            </div>
+            <div class="tpl-preview-divider"></div>
+            <div class="tpl-preview-line long"></div>
+            <div class="tpl-preview-line medium"></div>
+            <div style="height:1.5px;background:var(--n100);margin:6px 0;"></div>
+            <div class="tpl-preview-section-label"></div>
+            <div class="tpl-preview-line long"></div>
+            <div class="tpl-preview-line long" style="width:75%;"></div>
+          </div>
+          <div class="tpl-info">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <div class="tpl-name">Senior IC</div>
+              <span class="badge badge-neutral" style="font-size:10px;">2-page friendly</span>
+            </div>
+            <div class="tpl-desc">Generous whitespace, result-focused. Designed for 8+ years experience with depth to show.</div>
+            <div class="tpl-ats-row">
+              <span class="tpl-ats-badge tpl-ats-pass">Greenhouse ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Lever ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">Workday ✓</span>
+              <span class="tpl-ats-badge tpl-ats-pass">SAP ✓</span>
+            </div>
+            <button class="tpl-use-btn" onclick="showScreen('editor', document.querySelectorAll('.screen-tab')[2])">Use Senior IC →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─────── SCREEN 3: Editor ─────── -->
+    <div id="screen-editor" class="screen-content" style="padding:0;">
+      <!-- Editor top bar -->
+      <div class="editor-topbar">
+        <a class="btn btn-ghost btn-sm" onclick="showScreen('library', document.querySelectorAll('.screen-tab')[0])" style="gap:4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          My CVs
+        </a>
+        <div class="editor-cv-name"><input type="text" value="PM Berlin – Q1 2026"></div>
+        <span class="editor-tpl-badge">Precision template</span>
+        <button class="btn btn-ghost btn-sm">Save</button>
+        <button class="btn btn-primary btn-sm" onclick="showScreen('ats', document.querySelectorAll('.screen-tab')[3])">
+          Check ATS Score
+          <span style="background:rgba(255,255,255,0.25);color:white;font-size:10px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:2px;">3</span>
+        </button>
+      </div>
+
+      <!-- Editor tabs -->
+      <div class="editor-tabs">
+        <div class="editor-tab active">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>
+          Content
+        </div>
+        <div class="editor-tab">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+          Design
+        </div>
+        <div class="editor-tab" onclick="showScreen('ats', document.querySelectorAll('.screen-tab')[3])">
+          ATS Score
+          <span class="editor-tab-badge">3</span>
+        </div>
+        <div class="editor-tab" onclick="showScreen('ats', document.querySelectorAll('.screen-tab')[3])">
+          Pipeline Keywords
+          <span class="editor-tab-badge" style="background:var(--warning);">8</span>
+        </div>
+      </div>
+
+      <!-- Editor body -->
+      <div class="editor-shell">
+        <!-- Left: form -->
+        <div class="editor-left">
+
+          <div class="form-section">
+            <div class="form-section-header" onclick="toggleSec(this)">
+              <svg class="section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="section-title">Contact Information</span>
+              <span class="badge badge-success" style="font-size:10px;">Complete</span>
+            </div>
+            <div class="section-body open">
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">First Name</label><input class="form-input" value="Alex"></div>
+                <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" value="Chen"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Job Title</label><input class="form-input" value="Senior Product Manager"></div>
+              <div class="form-group"><label class="form-label">Location</label><input class="form-input" value="Berlin, Germany"></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="alex@email.com"></div>
+                <div class="form-group"><label class="form-label">LinkedIn</label><input class="form-input" value="linkedin.com/in/alexchen"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-header" onclick="toggleSec(this)">
+              <svg class="section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="section-title">Professional Summary</span>
+            </div>
+            <div class="section-body">
+              <div class="form-group"><textarea class="form-input" rows="4" style="resize:vertical;">Product Manager with 7 years building B2B SaaS products in European markets. Led cross-functional teams at N26 and Personio, delivering features used by 500K+ users. Deep expertise in data-driven prioritization and stakeholder alignment.</textarea></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-header" onclick="toggleSec(this)">
+              <svg class="section-chevron section-chevron open" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="section-title">Work Experience</span>
+              <button class="add-btn-sm" onclick="event.stopPropagation()" style="margin-top:0;font-size:11px;">+ Add</button>
+            </div>
+            <div class="section-body open">
+              <!-- Job entry -->
+              <div style="border:1px solid var(--n200);border-radius:8px;padding:14px;margin-bottom:12px;background:var(--n50);">
+                <div class="form-row" style="margin-bottom:10px;">
+                  <div class="form-group" style="margin-bottom:0;"><label class="form-label">Company</label><input class="form-input" value="Personio"></div>
+                  <div class="form-group" style="margin-bottom:0;"><label class="form-label">Job Title</label><input class="form-input" value="Senior PM"></div>
+                </div>
+                <div class="form-row" style="margin-bottom:10px;">
+                  <div class="form-group" style="margin-bottom:0;"><label class="form-label">Start</label><input class="form-input" value="Jan 2022"></div>
+                  <div class="form-group" style="margin-bottom:0;"><label class="form-label">End</label><input class="form-input" value="Present"></div>
+                </div>
+                <label class="form-label">Achievements</label>
+                <div class="bullet-item">
+                  <div class="bullet-dot"></div>
+                  <div class="bullet-text">Led end-to-end development of a time-tracking module, adopted by 120K users within 6 months of launch</div>
+                  <div class="bullet-action"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+                </div>
+                <div class="bullet-item">
+                  <div class="bullet-dot"></div>
+                  <div class="bullet-text">Reduced onboarding drop-off by 34% through targeted A/B testing and funnel instrumentation with Amplitude</div>
+                  <div class="bullet-action"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+                </div>
+                <button class="add-btn-sm">+ Add bullet</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-header" onclick="toggleSec(this)">
+              <svg class="section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="section-title">Skills</span>
+            </div>
+            <div class="section-body">
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+                <span class="badge badge-neutral" style="cursor:pointer;">Product Strategy ×</span>
+                <span class="badge badge-neutral" style="cursor:pointer;">Data Analysis ×</span>
+                <span class="badge badge-neutral" style="cursor:pointer;">A/B Testing ×</span>
+                <span class="badge badge-neutral" style="cursor:pointer;">SQL ×</span>
+                <span class="badge badge-neutral" style="cursor:pointer;">Figma ×</span>
+              </div>
+              <input class="form-input" placeholder="Add skill…">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-header" onclick="toggleSec(this)">
+              <svg class="section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="section-title">Languages · CEFR</span>
+            </div>
+            <div class="section-body">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <input class="form-input" value="English" style="flex:1;">
+                <select class="form-input" style="width:90px;">
+                  <option>C2 – Native</option><option>C1</option><option>B2</option><option>B1</option>
+                </select>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <input class="form-input" value="German" style="flex:1;">
+                <select class="form-input" style="width:90px;">
+                  <option>B2</option><option>C1</option><option>C2 – Native</option><option>B1</option>
+                </select>
+              </div>
+              <button class="add-btn-sm" style="margin-top:10px;">+ Add language</button>
+            </div>
+          </div>
+
+          <div style="padding:16px 20px;text-align:center;">
+            <button class="add-btn-sm" style="margin:0 auto;display:flex;">+ Add section</button>
+          </div>
+
+          <!-- ATS chip -->
+          <div style="display:flex;justify-content:center;padding:12px 20px 20px;">
+            <div class="ats-chip warn" onclick="showScreen('ats', document.querySelectorAll('.screen-tab')[3])">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              ATS 87/100 · 3 warnings → View
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: live preview -->
+        <div class="editor-right">
+          <div style="display:flex;flex-direction:column;gap:16px;align-items:center;width:100%;">
+            <div class="cv-preview-paper">
+              <div class="cv-preview-name">Alex Chen</div>
+              <div class="cv-preview-title">Senior Product Manager</div>
+              <div class="cv-preview-contact">
+                <span>Berlin, Germany</span>
+                <span>alex@email.com</span>
+                <span>linkedin.com/in/alexchen</span>
+              </div>
+              <div class="cv-preview-divider"></div>
+              <div class="cv-section-label">Professional Summary</div>
+              <p style="font-size:11px;color:var(--n700,#374151);line-height:17px;margin-bottom:14px;">Product Manager with 7 years building B2B SaaS products in European markets. Led cross-functional teams at N26 and Personio, delivering features used by 500K+ users. Deep expertise in data-driven prioritization and stakeholder alignment.</p>
+              <div class="cv-section-label">Work Experience</div>
+              <div class="cv-job">
+                <div class="cv-job-header">
+                  <div><div class="cv-job-title">Senior Product Manager</div><div class="cv-job-company">Personio · Munich, Germany</div></div>
+                  <div class="cv-job-dates">Jan 2022 – Present</div>
+                </div>
+                <ul class="cv-job-bullets">
+                  <li>Led end-to-end development of a time-tracking module, adopted by 120K users within 6 months of launch</li>
+                  <li>Reduced onboarding drop-off by 34% through targeted A/B testing and funnel instrumentation with Amplitude</li>
+                  <li>Defined and shipped 3 core API integrations (Slack, Workday, BambooHR), expanding enterprise addressable market by 40%</li>
+                </ul>
+              </div>
+              <div class="cv-job">
+                <div class="cv-job-header">
+                  <div><div class="cv-job-title">Product Manager</div><div class="cv-job-company">N26 · Berlin, Germany</div></div>
+                  <div class="cv-job-dates">Mar 2019 – Dec 2021</div>
+                </div>
+                <ul class="cv-job-bullets">
+                  <li>Owned the transaction categorization feature from 0→1, reaching 2M active users</li>
+                  <li>Partnered with data science to build ML-powered spending insights, increasing DAU by 18%</li>
+                </ul>
+              </div>
+              <div class="cv-preview-divider" style="margin-top:4px;"></div>
+              <div class="cv-section-label">Skills</div>
+              <div class="cv-skills-row" style="margin-bottom:14px;">
+                <span class="cv-skill-tag">Product Strategy</span>
+                <span class="cv-skill-tag">Data Analysis</span>
+                <span class="cv-skill-tag">A/B Testing</span>
+                <span class="cv-skill-tag">SQL</span>
+                <span class="cv-skill-tag">Figma</span>
+                <span class="cv-skill-tag">Roadmapping</span>
+              </div>
+              <div class="cv-section-label">Education</div>
+              <div class="cv-job">
+                <div class="cv-job-header">
+                  <div><div class="cv-job-title">M.Sc. Information Systems</div><div class="cv-job-company">TU Berlin</div></div>
+                  <div class="cv-job-dates">2016 – 2018</div>
+                </div>
+              </div>
+              <div class="cv-section-label">Languages</div>
+              <p style="font-size:11px;color:var(--n700,#374151);">English (C2 – Native) · German (B2 – Upper Intermediate)</p>
+            </div>
+            <!-- Download bar -->
+            <div style="background:white;border-radius:var(--radius-lg);border:1px solid var(--n200);padding:12px 20px;display:flex;align-items:center;gap:12px;width:595px;box-shadow:var(--shadow-sm);">
+              <button class="btn btn-primary btn-sm">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download PDF
+              </button>
+              <button class="btn btn-ghost btn-sm">Download DOCX</button>
+              <span style="font-size:11px;color:var(--n400);flex:1;">Use DOCX for SAP/Taleo applications — <a onclick="showScreen('ats', document.querySelectorAll('.screen-tab')[3])" style="color:var(--primary);cursor:pointer;text-decoration:underline;">see guide</a></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────── SCREEN 4: ATS Scanner ─────── -->
+    <div id="screen-ats" class="screen-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ATS Score</div>
+          <div class="page-subtitle">PM Berlin – Q1 2026 · Precision template · Checked just now</div>
+        </div>
+        <button class="btn btn-ghost btn-sm">Re-scan</button>
+      </div>
+
+      <div class="ats-layout">
+        <!-- Left col -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div class="ats-score-card">
+            <div class="ats-gauge">
+              <svg width="120" height="120" class="ats-gauge-ring" viewBox="0 0 100 100">
+                <circle class="ats-gauge-bg" cx="50" cy="50" r="40"/>
+                <circle class="ats-gauge-fill" cx="50" cy="50" r="40"/>
+              </svg>
+              <div class="ats-gauge-label">
+                <span class="ats-gauge-score">87</span>
+                <span class="ats-gauge-max">/100</span>
+              </div>
+            </div>
+            <div class="ats-grade">Good — passes most ATS</div>
+            <div class="ats-grade-sub">3 warnings to review before applying to SAP / Taleo roles</div>
+          </div>
+
+          <div class="ats-breakdown">
+            <div class="ats-breakdown-title">Score Breakdown</div>
+            <div class="ats-check">
+              <div class="ats-check-icon check-pass"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg></div>
+              <div class="ats-check-body">
+                <div class="ats-check-label">Layout & Formatting</div>
+                <div class="ats-check-detail">Single-column, no tables, no images</div>
+              </div>
+              <div class="ats-check-score check-pass">25/25</div>
+            </div>
+            <div class="ats-check">
+              <div class="ats-check-icon check-warn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+              <div class="ats-check-body">
+                <div class="ats-check-label">Section Headers</div>
+                <div class="ats-check-detail">Consider "Professional Summary" instead of "Summary" for Taleo</div>
+              </div>
+              <div class="ats-check-score check-warn">23/25</div>
+            </div>
+            <div class="ats-check">
+              <div class="ats-check-icon check-warn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+              <div class="ats-check-body">
+                <div class="ats-check-label">Pipeline Keywords</div>
+                <div class="ats-check-detail">3 high-frequency keywords from your saved jobs are missing</div>
+              </div>
+              <div class="ats-check-score check-warn">18/25</div>
+            </div>
+            <div class="ats-check">
+              <div class="ats-check-icon check-warn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+              <div class="ats-check-body">
+                <div class="ats-check-label">File Export</div>
+                <div class="ats-check-detail">2 of your saved companies use Taleo — download DOCX for those</div>
+              </div>
+              <div class="ats-check-score check-warn">21/25</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div class="ats-right-col">
+          <div class="keyword-card">
+            <div class="keyword-card-header">
+              <div class="keyword-card-title">Missing keywords from your pipeline</div>
+              <div class="keyword-card-sub">From 8 saved jobs in your pipeline — ranked by frequency</div>
+            </div>
+            <div class="keyword-card-body">
+              <div class="keyword-tags">
+                <div class="keyword-tag">Agile <span class="keyword-count">×6</span></div>
+                <div class="keyword-tag">OKR <span class="keyword-count">×5</span></div>
+                <div class="keyword-tag">Stakeholder Management <span class="keyword-count">×5</span></div>
+                <div class="keyword-tag">Product Strategy <span class="keyword-count">×4</span></div>
+                <div class="keyword-tag">Go-to-Market <span class="keyword-count">×3</span></div>
+                <div class="keyword-tag">B2B SaaS <span class="keyword-count">×3</span></div>
+                <div class="keyword-tag">Cross-functional <span class="keyword-count">×3</span></div>
+                <div class="keyword-tag">Roadmap <span class="keyword-count">×2</span></div>
+              </div>
+              <div style="margin-top:12px;padding:10px 12px;background:var(--n50);border-radius:8px;font-size:12px;color:var(--n600);border:1px solid var(--n100);">
+                💡 Click any keyword to see which of your saved jobs mention it — and add it to the right section of your CV.
+              </div>
+            </div>
+          </div>
+
+          <div class="export-guide">
+            <div class="export-guide-header">Export format guide — your pipeline companies</div>
+            <table class="export-table">
+              <thead>
+                <tr><th>ATS Platform</th><th>PDF</th><th>DOCX</th><th>Recommendation</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Greenhouse</strong> <span style="font-size:10px;color:var(--n400);">Spotify, N26, Personio</span></td>
+                  <td><span class="ats-pass-dot dot-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Safe</span></td>
+                  <td><span class="ats-pass-dot dot-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Safe</span></td>
+                  <td><span class="rec-tag">PDF</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Lever</strong> <span style="font-size:10px;color:var(--n400);">Contentful, Pitch</span></td>
+                  <td><span class="ats-pass-dot dot-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Safe</span></td>
+                  <td><span class="ats-pass-dot dot-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Safe</span></td>
+                  <td><span class="rec-tag">PDF</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Workday</strong> <span style="font-size:10px;color:var(--n400);">SAP SE, Bosch</span></td>
+                  <td><span class="ats-pass-dot dot-warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Partial</span></td>
+                  <td><span class="ats-pass-dot dot-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Preferred</span></td>
+                  <td><span class="rec-tag">DOCX</span></td>
+                </tr>
+                <tr>
+                  <td><strong>SAP / Taleo</strong> <span style="font-size:10px;color:var(--n400);">Deutsche Telekom</span></td>
+                  <td><span class="ats-pass-dot dot-red"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Avoid</span></td>
+                  <td><span class="ats-pass-dot dot-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Required</span></td>
+                  <td><span class="rec-tag">DOCX only</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────── SCREEN 5: Performance ─────── -->
+    <div id="screen-performance" class="screen-content">
+      <div class="perf-header">
+        <div>
+          <div class="page-title">CV Performance</div>
+          <div class="page-subtitle">Last 90 days · Based on your pipeline data</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="showScreen('ats', document.querySelectorAll('.screen-tab')[3])">ATS Scanner →</button>
+      </div>
+
+      <div class="perf-cards">
+        <!-- Card 1: Best -->
+        <div class="perf-card best">
+          <div class="perf-card-top">
+            <div>
+              <div class="perf-cv-name">PM Berlin – Q1 2026</div>
+              <div class="perf-cv-meta">Precision template · 🇩🇪 DE</div>
+            </div>
+            <span class="perf-best-badge">Best Performer</span>
+          </div>
+          <div class="perf-stat-row">
+            <div class="perf-stat">
+              <div class="perf-stat-value">14</div>
+              <div class="perf-stat-label">Applications</div>
+            </div>
+            <div class="perf-stat">
+              <div class="perf-stat-value">3</div>
+              <div class="perf-stat-label">Screenings</div>
+            </div>
+            <div class="perf-stat">
+              <div class="perf-rate high">21.4%</div>
+              <div class="perf-stat-label">Screening rate</div>
+            </div>
+            <div class="perf-stat">
+              <div class="perf-trend up">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                Trending up
+              </div>
+            </div>
+          </div>
+          <div class="perf-companies">
+            <strong>Top companies:</strong> Spotify, N26, Personio
+          </div>
+        </div>
+
+        <!-- Card 2: Low confidence -->
+        <div class="perf-card">
+          <div class="perf-card-top">
+            <div>
+              <div class="perf-cv-name">Tech Lead NL – Compact</div>
+              <div class="perf-cv-meta">Modern Tech template · 🇳🇱 NL</div>
+            </div>
+            <span class="perf-low-badge">Low confidence</span>
+          </div>
+          <div class="perf-stat-row">
+            <div class="perf-stat">
+              <div class="perf-stat-value">8</div>
+              <div class="perf-stat-label">Applications</div>
+            </div>
+            <div class="perf-stat">
+              <div class="perf-stat-value">1</div>
+              <div class="perf-stat-label">Screenings</div>
+            </div>
+            <div class="perf-stat">
+              <div class="perf-rate low">12.5%</div>
+              <div class="perf-stat-label">Screening rate</div>
+            </div>
+            <div class="perf-stat">
+              <div class="perf-trend flat">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Flat
+              </div>
+            </div>
+          </div>
+          <div class="perf-companies" style="display:flex;align-items:center;gap:6px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Apply to 10+ roles with this CV for reliable data
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-card">
+        <div class="chart-title">Applied → Screening Rate by CV Version</div>
+        <div class="chart-bars">
+          <div class="chart-row">
+            <div class="chart-row-label">PM Berlin – Q1 2026</div>
+            <div class="chart-bar-track">
+              <div class="chart-bar-fill" style="width:71%;background:var(--success);">
+                <span>14 applied</span>
+              </div>
+            </div>
+            <div class="chart-row-pct high">21.4%</div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-row-label">Tech Lead NL – Compact</div>
+            <div class="chart-bar-track">
+              <div class="chart-bar-fill" style="width:40%;background:var(--error);">
+                <span>8 applied</span>
+              </div>
+            </div>
+            <div class="chart-row-pct low">12.5%</div>
+          </div>
+          <div class="chart-row" style="opacity:.4;">
+            <div class="chart-row-label" style="font-style:italic;color:var(--n400);">Industry avg (EU tech)</div>
+            <div class="chart-bar-track">
+              <div class="chart-bar-fill" style="width:60%;background:var(--n300,#CBD5E1);">
+                <span style="color:var(--n700,#374151);font-size:10px;"></span>
+              </div>
+            </div>
+            <div class="chart-row-pct" style="color:var(--n400);">~18%</div>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <div class="chart-legend-item"><div class="legend-dot" style="background:var(--success);"></div>Above avg</div>
+          <div class="chart-legend-item"><div class="legend-dot" style="background:var(--error);"></div>Below avg</div>
+          <div class="chart-legend-item"><div class="legend-dot" style="background:var(--n300,#CBD5E1);"></div>Industry avg (EU tech ~18%)</div>
+        </div>
+      </div>
+
+      <!-- Insight card -->
+      <div class="insight-card">
+        <div class="insight-icon">💡</div>
+        <div class="insight-body">
+          <div class="insight-title">PM Berlin – Q1 2026 is performing 1.7× better on Applied→Screening</div>
+          <div class="insight-text">Your Berlin-targeted CV (21.4%) significantly outperforms Tech Lead NL (12.5%). Consider applying the same positioning framework — results-led bullets, B2B SaaS focus — to your Dutch market applications. The gap is likely positioning, not the market.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;text-align:right;">
+        <a class="btn btn-ghost btn-sm" style="display:inline-flex;" onclick="void(0)">
+          View full funnel analytics →
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+  function showScreen(id, tabEl) {
+    // Switch tabs
+    document.querySelectorAll('.screen-tab').forEach(t => t.classList.remove('active'));
+    if (tabEl) tabEl.classList.add('active');
+    // Switch screens
+    document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('screen-' + id);
+    if (el) { el.classList.add('active'); el.scrollTop = 0; }
+  }
+
+  function toggleSec(headerEl) {
+    const body = headerEl.nextElementSibling;
+    const chevron = headerEl.querySelector('.section-chevron');
+    if (!body) return;
+    body.classList.toggle('open');
+    if (chevron) chevron.classList.toggle('open');
+  }
+
+  // Filter pill toggle
+  document.querySelectorAll('.filter-row').forEach(row => {
+    row.querySelectorAll('.filter-pill').forEach(pill => {
+      pill.addEventListener('click', function () {
+        row.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  });
+
+  // Editor tabs (visual only)
+  document.querySelectorAll('.editor-tab').forEach(tab => {
+    tab.addEventListener('click', function () {
+      if (this.getAttribute('onclick')) return;
+      document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

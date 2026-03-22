@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2, Check } from 'lucide-react'
+import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -13,9 +16,17 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const TECH_ROLES = [
-  // Engineering
   { group: 'Engineering', roles: [
     'Software Engineer', 'Senior Software Engineer', 'Staff Engineer',
     'Principal Engineer', 'Engineering Manager', 'VP of Engineering', 'CTO',
@@ -25,24 +36,20 @@ const TECH_ROLES = [
     'Site Reliability Engineer (SRE)', 'QA / Automation Engineer',
     'Solutions Architect', 'Technical Lead',
   ]},
-  // Product
   { group: 'Product', roles: [
     'Product Manager', 'Senior Product Manager', 'Principal Product Manager',
     'Group Product Manager', 'Director of Product', 'VP of Product', 'CPO',
     'Product Owner', 'Technical Product Manager',
   ]},
-  // Data & AI
   { group: 'Data & AI', roles: [
     'Data Scientist', 'Senior Data Scientist', 'Data Analyst',
     'Analytics Engineer', 'ML Researcher', 'AI Engineer',
     'Business Intelligence Analyst',
   ]},
-  // Design
   { group: 'Design', roles: [
     'Product Designer', 'UX Designer', 'UI Designer',
     'Design Lead', 'Head of Design',
   ]},
-  // Other
   { group: 'Other', roles: [
     'Technical Program Manager', 'Scrum Master / Agile Coach',
     'Developer Advocate', 'Engineering Consultant',
@@ -50,14 +57,26 @@ const TECH_ROLES = [
 ]
 
 const SALARY_RANGES = [
-  { label: 'Up to €50,000', min: 0, max: 50000 },
-  { label: '€50,000 – €75,000', min: 50000, max: 75000 },
-  { label: '€75,000 – €100,000', min: 75000, max: 100000 },
-  { label: '€100,000 – €125,000', min: 100000, max: 125000 },
-  { label: '€125,000 – €150,000', min: 125000, max: 150000 },
-  { label: '€150,000 – €200,000', min: 150000, max: 200000 },
-  { label: '€200,000+', min: 200000, max: null },
+  { label: 'Up to €50,000',         min: 0,      max: 50000  },
+  { label: '€50,000 – €75,000',     min: 50000,  max: 75000  },
+  { label: '€75,000 – €100,000',    min: 75000,  max: 100000 },
+  { label: '€100,000 – €125,000',   min: 100000, max: 125000 },
+  { label: '€125,000 – €150,000',   min: 125000, max: 150000 },
+  { label: '€150,000 – €200,000',   min: 150000, max: 200000 },
+  { label: '€200,000+',             min: 200000, max: null   },
 ]
+
+function salaryKey(min: number | null | undefined, max: number | null | undefined): string {
+  return `${min ?? ''}-${max ?? ''}`
+}
+
+// Form schema uses string keys for selects; transformation happens at submit
+const careerGoalSchema = z.object({
+  target_role:   z.string().optional(),
+  target_date:   z.string().optional(),
+  salary_key:    z.string().optional(),
+})
+type CareerGoalFormData = z.infer<typeof careerGoalSchema>
 
 interface CareerGoalModalProps {
   open: boolean
@@ -70,29 +89,32 @@ interface CareerGoalModalProps {
   }
 }
 
-function salaryRangeKey(min: number | null, max: number | null | undefined): string {
-  return `${min ?? ''}-${max ?? ''}`
-}
-
 export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoalModalProps) {
   const queryClient = useQueryClient()
-
-  const [role, setRole] = useState(initialValues?.target_role ?? '')
-  const [date, setDate] = useState(initialValues?.target_date?.slice(0, 7) ?? '') // YYYY-MM
   const [justSaved, setJustSaved] = useState(false)
-  const [salaryKey, setSalaryKey] = useState(
-    salaryRangeKey(initialValues?.target_salary_min ?? null, initialValues?.target_salary_max)
-  )
 
-  const selectedRange = SALARY_RANGES.find(
-    (r) => salaryRangeKey(r.min, r.max) === salaryKey
-  ) ?? null
+  const {
+    handleSubmit,
+    control,
+    formState: { isSubmitting },
+  } = useForm<CareerGoalFormData>({
+    resolver: zodResolver(careerGoalSchema),
+    defaultValues: {
+      target_role: initialValues?.target_role ?? '',
+      target_date: initialValues?.target_date?.slice(0, 7) ?? '',
+      salary_key: salaryKey(initialValues?.target_salary_min, initialValues?.target_salary_max),
+    },
+  })
 
   const mutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (data: CareerGoalFormData) => {
+      const selectedRange = SALARY_RANGES.find(
+        (r) => salaryKey(r.min, r.max) === data.salary_key
+      ) ?? null
+
       const payload = {
-        target_role: role || null,
-        target_date: date ? `${date}-01` : null, // store as first of month
+        target_role: data.target_role || null,
+        target_date: data.target_date ? `${data.target_date}-01` : null,
         target_salary_min: selectedRange?.min ?? null,
         target_salary_max: selectedRange?.max ?? null,
         target_salary_currency: 'EUR',
@@ -118,6 +140,8 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
     onError: (err: Error) => toast.error(err.message),
   })
 
+  const isPending = isSubmitting || mutation.isPending
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="md">
@@ -125,73 +149,90 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
           <DialogTitle>Edit Career Goal</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5 pt-2">
+        <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-5 pt-2">
           {/* Target Role */}
           <div className="space-y-1.5">
-            <Label htmlFor="target-role">Target Role</Label>
-            <select
-              id="target-role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
-            >
-              <option value="">Select a role…</option>
-              {TECH_ROLES.map(({ group, roles }) => (
-                <optgroup key={group} label={group}>
-                  {roles.map((r) => (
-                    <option key={r} value={r}>{r}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+            <Label>Target Role</Label>
+            <Controller
+              name="target_role"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value || undefined} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full h-9">
+                    <SelectValue placeholder="Select a role…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TECH_ROLES.map(({ group, roles }) => (
+                      <SelectGroup key={group}>
+                        <SelectLabel>{group}</SelectLabel>
+                        {roles.map((r) => (
+                          <SelectItem key={r} value={r}>{r}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
 
           {/* Target Date */}
           <div className="space-y-1.5">
             <Label htmlFor="target-date">Target Date</Label>
-            <input
-              id="target-date"
-              type="month"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              min={new Date().toISOString().slice(0, 7)}
-              className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+            <Controller
+              name="target_date"
+              control={control}
+              render={({ field }) => (
+                <input
+                  id="target-date"
+                  type="month"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  min={new Date().toISOString().slice(0, 7)}
+                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                />
+              )}
             />
-            <p className="text-xs text-gray-400">The month you aim to have an offer</p>
+            <p className="text-xs text-gray-500">The month you aim to have an offer</p>
           </div>
 
           {/* Target Salary */}
           <div className="space-y-1.5">
-            <Label htmlFor="target-salary">Target Salary Range</Label>
-            <select
-              id="target-salary"
-              value={salaryKey}
-              onChange={(e) => setSalaryKey(e.target.value)}
-              className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
-            >
-              <option value="-">Select a range…</option>
-              {SALARY_RANGES.map((r) => (
-                <option key={salaryRangeKey(r.min, r.max)} value={salaryRangeKey(r.min, r.max)}>
-                  {r.label}
-                </option>
-              ))}
-            </select>
+            <Label>Target Salary Range</Label>
+            <Controller
+              name="salary_key"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full h-9">
+                    <SelectValue placeholder="Select a range…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SALARY_RANGES.map((r) => (
+                      <SelectItem key={salaryKey(r.min, r.max)} value={salaryKey(r.min, r.max)}>
+                        {r.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
 
           {/* Actions */}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || justSaved} className="gap-1.5">
-              {mutation.isPending ? (
+            <Button type="submit" disabled={isPending} className="gap-1.5">
+              {isPending ? (
                 <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving…</>
               ) : justSaved ? (
                 <><Check className="w-3.5 h-3.5" />Saved!</>
               ) : 'Save Goal'}
             </Button>
           </DialogFooter>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   )

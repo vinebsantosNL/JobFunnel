@@ -8,7 +8,7 @@ export function UpgradeBanner({ isPro }: UpgradeBannerProps) {
   if (isPro) return null
 
   return (
-    <div className="w-full bg-[#1e3a5f] text-white px-6 h-12 flex items-center justify-between gap-4 flex-shrink-0">
+    <div className="w-full bg-blue-950 text-white px-6 h-12 flex items-center justify-between gap-4 flex-shrink-0">
       <div className="flex items-center gap-6 text-sm font-medium">
         <span className="flex items-center gap-1.5">
           <span className="text-blue-300">✦</span> Unlimited AI

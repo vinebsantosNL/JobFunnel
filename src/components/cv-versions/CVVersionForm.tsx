@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createCVVersionSchema, type CreateCVVersionInput } from '@/lib/validations/cv-version'
 import { useCreateCVVersion, useUpdateCVVersion } from '@/hooks/useCVVersions'
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import type { CVVersion } from '@/types/database.types'
 
 interface CVVersionFormProps {
@@ -29,6 +30,7 @@ export function CVVersionForm({ version, onSuccess, onCancel }: CVVersionFormPro
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<CreateCVVersionInput>({
     resolver: zodResolver(createCVVersionSchema),
@@ -125,11 +127,16 @@ export function CVVersionForm({ version, onSuccess, onCancel }: CVVersionFormPro
 
       {/* Set as default */}
       <div className="flex items-center gap-2">
-        <input
-          id="cv-default"
-          type="checkbox"
-          className="h-4 w-4 rounded border-gray-300"
-          {...register('is_default')}
+        <Controller
+          name="is_default"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              id="cv-default"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
         />
         <Label htmlFor="cv-default" className="cursor-pointer">
           Set as default CV

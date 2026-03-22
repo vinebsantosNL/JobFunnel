@@ -1,8 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Stage } from '@/types/database.types'
 import type { FunnelData, TimelinePoint, StageTimePoint } from '@/types/analytics'
-import { AppError, ProRequiredError } from '@/lib/utils/errors'
-import { getProfileTier } from '@/lib/services/profileService'
+import { AppError } from '@/lib/utils/errors'
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -39,9 +38,6 @@ export async function getFunnelMetrics(
   userId: string,
   filters: DateRangeFilters = {}
 ): Promise<FunnelData> {
-  const { subscription_tier } = await getProfileTier(supabase, userId)
-  if (subscription_tier !== 'pro') throw new ProRequiredError('funnel analytics')
-
   let jobQuery = supabase
     .from('job_applications')
     .select('id, stage')
@@ -117,9 +113,6 @@ export async function getTimeline(
   supabase: SupabaseClient,
   userId: string
 ): Promise<TimelinePoint[]> {
-  const { subscription_tier } = await getProfileTier(supabase, userId)
-  if (subscription_tier !== 'pro') throw new ProRequiredError('timeline analytics')
-
   const ninetyDaysAgo = new Date()
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
 
@@ -153,9 +146,6 @@ export async function getStageTime(
   userId: string,
   filters: DateRangeFilters = {}
 ): Promise<StageTimePoint[]> {
-  const { subscription_tier } = await getProfileTier(supabase, userId)
-  if (subscription_tier !== 'pro') throw new ProRequiredError('stage time analytics')
-
   let jobQuery = supabase
     .from('job_applications')
     .select('id')
@@ -232,9 +222,6 @@ export async function getCVComparison(
   userId: string,
   filters: DateRangeFilters = {}
 ): Promise<CVComparisonRow[]> {
-  const { subscription_tier } = await getProfileTier(supabase, userId)
-  if (subscription_tier !== 'pro') throw new ProRequiredError('CV A/B testing')
-
   let appsQuery = supabase
     .from('job_applications')
     .select('id, cv_version_id, stage, applied_at, stage_updated_at')

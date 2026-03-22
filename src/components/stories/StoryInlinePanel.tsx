@@ -62,7 +62,16 @@ export function StoryInlinePanel() {
                   </button>
                   {activeStory
                     ? <StoryDetail story={activeStory} />
-                    : <p className="text-sm text-gray-400">Loading story...</p>
+                    : (
+                      <div className="space-y-4 animate-pulse">
+                        <div className="h-6 bg-gray-100 rounded w-3/4" />
+                        <div className="space-y-2">
+                          <div className="h-3 bg-gray-100 rounded w-full" />
+                          <div className="h-3 bg-gray-100 rounded w-5/6" />
+                          <div className="h-3 bg-gray-100 rounded w-4/6" />
+                        </div>
+                      </div>
+                    )
                   }
                 </div>
               )}
@@ -73,7 +82,13 @@ export function StoryInlinePanel() {
                 <StoryForm mode="edit" initialValues={activeStory} />
               )}
               {expandedView.type === 'edit' && !activeStory && (
-                <p className="text-sm text-gray-400">Loading story...</p>
+                <div className="space-y-4 animate-pulse">
+                  <div className="h-6 bg-gray-100 rounded w-3/4" />
+                  <div className="space-y-2">
+                    <div className="h-3 bg-gray-100 rounded w-full" />
+                    <div className="h-3 bg-gray-100 rounded w-5/6" />
+                  </div>
+                </div>
               )}
             </div>
           </div>

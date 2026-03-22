@@ -334,6 +334,7 @@ feature/your-change  →  staging  →  main (production)
 - Only after validating on staging should code be merged into `main` for production.
 - Never push directly to `main` without going through `staging`.
 - Cron jobs and email notifications only run on production (`main`). Staging is safe to test freely.
+- **All coding standards defined in this file apply equally to `staging` and `main`.** There is no relaxed mode for staging. TypeScript strict mode, Zod validation, RLS scoping, shadcn/ui-first, no banned libraries — all rules hold on every branch.
 
 **CI (GitHub Actions)** runs automatically on every push to `staging` and every PR to `main`:
 - Type check (`tsc --noEmit`)

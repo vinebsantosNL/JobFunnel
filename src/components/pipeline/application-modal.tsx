@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Dialog,
   DialogContent,
@@ -21,7 +23,7 @@ import { MapPin, DollarSign, ExternalLink, BookOpen, FileText, ArrowRight, Share
 import { AnimatePresence, motion } from 'framer-motion'
 import type { JobApplication, Stage, Priority } from '@/types/database.types'
 import { STAGE_CONFIG, STAGES, PRIORITY_CONFIG } from '@/lib/stages'
-import type { UpdateJobInput } from '@/lib/validations/job'
+import { updateJobSchema, type UpdateJobInput } from '@/lib/validations/job'
 import { CVVersionPicker } from '@/components/cv-versions/CVVersionPicker'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -64,16 +66,39 @@ const avatarColors = [
 
 export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: ApplicationModalProps) {
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState<Partial<JobApplication>>({})
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [activeTab, setActiveTab] = useState<TabId>('details')
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<UpdateJobInput>({
+    resolver: zodResolver(updateJobSchema),
+  })
+
   useEffect(() => {
-    if (job) setForm(job)
+    if (job) {
+      reset({
+        company_name: job.company_name,
+        job_title: job.job_title,
+        job_url: job.job_url ?? '',
+        location: job.location ?? '',
+        notes: job.notes ?? '',
+        priority: job.priority,
+        salary_min: job.salary_min ?? undefined,
+        salary_max: job.salary_max ?? undefined,
+        salary_currency: job.salary_currency ?? undefined,
+        applied_at: job.applied_at ?? undefined,
+        cv_version_id: job.cv_version_id ?? undefined,
+      })
+    }
     setEditing(false)
     setConfirmDelete(false)
     setActiveTab('details')
-  }, [job])
+  }, [job, reset])
 
   if (!job) return null
 
@@ -83,20 +108,8 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
   const stageConfig = STAGE_CONFIG[job.stage]
   const nextStage = STAGE_NEXT[job.stage]
 
-  function handleSave() {
-    onUpdate(job!.id, {
-      company_name: form.company_name,
-      job_title: form.job_title,
-      job_url: form.job_url ?? undefined,
-      location: form.location ?? undefined,
-      notes: form.notes ?? undefined,
-      priority: form.priority,
-      salary_min: form.salary_min,
-      salary_max: form.salary_max,
-      salary_currency: form.salary_currency ?? undefined,
-      applied_at: form.applied_at ?? undefined,
-      cv_version_id: form.cv_version_id,
-    })
+  function onEditSubmit(data: UpdateJobInput) {
+    onUpdate(job!.id, data)
     setEditing(false)
   }
 
@@ -137,7 +150,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               type="button"
-              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1.5 rounded-lg hover:bg-gray-50"
+              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-2 rounded-lg hover:bg-gray-50 min-h-[36px]"
             >
               <Share2 className="w-3.5 h-3.5" />
               Share
@@ -146,7 +159,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
               <button
                 type="button"
                 onClick={() => handleStageChange(nextStage)}
-                className="flex items-center gap-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors px-3 py-1.5 rounded-lg"
+                className="flex items-center gap-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors px-3 py-2 rounded-lg min-h-[36px]"
               >
                 Move to {STAGE_CONFIG[nextStage].label}
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -155,7 +168,8 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
             <button
               type="button"
               onClick={onClose}
-              className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Close"
             >
               <X className="w-4 h-4" />
             </button>
@@ -197,7 +211,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
             <h2 className="text-2xl font-bold text-gray-900 mb-5">{job.job_title}</h2>
 
             {/* Metadata row */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <div>
                 <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Location</p>
                 <div className="flex items-center gap-1.5">
@@ -323,63 +337,81 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
 
             {/* Tab: Details — Edit mode */}
             {activeTab === 'details' && editing && (
-              <div className="space-y-3">
+              <form onSubmit={handleSubmit(onEditSubmit)} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="edit-company" className="text-xs font-medium text-gray-500 uppercase tracking-wide">Company</Label>
-                    <Input id="edit-company" value={form.company_name ?? ''} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} className="mt-1" />
+                    <Input id="edit-company" className="mt-1" aria-invalid={!!errors.company_name} {...register('company_name')} />
+                    {errors.company_name && <p className="text-xs text-red-500 mt-0.5">{errors.company_name.message}</p>}
                   </div>
                   <div>
                     <Label htmlFor="edit-title" className="text-xs font-medium text-gray-500 uppercase tracking-wide">Job Title</Label>
-                    <Input id="edit-title" value={form.job_title ?? ''} onChange={e => setForm(f => ({ ...f, job_title: e.target.value }))} className="mt-1" />
+                    <Input id="edit-title" className="mt-1" aria-invalid={!!errors.job_title} {...register('job_title')} />
+                    {errors.job_title && <p className="text-xs text-red-500 mt-0.5">{errors.job_title.message}</p>}
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="edit-url" className="text-xs font-medium text-gray-500 uppercase tracking-wide">Job URL</Label>
-                  <Input id="edit-url" value={form.job_url ?? ''} onChange={e => setForm(f => ({ ...f, job_url: e.target.value }))} placeholder="https://..." className="mt-1" />
+                  <Input id="edit-url" placeholder="https://..." className="mt-1" {...register('job_url')} />
                 </div>
                 <div>
                   <Label htmlFor="edit-location" className="text-xs font-medium text-gray-500 uppercase tracking-wide">Location</Label>
-                  <Input id="edit-location" value={form.location ?? ''} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} className="mt-1" />
+                  <Input id="edit-location" className="mt-1" {...register('location')} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="edit-smin" className="text-xs font-medium text-gray-500 uppercase tracking-wide">Salary Min</Label>
-                    <Input id="edit-smin" type="number" value={form.salary_min ?? ''} onChange={e => setForm(f => ({ ...f, salary_min: e.target.value ? Number(e.target.value) : null }))} className="mt-1" />
+                    <Input id="edit-smin" type="number" className="mt-1" {...register('salary_min', { valueAsNumber: true })} />
                   </div>
                   <div>
                     <Label htmlFor="edit-smax" className="text-xs font-medium text-gray-500 uppercase tracking-wide">Salary Max</Label>
-                    <Input id="edit-smax" type="number" value={form.salary_max ?? ''} onChange={e => setForm(f => ({ ...f, salary_max: e.target.value ? Number(e.target.value) : null }))} className="mt-1" />
+                    <Input id="edit-smax" type="number" className="mt-1" {...register('salary_max', { valueAsNumber: true })} />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="edit-priority" className="text-xs font-medium text-gray-500 uppercase tracking-wide">Priority</Label>
-                  <Select value={form.priority} onValueChange={(v) => setForm(f => ({ ...f, priority: v as Priority }))}>
-                    <SelectTrigger id="edit-priority" className="w-full mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="priority"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={(v) => field.onChange(v as Priority)}>
+                        <SelectTrigger id="edit-priority" className="w-full mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="edit-notes" className="text-xs font-medium text-gray-500 uppercase tracking-wide">Notes</Label>
-                  <Textarea id="edit-notes" value={form.notes ?? ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={4} className="mt-1" />
+                  <Textarea id="edit-notes" rows={4} className="mt-1" {...register('notes')} />
                 </div>
                 <div>
                   <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">CV Version</Label>
                   <div className="mt-1">
-                    <CVVersionPicker value={form.cv_version_id ?? null} onChange={(id) => setForm(f => ({ ...f, cv_version_id: id }))} disabled={isCVVersionLocked} />
+                    <Controller
+                      name="cv_version_id"
+                      control={control}
+                      render={({ field }) => (
+                        <CVVersionPicker
+                          value={field.value ?? null}
+                          onChange={(id) => field.onChange(id)}
+                          disabled={isCVVersionLocked}
+                        />
+                      )}
+                    />
                   </div>
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <Button onClick={handleSave} size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">Save Changes</Button>
-                  <Button onClick={() => { setForm(job); setEditing(false) }} variant="outline" size="sm">Cancel</Button>
+                  <Button type="submit" size="sm" className="flex-1">Save Changes</Button>
+                  <Button type="button" onClick={() => { reset(); setEditing(false) }} variant="outline" size="sm">Cancel</Button>
                 </div>
-              </div>
+              </form>
             )}
 
             {/* Tab: Notes */}
