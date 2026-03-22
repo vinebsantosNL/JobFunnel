@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CVComparisonChart } from '@/components/analytics/CVComparisonChart'
 import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
 import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
-import type { CVVersion, Profile } from '@/types/database'
+import type { CVVersion, Profile } from '@/types/database.types'
 
 const EU_AVG_SCREENING_LABEL = '2–4%'
 const LOW_SAMPLE_THRESHOLD = 10

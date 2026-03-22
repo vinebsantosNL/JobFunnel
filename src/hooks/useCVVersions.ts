@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { CVVersion } from '@/types/database'
+import type { CVVersion } from '@/types/database.types'
 import type { CreateCVVersionInput, UpdateCVVersionInput } from '@/lib/validations/cv-version'
 
 async function fetchCVVersions(includeArchived = false): Promise<CVVersion[]> {

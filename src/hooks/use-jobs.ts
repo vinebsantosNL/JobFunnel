@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { JobApplication } from '@/types/database'
+import type { JobApplication } from '@/types/database.types'
 import type { CreateJobInput, UpdateJobInput } from '@/lib/validations/job'
 
 async function fetchJobs(params?: { priority?: string; search?: string }): Promise<JobApplication[]> {

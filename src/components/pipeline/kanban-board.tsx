@@ -10,7 +10,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import type { JobApplication, Stage } from '@/types/database'
+import type { JobApplication, Stage } from '@/types/database.types'
 import { STAGES, STAGE_CONFIG, SEQUENTIAL_STAGES, STAGE_ORDER, ACTIVE_STAGES } from '@/lib/stages'
 import { KanbanColumn } from './kanban-column'
 import { ApplicationCard } from './application-card'

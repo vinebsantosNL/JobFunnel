@@ -92,14 +92,14 @@ When building free tier limits and upgrade prompts, the goal is to let users exp
 
 | Layer | Tech | Version | Notes |
 |---|---|---|---|
-| Framework | Next.js (App Router) | 14.x | Do NOT use Next.js 15 APIs |
-| UI | React | 18.x | Do NOT use React 19 APIs (useActionState, useOptimistic are unavailable) |
+| Framework | Next.js (App Router) | 16.x | Do NOT use unreleased/canary Next.js APIs |
+| UI | React | 19.x | Stable APIs only — avoid experimental/canary-only features |
 | Language | TypeScript | 5.x | Strict mode, no `any` |
 | Styling | Tailwind CSS | 3.x | Utility classes only, no CSS-in-JS |
 | Components | shadcn/ui | latest | Extend via `cva`, not custom CSS files. Use before building anything custom |
 | Auth/DB/Storage | Supabase | latest | `@supabase/ssr` for auth. Magic link primary, OAuth secondary. Never use NextAuth, Auth0, or Clerk |
 | Server State | TanStack Query | v5 | For all async data |
-| Client State | Zustand | 4.x | `useUserStore` for profile, subscription tier, prefs |
+| Client State | Zustand | 5.x | `useUserStore` for profile, subscription tier, prefs. Use `create` from 'zustand' |
 | Drag & Drop | @dnd-kit/core | latest | Only DnD library. Do not use react-beautiful-dnd |
 | Charts | Recharts | 2.x | Only chart library. Do not use Chart.js, D3 directly, or Nivo |
 | Validation | Zod + React Hook Form | 3.x | Validate on both client and API route |
@@ -126,7 +126,7 @@ All tables enforce Row Level Security via `user_id = auth.uid()`. Every query is
 
 ### State
 - Server state: TanStack Query v5 (`useQuery`, `useMutation`, `useInfiniteQuery`)
-- Client/UI state: Zustand 4.x (`useUserStore` for profile, subscription tier, active filters)
+- Client/UI state: Zustand 5.x (`useUserStore` for profile, subscription tier, active filters)
 - Context API: only for narrow, co-located state (e.g., modal open state within a feature)
 - Optimistic updates: TanStack Query `onMutate` + rollback on error
 - Real-time: Supabase channels; invalidate TanStack Query cache on channel events
@@ -143,10 +143,10 @@ Zod schemas paired with React Hook Form. Validate on both client side (for UX) a
 
 Before making any frontend change (components, pages, styling, layout), follow the guidelines in `FrondDeveloper.md`. Key rules:
 
-- **Stack versions are non-negotiable**: Next.js 14.x, React 18, TypeScript 5.x, Tailwind 3.x, TanStack Query v5
-- **Do NOT use** Next.js 15 APIs, React 19 APIs (`useActionState`, `useOptimistic`), MUI, Chakra, Prisma, NextAuth
+- **Stack versions are non-negotiable**: Next.js 16.x, React 19, TypeScript 5.x, Tailwind 3.x, TanStack Query v5
+- **Do NOT use** unreleased/canary APIs, MUI, Chakra, Prisma, NextAuth
 - **Component library**: shadcn/ui primitives first; extend with Tailwind `cva` — never custom CSS files
-- **State**: TanStack Query v5 for server state; Zustand 4.x for global UI state
+- **State**: TanStack Query v5 for server state; Zustand 5.x for global UI state
 - **Auth**: Supabase only via `@supabase/ssr`; always scope queries to `auth.uid()` via RLS
 - **Forms**: Zod 3.x + React Hook Form; validate on both client and API route
 - **Charts**: Recharts 2.x only

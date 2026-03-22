@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import type { Stage } from '@/types/database'
+import type { Stage } from '@/types/database.types'
 
 export async function GET(request: Request) {
   const supabase = await createClient()

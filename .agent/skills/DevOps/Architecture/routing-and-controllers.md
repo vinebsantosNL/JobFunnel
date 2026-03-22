@@ -1,13 +1,13 @@
 ---
 name: routing-and-controllers
 description: >
-  Next.js 14 App Router Route Handler patterns for JobFunnel OS — file structure, HTTP method exports,
+  Next.js 16 App Router Route Handler patterns for JobFunnel OS — file structure, HTTP method exports,
   auth checks, response formatting, and HTTP status codes. Use when writing or reviewing Route Handlers.
   Trigger on: "route handler", "api route", "GET endpoint", "POST endpoint", "PATCH endpoint",
   "DELETE endpoint", "NextResponse", "app router api", "next.js api".
 ---
 
-# Routing and Controllers — Next.js 14 App Router Route Handlers
+# Routing and Controllers — Next.js 16 App Router Route Handlers
 
 Complete guide to Route Handler patterns in JobFunnel OS. There is no Express. There is no BaseController. Every backend endpoint is a Next.js Route Handler in `app/api/`.
 

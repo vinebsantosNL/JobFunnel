@@ -3,7 +3,7 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import type { StageTimePoint } from '@/types/analytics'
 import { STAGE_CONFIG } from '@/lib/stages'
-import type { Stage } from '@/types/database'
+import type { Stage } from '@/types/database.types'
 
 const STAGE_HEX: Partial<Record<Stage, string>> = {
   saved: '#94A3B8',

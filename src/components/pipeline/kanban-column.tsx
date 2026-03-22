@@ -2,7 +2,7 @@
 
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import type { JobApplication, Stage } from '@/types/database'
+import type { JobApplication, Stage } from '@/types/database.types'
 import { STAGE_CONFIG } from '@/lib/stages'
 import { ApplicationCard } from './application-card'
 import { QuickAddForm } from './quick-add-form'

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { InterviewStory } from '@/types/database'
+import type { InterviewStory } from '@/types/database.types'
 import type { CreateStoryInput, UpdateStoryInput } from '@/lib/validations/story'
 
 async function fetchStories(params?: { search?: string; competency?: string }): Promise<InterviewStory[]> {

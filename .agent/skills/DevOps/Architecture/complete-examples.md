@@ -1,7 +1,7 @@
 ---
 name: complete-examples
 description: >
-  Full working end-to-end code examples for JobFunnel OS features — Next.js 14 Route Handlers,
+  Full working end-to-end code examples for JobFunnel OS features — Next.js 16 Route Handlers,
   Supabase service functions, Zod validation, TypeScript types, and Vitest tests.
   Use when implementing a new feature end-to-end, reviewing a reference implementation, or
   understanding how all layers connect. Trigger on: "complete example", "full implementation",

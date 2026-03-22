@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import type { CVVersion } from '@/types/database'
+import type { CVVersion } from '@/types/database.types'
 
 interface CVVersionFormProps {
   version?: CVVersion

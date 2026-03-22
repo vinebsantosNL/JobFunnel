@@ -10,7 +10,7 @@ import { CompetencyPicker } from './competency-picker'
 import { WordCount } from './WordCount'
 import { useCreateStory, useUpdateStory } from '@/hooks/use-stories'
 import { useStoryLibrary } from '@/hooks/useStoryLibrary'
-import type { InterviewStory } from '@/types/database'
+import type { InterviewStory } from '@/types/database.types'
 import { cn } from '@/lib/utils'
 
 interface StoryFormProps {

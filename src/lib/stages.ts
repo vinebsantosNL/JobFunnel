@@ -1,4 +1,4 @@
-import type { Stage } from '@/types/database'
+import type { Stage } from '@/types/database.types'
 
 export interface StageConfig {
   label: string

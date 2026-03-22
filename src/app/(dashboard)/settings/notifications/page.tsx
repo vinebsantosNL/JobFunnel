@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Profile } from '@/types/database'
+import type { Profile } from '@/types/database.types'
 
 interface NotificationPrefs {
   weekly_summary: boolean

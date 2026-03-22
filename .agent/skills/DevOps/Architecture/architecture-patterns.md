@@ -5,7 +5,7 @@ description: Review frontend and backend architecture of the JobFunnel OS SaaS p
 
 # Architecture Patterns — JobFunnel OS
 
-A senior-level architecture review for the JobFunnel OS project. Examines frontend (Next.js 14 App Router + shadcn/ui) and backend (Supabase + API routes) against patterns that make B2C SaaS products scalable, maintainable, and ready to ship to real users.
+A senior-level architecture review for the JobFunnel OS project. Examines frontend (Next.js 16 App Router + shadcn/ui) and backend (Supabase + API routes) against patterns that make B2C SaaS products scalable, maintainable, and ready to ship to real users.
 
 ## Use this skill when
 
@@ -24,7 +24,7 @@ A senior-level architecture review for the JobFunnel OS project. Examines fronte
 
 ## Tech stack context
 
-- **Frontend**: Next.js 14, App Router, TypeScript, Tailwind CSS, shadcn/ui
+- **Frontend**: Next.js 16, App Router, TypeScript, Tailwind CSS, shadcn/ui
 - **Backend**: Supabase (Postgres + Auth + Storage + Realtime), API routes
 - **Deployment**: Vercel
 - **Product**: B2C SaaS — tech professionals managing job search as a product funnel

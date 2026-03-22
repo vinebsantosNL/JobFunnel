@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { CVVersionForm } from './CVVersionForm'
 import { useUpdateCVVersion, useDeleteCVVersion } from '@/hooks/useCVVersions'
-import type { CVVersion } from '@/types/database'
+import type { CVVersion } from '@/types/database.types'
 import { cn } from '@/lib/utils'
 
 const LOW_DATA_THRESHOLD = 10

@@ -9,7 +9,7 @@ description: >
 
 # Configuration Management — JobFunnel OS
 
-Complete guide to environment variables and configuration in Next.js 14 / Vercel. There is no `unifiedConfig.ts`, no `config.ini`, no `process.env` scattered through the codebase. All configuration is managed via `.env.local` and a typed config helper.
+Complete guide to environment variables and configuration in Next.js 16 / Vercel. There is no `unifiedConfig.ts`, no `config.ini`, no `process.env` scattered through the codebase. All configuration is managed via `.env.local` and a typed config helper.
 
 ---
 

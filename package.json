@@ -48,6 +48,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "generate:types": "echo \"WARNING: This will overwrite database.types.ts with the Supabase generated format, breaking all named imports. Read the header in src/types/database.types.ts before proceeding.\" && exit 1"
   }
 }

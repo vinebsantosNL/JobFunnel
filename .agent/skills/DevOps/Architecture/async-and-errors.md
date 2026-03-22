@@ -9,7 +9,7 @@ description: >
 
 # Async Patterns and Error Handling — JobFunnel OS
 
-Complete guide to async/await patterns and typed error handling in Next.js 14 App Router.
+Complete guide to async/await patterns and typed error handling in Next.js 16 App Router.
 
 ---
 

@@ -48,7 +48,7 @@ Work through each section in order. For each item, report ✅ Pass, ❌ Fail (wi
 - [ ] Search or filter on job list returns expected results
 - [ ] User settings page loads and saves preferences
 
-### 4. UI & component health (Next.js 14 + shadcn/ui)
+### 4. UI & component health (Next.js 16 + shadcn/ui)
 
 - [ ] No hydration mismatch errors in the browser console
 - [ ] shadcn/ui components render correctly (no unstyled or broken components)

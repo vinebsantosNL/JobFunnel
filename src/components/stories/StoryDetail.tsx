@@ -5,7 +5,7 @@ import { Star, AlignLeft } from 'lucide-react'
 import { useUpdateStory, useDeleteStory } from '@/hooks/use-stories'
 import { useStoryLibrary } from '@/hooks/useStoryLibrary'
 import { Button } from '@/components/ui/button'
-import type { InterviewStory } from '@/types/database'
+import type { InterviewStory } from '@/types/database.types'
 import { cn } from '@/lib/utils'
 
 interface StoryDetailProps {

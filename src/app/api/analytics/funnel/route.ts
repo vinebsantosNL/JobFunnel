@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import type { Stage } from '@/types/database'
+import type { Stage } from '@/types/database.types'
 
 // Ordered funnel stages (index matters for "at or beyond" logic)
 const FUNNEL_STAGES = ['applied', 'screening', 'interviewing', 'offer', 'hired'] as const

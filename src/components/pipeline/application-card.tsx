@@ -5,7 +5,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
-import type { JobApplication, Stage } from '@/types/database'
+import type { JobApplication, Stage } from '@/types/database.types'
 import { PRIORITY_CONFIG } from '@/lib/stages'
 import { Badge } from '@/components/ui/badge'
 

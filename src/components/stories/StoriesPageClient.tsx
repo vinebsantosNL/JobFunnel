@@ -10,7 +10,7 @@ import { useStories } from '@/hooks/use-stories'
 import { useStoryLibrary } from '@/hooks/useStoryLibrary'
 import { ALL_COMPETENCIES } from '@/lib/competencies'
 import { cn } from '@/lib/utils'
-import type { InterviewStory } from '@/types/database'
+import type { InterviewStory } from '@/types/database.types'
 
 const FILTER_COMPETENCIES = ALL_COMPETENCIES.slice(0, 8)
 

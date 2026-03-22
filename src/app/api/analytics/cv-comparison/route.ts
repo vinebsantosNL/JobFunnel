@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import type { CVVersion, JobApplication, Stage } from '@/types/database'
+import type { CVVersion, JobApplication, Stage } from '@/types/database.types'
 
 const FUNNEL_INDEX: Record<string, number> = {
   applied: 0, screening: 1, interviewing: 2, offer: 3, hired: 4,

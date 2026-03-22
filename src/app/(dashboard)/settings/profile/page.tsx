@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import type { Profile, UserRole } from '@/types/database'
+import type { Profile, UserRole } from '@/types/database.types'
 
 const ROLES: { value: UserRole; label: string }[] = [
   { value: 'software_engineer', label: 'Software Engineer' },

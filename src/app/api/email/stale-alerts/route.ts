@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { resend } from '@/lib/email/resend'
 import { staleApplicationEmail } from '@/lib/email/templates'
-import type { Profile, JobApplication } from '@/types/database'
+import type { Profile, JobApplication } from '@/types/database.types'
 
 type ProfileRow = Pick<Profile, 'id' | 'email' | 'full_name' | 'notification_prefs'>
 type JobRow = Pick<JobApplication, 'id' | 'company_name' | 'job_title' | 'stage' | 'stage_updated_at'>

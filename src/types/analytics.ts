@@ -1,4 +1,4 @@
-import type { Stage } from './database'
+import type { Stage } from './database.types'
 
 export interface FunnelData {
   stage_counts: Record<Stage, number>

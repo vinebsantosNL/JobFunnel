@@ -1,3 +1,14 @@
+// Manually maintained until Supabase CLI is integrated into this project.
+//
+// When the CLI is available, run:
+//   npm run generate:types
+//
+// WARNING: The CLI outputs a `Database` type with nested Tables/Row/Insert/Update keys.
+// Running generate:types will overwrite this file and break all 28 import sites that
+// use named exports (Profile, JobApplication, etc.). Before running, migrate all imports
+// to the Database['public']['Tables'][...]['Row'] pattern first.
+// See: https://supabase.com/docs/guides/api/rest/generating-types
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Stage = 'saved' | 'applied' | 'screening' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn'

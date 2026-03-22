@@ -1,7 +1,7 @@
 ---
 name: architecture-overview
 description: >
-  Reference guide for JobFunnel OS layered architecture pattern — Next.js 14 App Router, Supabase, Vercel.
+  Reference guide for JobFunnel OS layered architecture pattern — Next.js 16 App Router, Supabase, Vercel.
   Use when understanding the directory structure, request lifecycle, separation of concerns, or deciding
   where new code belongs. Trigger on: "where does this code go", "how is the app structured",
   "request lifecycle", "directory layout", "App Router structure", "separation of concerns".

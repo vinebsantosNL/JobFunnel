@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select'
 import { MapPin, DollarSign, ExternalLink, BookOpen, FileText, ArrowRight, Share2, Pencil, Trash2, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
-import type { JobApplication, Stage, Priority } from '@/types/database'
+import type { JobApplication, Stage, Priority } from '@/types/database.types'
 import { STAGE_CONFIG, STAGES, PRIORITY_CONFIG } from '@/lib/stages'
 import type { UpdateJobInput } from '@/lib/validations/job'
 import { CVVersionPicker } from '@/components/cv-versions/CVVersionPicker'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import type { Profile } from '@/types/database'
+import type { Profile } from '@/types/database.types'
 
 export function useSubscription() {
   const { data, isLoading } = useQuery({

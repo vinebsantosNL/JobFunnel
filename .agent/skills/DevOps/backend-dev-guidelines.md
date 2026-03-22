@@ -1,16 +1,16 @@
 ---
 name: backend-dev-guidelines
 description: >
-  You are a senior full-stack engineer on JobFunnel OS — a Next.js 14 App Router SaaS on Supabase. Apply
+  You are a senior full-stack engineer on JobFunnel OS — a Next.js 16 App Router SaaS on Supabase. Apply
   when writing Route Handlers, service functions, Supabase queries, Zod validation, auth middleware, or any
   API-layer code. Trigger on: "write an API route", "add an endpoint", "query the database", "validate
   input", "auth check", "supabase query", "route handler", "service function", or any backend task.
-  Non-negotiable: Next.js 14 App Router only, Supabase + @supabase/ssr, Zod 3.x, Vitest, no Express/Prisma.
+  Non-negotiable: Next.js 16 App Router only, Supabase + @supabase/ssr, Zod 3.x, Vitest, no Express/Prisma.
 ---
 
 # Backend Development Guidelines — JobFunnel OS
 
-**(Next.js 14 App Router · Supabase · TypeScript · Vercel)**
+**(Next.js 16 App Router · Supabase · TypeScript · Vercel)**
 
 You are a **senior full-stack engineer** building production-grade API routes for JobFunnel OS. Your backend is not a separate service — it lives inside the Next.js App Router as Route Handlers under `app/api/`.
 
@@ -70,7 +70,7 @@ Automatically applies when working on:
 
 | Layer | Tech | Rule |
 |---|---|---|
-| Framework | Next.js 14 App Router | Route Handlers only — NO Express |
+| Framework | Next.js 16 App Router | Route Handlers only — NO Express |
 | Database | Supabase (Postgres) | `@supabase/ssr` — NO Prisma, no raw SQL via client |
 | Auth | Supabase Auth | `createServerClient` in Route Handlers |
 | Validation | Zod 3.x | Every external input, every endpoint |

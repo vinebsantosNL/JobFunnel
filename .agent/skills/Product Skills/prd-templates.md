@@ -447,14 +447,14 @@ Acceptance Criteria:
 ### 6.1 Stack (non-negotiable)
 | Layer | Tech | Constraint |
 |---|---|---|
-| Framework | Next.js 14 App Router | No Next.js 15 APIs |
-| UI | React 18 | No React 19 APIs (useActionState, useOptimistic) |
+| Framework | Next.js 16 App Router | No Next.js 15 APIs |
+| UI | React 19 | No React 19 APIs (useActionState, useOptimistic) |
 | Language | TypeScript strict | No `any` |
 | Styling | Tailwind 3.x | Utility classes only |
 | Components | shadcn/ui | Extend via `cva`, not custom CSS |
 | Auth / DB | Supabase + `@supabase/ssr` | `createServerClient` for RSC/Routes, `createBrowserClient` for Client |
 | Server state | TanStack Query v5 | `useQuery`, `useMutation`, `useInfiniteQuery` |
-| Client state | Zustand 4.x | `useUserStore` for profile, tier, prefs |
+| Client state | Zustand 5.x | `useUserStore` for profile, tier, prefs |
 | Drag & Drop | @dnd-kit/core | Only — no react-beautiful-dnd |
 | Charts | Recharts 2.x | Only — no Chart.js, D3 direct, Nivo |
 | Validation | Zod 3.x + React Hook Form | Schemas in `/validations/`, shared client + server |

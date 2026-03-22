@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { FunnelData } from '@/types/analytics'
-import type { Stage } from '@/types/database'
+import type { Stage } from '@/types/database.types'
 
 const STAGE_COLORS: Partial<Record<Stage, string>> = {
   applied:      '#2563EB',

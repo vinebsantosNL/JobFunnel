@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CareerGoalModal } from './CareerGoalModal'
-import type { Profile } from '@/types/database'
+import type { Profile } from '@/types/database.types'
 
 interface NextCareerGoalProps {
   initialProfile: {
