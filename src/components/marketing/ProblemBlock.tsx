@@ -44,6 +44,106 @@ function ChaosVisual() {
   )
 }
 
+// ─── Spreadsheet visual for Act 02 ──────────────────────────────────────────
+
+const spreadsheetRows = [
+  { company: 'Spotify',  role: 'Sr PM',   status: '???',     statusColor: '#EF4444', statusBg: '#FEF2F2', notes: 'applied?',    faded: false },
+  { company: 'N26',      role: 'PL',      status: 'yellow',  statusColor: '#D97706', statusBg: '#FFFBEB', notes: 'follow up',   faded: false },
+  { company: 'Booking',  role: 'PM-II',   status: 'green?',  statusColor: '#059669', statusBg: '#ECFDF5', notes: 'dunno',       faded: true, strikeRole: true },
+  { company: 'Zalando',  role: 'GPM',     status: 'purple',  statusColor: '#7C3AED', statusBg: '#F5F3FF', notes: 'check email', faded: false },
+  { company: 'Adyen',    role: '??',      status: 'blue2',   statusColor: '#94A3B8', statusBg: '#F8FAFC', notes: 'idk …',       faded: true },
+]
+
+function SpreadsheetVisual() {
+  return (
+    <div
+      className="w-full rounded-xl overflow-hidden shadow-lg border border-[#E2E8F0] select-none"
+      style={{ background: '#fff' }}
+    >
+      {/* Window chrome */}
+      <div className="flex items-center gap-1.5 px-4 py-3 border-b border-[#E2E8F0]" style={{ background: '#F8FAFC' }}>
+        <span className="w-3 h-3 rounded-full bg-[#EF4444]/70" />
+        <span className="w-3 h-3 rounded-full bg-[#F59E0B]/70" />
+        <span className="w-3 h-3 rounded-full bg-[#10B981]/70" />
+        <span
+          className="ml-3 text-xs text-[#94A3B8]"
+          style={{ fontFamily: 'var(--font-dm-mono)' }}
+        >
+          job_search_v4_FINAL.xlsx
+        </span>
+      </div>
+
+      {/* Table */}
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr style={{ background: '#F8FAFC' }}>
+            {['Company', 'Role', 'Status', 'Notes'].map((h) => (
+              <th
+                key={h}
+                className="text-left px-4 py-2.5 text-xs font-medium text-[#94A3B8] border-b border-[#E2E8F0]"
+                style={{ fontFamily: 'var(--font-dm-mono)', letterSpacing: '0.02em' }}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {spreadsheetRows.map((row, i) => (
+            <tr
+              key={i}
+              className="border-b border-[#F1F5F9]"
+              style={{ opacity: row.faded ? 0.55 : 1 }}
+            >
+              <td className="px-4 py-2.5 text-[#374151] font-medium">{row.company}</td>
+              <td
+                className="px-4 py-2.5 text-[#64748B]"
+                style={{
+                  textDecoration: row.strikeRole ? 'line-through' : 'none',
+                  fontFamily: 'var(--font-dm-mono)',
+                  fontSize: '12px',
+                }}
+              >
+                {row.role}
+              </td>
+              <td className="px-4 py-2.5">
+                <span
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                  style={{
+                    color: row.statusColor,
+                    background: row.statusBg,
+                    fontFamily: 'var(--font-dm-mono)',
+                  }}
+                >
+                  {row.status}
+                </span>
+              </td>
+              <td
+                className="px-4 py-2.5 text-[#94A3B8]"
+                style={{ fontFamily: 'var(--font-dm-mono)', fontSize: '12px' }}
+              >
+                {row.notes}
+              </td>
+            </tr>
+          ))}
+          {/* Footer row */}
+          <tr style={{ background: '#F8FAFC' }}>
+            {['—', '—', '—', '55 more rows'].map((cell, i) => (
+              <td
+                key={i}
+                className="px-4 py-2.5 text-xs text-[#CBD5E1]"
+                style={{ fontFamily: 'var(--font-dm-mono)' }}
+              >
+                {cell}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 // ─── Acts 02 + 03 data ────────────────────────────────────────────────────────
 
 const act02 = {
@@ -139,10 +239,11 @@ export function ProblemBlock() {
         </div>
       </section>
 
-      {/* ── Act 02 ── */}
+      {/* ── Act 02 — two-column with spreadsheet visual ── */}
       <section style={{ background: act02.bg }} className="relative overflow-hidden">
+        {/* Large decorative number */}
         <div
-          className="absolute top-8 right-8 hidden sm:block select-none pointer-events-none"
+          className="absolute top-8 left-8 hidden sm:block select-none pointer-events-none"
           style={{
             fontFamily: 'var(--font-dm-mono)',
             fontSize: 'clamp(80px, 12vw, 160px)',
@@ -155,22 +256,32 @@ export function ProblemBlock() {
           {act02.number}
         </div>
         <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
-          <div className="max-w-2xl">
-            <ActLabel number={act02.number} />
-            <h2
-              className="text-3xl sm:text-4xl font-bold leading-tight mb-8"
-              style={{ color: act02.textColor, letterSpacing: '-0.02em' }}
-            >
-              {act02.headline}
-            </h2>
-            <div className="space-y-4">
-              {act02.body.map((para, i) => (
-                <p key={i} className="text-base leading-relaxed" style={{ color: act02.mutedColor }}>{para}</p>
-              ))}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+            {/* Left — text */}
+            <div>
+              <ActLabel number={act02.number} />
+              <h2
+                className="text-3xl sm:text-4xl font-bold leading-tight mb-8"
+                style={{ color: act02.textColor, letterSpacing: '-0.02em' }}
+              >
+                {act02.headline}
+              </h2>
+              <div className="space-y-4 mb-6">
+                {act02.body.map((para, i) => (
+                  <p key={i} className="text-base leading-relaxed" style={{ color: act02.mutedColor }}>{para}</p>
+                ))}
+              </div>
+              <blockquote className="border-l-2 border-[#10B981] pl-5 text-base italic leading-relaxed text-[#1A3329]">
+                {act02.emphasis}
+              </blockquote>
             </div>
-            <p className="mt-4 text-base font-semibold leading-relaxed text-[#0F172A]">
-              {act02.emphasis}
-            </p>
+
+            {/* Right — spreadsheet visual */}
+            <div className="hidden lg:block">
+              <SpreadsheetVisual />
+            </div>
+
           </div>
         </div>
       </section>
