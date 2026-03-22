@@ -9,12 +9,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <UserStoreHydrator />
 
       {/* Desktop sidebar — fixed height, never scrolls */}
-      <div className="hidden md:flex flex-shrink-0">
+      <div className="hidden sm:flex flex-shrink-0">
         <Sidebar />
       </div>
 
       {/* Main content — fills remaining height, children control their own scroll */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden pb-16 md:pb-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden pb-16 sm:pb-0">
         {children}
       </div>
 

@@ -69,7 +69,7 @@ export function NextCareerGoal({ initialProfile }: NextCareerGoalProps) {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-5 pt-5 border-t border-gray-100">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5 pt-5 border-t border-gray-100">
           <div>
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Target Title</p>
             <p className="text-sm font-semibold text-blue-600">

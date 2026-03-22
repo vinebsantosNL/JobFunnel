@@ -2,6 +2,13 @@
 
 import Link from 'next/link'
 import { useCVVersions } from '@/hooks/useCVVersions'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface CVVersionPickerProps {
   value: string | null
@@ -28,11 +35,7 @@ export function CVVersionPicker({ value, onChange, disabled = false }: CVVersion
   }
 
   if (isLoading) {
-    return (
-      <select disabled className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none opacity-50">
-        <option>Loading versions…</option>
-      </select>
-    )
+    return <div className="h-9 w-full bg-gray-100 rounded-lg animate-pulse" />
   }
 
   if (activeVersions.length === 0) {
@@ -47,17 +50,21 @@ export function CVVersionPicker({ value, onChange, disabled = false }: CVVersion
   }
 
   return (
-    <select
+    <Select
       value={value ?? '__untagged__'}
-      onChange={(e) => onChange(e.target.value === '__untagged__' ? null : e.target.value)}
-      className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+      onValueChange={(v) => onChange(v === '__untagged__' ? null : v)}
     >
-      <option value="__untagged__">Untagged</option>
-      {activeVersions.map((version) => (
-        <option key={version.id} value={version.id}>
-          {version.name}{version.is_default ? ' (Default)' : ''}
-        </option>
-      ))}
-    </select>
+      <SelectTrigger className="w-full h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__untagged__">Untagged</SelectItem>
+        {activeVersions.map((version) => (
+          <SelectItem key={version.id} value={version.id}>
+            {version.name}{version.is_default ? ' (Default)' : ''}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }

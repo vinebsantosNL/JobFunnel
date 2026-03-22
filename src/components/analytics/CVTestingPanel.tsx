@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MetricCard } from '@/components/analytics/metric-card'
 import { CVComparisonChart } from '@/components/analytics/CVComparisonChart'
 import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
 import type { CVComparisonRow } from '@/lib/services/analyticsService'
@@ -84,8 +85,7 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {/* Best Performing Version */}
-      <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-blue-500 p-5">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Best Performing Version</p>
+      <MetricCard title="Best Performing Version" accentColor="border-l-blue-500">
         {best ? (
           <>
             <p className="text-xl font-bold text-gray-900 leading-tight">{best.version_name}</p>
@@ -104,22 +104,18 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
         ) : (
           <p className="text-sm text-gray-400">No data yet</p>
         )}
-      </div>
+      </MetricCard>
 
       {/* Screening Rate All Versions */}
-      <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-green-500 p-5">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Screening Rate (All Versions)</p>
-        <p className="text-2xl font-bold text-gray-900">{overallScreening}%</p>
-        {totalTracked > 0 && (
-          <p className="text-xs mt-1 text-green-600">
-            {overallScreening}% vs. EU avg. {EU_AVG_SCREENING_LABEL}
-          </p>
-        )}
-      </div>
+      <MetricCard
+        title="Screening Rate (All Versions)"
+        value={`${overallScreening}%`}
+        subtitle={totalTracked > 0 ? `${overallScreening}% vs. EU avg. ${EU_AVG_SCREENING_LABEL}` : undefined}
+        accentColor="border-l-green-500"
+      />
 
       {/* Untagged Applications */}
-      <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-amber-500 p-5">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Untagged Applications</p>
+      <MetricCard title="Untagged Applications" accentColor="border-l-amber-500">
         <p className={`text-2xl font-bold ${untaggedCount > 0 ? 'text-amber-500' : 'text-gray-900'}`}>
           {untaggedCount}
         </p>
@@ -131,7 +127,7 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
             Tag them →
           </Link>
         )}
-      </div>
+      </MetricCard>
     </div>
   )
 }
@@ -207,9 +203,16 @@ export function CVTestingPanel() {
         </div>
       ) : isLoading ? (
         <div className="space-y-4">
-          <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
-            Loading...
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-gray-200 p-5 animate-pulse">
+                <div className="h-3 bg-gray-100 rounded w-2/3 mb-3" />
+                <div className="h-7 bg-gray-100 rounded w-1/2 mb-2" />
+                <div className="h-2.5 bg-gray-100 rounded w-3/4" />
+              </div>
+            ))}
           </div>
+          <div className="h-56 bg-gray-50 rounded-xl border border-gray-100 animate-pulse" />
         </div>
       ) : hasNoData ? (
         <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">

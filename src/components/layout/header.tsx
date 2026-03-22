@@ -12,7 +12,7 @@ export async function Header({ title, backHref }: HeaderProps) {
       {backHref && (
         <Link
           href={backHref}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors flex-shrink-0"
+          className="p-2.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors flex-shrink-0"
           aria-label="Back"
         >
           <ArrowLeft className="w-4 h-4" />

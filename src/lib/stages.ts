@@ -85,6 +85,24 @@ export const STAGE_ORDER: Partial<Record<Stage, number>> = {
 // Active stages for pipeline counter (in-progress applications)
 export const ACTIVE_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer']
 
+// Hex values for each stage — used in Recharts/react-pdf where Tailwind classes don't apply
+export const STAGE_HEX: Partial<Record<Stage, string>> = {
+  saved:        '#94A3B8',
+  applied:      '#2563EB',
+  screening:    '#7C3AED',
+  interviewing: '#F59E0B',
+  offer:        '#10B981',
+  hired:        '#059669',
+  rejected:     '#EF4444',
+  withdrawn:    '#94A3B8',
+}
+
+// Generic chart palette for CV comparison / multi-series charts
+export const CHART_PALETTE = ['#2563EB', '#7C3AED', '#10B981', '#94A3B8', '#F59E0B', '#06B6D4', '#EC4899']
+
+// Row accent palette for comparison tables (same blue/slate/… sequence)
+export const TABLE_ROW_COLORS = ['#2563EB', '#64748B', '#93C5FD', '#7C3AED', '#059669']
+
 export const PRIORITY_CONFIG = {
   low: { label: 'Low', color: 'bg-gray-300' },
   medium: { label: 'Medium', color: 'bg-amber-400' },

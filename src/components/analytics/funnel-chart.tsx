@@ -3,13 +3,9 @@
 import { useEffect, useState } from 'react'
 import type { FunnelData } from '@/types/analytics'
 import type { Stage } from '@/types/database.types'
+import { STAGE_HEX } from '@/lib/stages'
 
-const STAGE_COLORS: Partial<Record<Stage, string>> = {
-  applied:      '#2563EB',
-  screening:    '#7C3AED',
-  interviewing: '#F59E0B',
-  offer:        '#10B981',
-}
+const STAGE_COLORS: Partial<Record<Stage, string>> = STAGE_HEX
 
 const FUNNEL_STAGES: Stage[] = ['applied', 'screening', 'interviewing', 'offer']
 
@@ -84,7 +80,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
                   width: mounted ? `${targetWidth}%` : '0%',
                   backgroundColor: color,
                   opacity: isApplied ? 1 : 0.85,
-                  transition: `width 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${staggerDelay}`,
+                  transition: `width 0.35s cubic-bezier(0.16, 1, 0.3, 1) ${staggerDelay}`,
                 }}
               >
                 {convRate !== undefined && convRate > 0 && (
@@ -92,7 +88,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
                     className="text-xs font-semibold text-white/90 leading-none"
                     style={{
                       opacity: mounted ? 1 : 0,
-                      transition: `opacity 0.3s ease ${index * 120 + 400}ms`,
+                      transition: `opacity 0.2s ease ${index * 80 + 200}ms`,
                     }}
                   >
                     {convRate}%

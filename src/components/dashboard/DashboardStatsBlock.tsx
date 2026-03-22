@@ -58,7 +58,7 @@ function StatTile({
   const inner = (
     <Link
       href={href}
-      className={`bg-white rounded-xl border border-gray-200 border-l-4 ${borderColor} p-5 hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-150 group block`}
+      className={`bg-white rounded-xl border border-gray-200 border-l-4 ${borderColor} p-5 hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98] transition-[colors,box-shadow,transform] duration-150 group block`}
     >
       {loading ? (
         <div className="space-y-2">
@@ -108,7 +108,7 @@ export function DashboardStatsBlock() {
           label="TOTAL APPLICATIONS"
           value={data?.totalApplications ?? 0}
           loading={isLoading}
-          borderColor="border-blue-500"
+          borderColor="border-l-blue-500"
           descriptor="Last 30 days"
           descriptorClass="text-gray-400"
           href="/pipeline"
@@ -117,7 +117,7 @@ export function DashboardStatsBlock() {
           label="ACTIVE PIPELINE"
           value={data?.activeApplications ?? 0}
           loading={isLoading}
-          borderColor="border-blue-400"
+          borderColor="border-l-blue-400"
           descriptor="Screening · Interviewing · Offer"
           descriptorClass="text-gray-400"
           href="/pipeline"
@@ -127,7 +127,7 @@ export function DashboardStatsBlock() {
           label="INTERVIEWS"
           value={data?.interviews ?? 0}
           loading={isLoading}
-          borderColor="border-purple-500"
+          borderColor="border-l-purple-500"
           descriptor="Active now"
           descriptorClass="text-gray-400"
           href="/pipeline"
@@ -136,7 +136,7 @@ export function DashboardStatsBlock() {
           label="STAR STORIES"
           value={data?.storiesCreated ?? 0}
           loading={isLoading}
-          borderColor="border-amber-500"
+          borderColor="border-l-amber-500"
           descriptor="All time"
           descriptorClass="text-gray-400"
           href="/stories"

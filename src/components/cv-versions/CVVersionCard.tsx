@@ -288,7 +288,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             {version.is_locked && (
               <Lock className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
             )}
-            <h3 className="text-[15px] font-bold text-gray-900 leading-snug truncate flex-1">
+            <h3 className="text-base font-bold text-gray-900 leading-snug truncate flex-1">
               {version.name}
             </h3>
             {/* Set default — top right, only when not default */}

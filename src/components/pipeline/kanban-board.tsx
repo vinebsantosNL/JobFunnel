@@ -107,8 +107,15 @@ export function KanbanBoard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400 text-sm">Loading pipeline...</p>
+      <div className="flex gap-3 p-4 overflow-x-auto">
+        {[1, 2, 3, 4, 5].map((col) => (
+          <div key={col} className="w-64 min-w-[220px] flex-shrink-0 space-y-2">
+            <div className="h-9 bg-gray-100 rounded-lg animate-pulse" />
+            {[1, 2, 3].map((card) => (
+              <div key={card} className="h-24 bg-gray-100 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ))}
       </div>
     )
   }

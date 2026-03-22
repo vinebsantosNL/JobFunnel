@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +12,7 @@ import { CompetencyPicker } from './competency-picker'
 import { WordCount } from './WordCount'
 import { useCreateStory, useUpdateStory } from '@/hooks/use-stories'
 import { useStoryLibrary } from '@/hooks/useStoryLibrary'
+import { createStorySchema, type CreateStoryInput } from '@/lib/validations/story'
 import type { InterviewStory } from '@/types/database.types'
 import { cn } from '@/lib/utils'
 
@@ -54,40 +57,43 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
   const createStory = useCreateStory()
   const updateStory = useUpdateStory()
 
+  // UI-only state — not part of the form schema
   const [formMode, setFormMode] = useState<'star' | 'freeform'>(
     initialValues?.full_content ? 'freeform' : 'star'
   )
-  const [title, setTitle] = useState(initialValues?.title ?? '')
-  const [situation, setSituation] = useState(initialValues?.situation ?? '')
-  const [task, setTask] = useState(initialValues?.task ?? '')
-  const [action, setAction] = useState(initialValues?.action ?? '')
-  const [result, setResult] = useState(initialValues?.result ?? '')
-  const [fullContent, setFullContent] = useState(initialValues?.full_content ?? '')
-  const [competencies, setCompetencies] = useState<string[]>(initialValues?.competencies ?? [])
 
-  const isPending = createStory.isPending || updateStory.isPending
-
-  const fieldValues: Record<string, string> = { situation, task, action, result }
-  const fieldSetters: Record<string, (v: string) => void> = {
-    situation: setSituation,
-    task: setTask,
-    action: setAction,
-    result: setResult,
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!title.trim()) return
-
-    const input = {
-      title,
-      situation: formMode === 'star' ? situation || undefined : undefined,
-      task: formMode === 'star' ? task || undefined : undefined,
-      action: formMode === 'star' ? action || undefined : undefined,
-      result: formMode === 'star' ? result || undefined : undefined,
-      full_content: formMode === 'freeform' ? fullContent || undefined : undefined,
-      competencies,
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateStoryInput>({
+    resolver: zodResolver(createStorySchema),
+    defaultValues: {
+      title: initialValues?.title ?? '',
+      situation: initialValues?.situation ?? '',
+      task: initialValues?.task ?? '',
+      action: initialValues?.action ?? '',
+      result: initialValues?.result ?? '',
+      full_content: initialValues?.full_content ?? '',
+      competencies: initialValues?.competencies ?? [],
       is_favorite: initialValues?.is_favorite ?? false,
+    },
+  })
+
+  const isPending = isSubmitting || createStory.isPending || updateStory.isPending
+
+  async function onSubmit(data: CreateStoryInput) {
+    const input = {
+      title: data.title,
+      situation: formMode === 'star' ? data.situation || undefined : undefined,
+      task: formMode === 'star' ? data.task || undefined : undefined,
+      action: formMode === 'star' ? data.action || undefined : undefined,
+      result: formMode === 'star' ? data.result || undefined : undefined,
+      full_content: formMode === 'freeform' ? data.full_content || undefined : undefined,
+      competencies: data.competencies,
+      is_favorite: data.is_favorite,
     }
 
     if (mode === 'create') {
@@ -100,7 +106,7 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Title */}
       <div>
         <Label htmlFor="story-title-inline" className="text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -108,12 +114,14 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
         </Label>
         <Input
           id="story-title-inline"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
           placeholder="e.g. Led cross-team migration to microservices"
           className="mt-1"
-          required
+          aria-invalid={!!errors.title}
+          {...register('title')}
         />
+        {errors.title && (
+          <p className="text-xs text-red-500 mt-0.5">{errors.title.message}</p>
+        )}
       </div>
 
       {/* Mode toggle */}
@@ -140,7 +148,6 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
         <div className="space-y-4">
           {STAR_CONFIG.map(field => (
             <div key={field.id}>
-              {/* Section header with letter badge */}
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className={cn('w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs', field.colors)}>
@@ -148,15 +155,14 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
                   </div>
                   <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{field.label}</span>
                 </div>
-                <WordCount value={fieldValues[field.id]} />
+                <WordCount value={watch(field.id) ?? ''} />
               </div>
               <Textarea
                 id={`inline-${field.id}`}
-                value={fieldValues[field.id]}
-                onChange={e => fieldSetters[field.id](e.target.value)}
                 placeholder={field.placeholder}
                 rows={3}
                 className="text-sm"
+                {...register(field.id)}
               />
             </div>
           ))}
@@ -167,15 +173,14 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
             <Label htmlFor="inline-full-content" className="text-xs font-medium text-gray-500 uppercase tracking-wide">
               Story
             </Label>
-            <WordCount value={fullContent} />
+            <WordCount value={watch('full_content') ?? ''} />
           </div>
           <Textarea
             id="inline-full-content"
-            value={fullContent}
-            onChange={e => setFullContent(e.target.value)}
             placeholder="Write your full story..."
             rows={8}
             className="text-sm"
+            {...register('full_content')}
           />
         </div>
       )}
@@ -185,7 +190,13 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
         <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
           Competencies
         </Label>
-        <CompetencyPicker selected={competencies} onChange={setCompetencies} />
+        <Controller
+          name="competencies"
+          control={control}
+          render={({ field }) => (
+            <CompetencyPicker selected={field.value} onChange={field.onChange} />
+          )}
+        />
       </div>
 
       {/* Submit */}

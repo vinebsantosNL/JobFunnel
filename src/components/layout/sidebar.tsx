@@ -58,7 +58,7 @@ export function Sidebar() {
     pathname === href || pathname.startsWith(href + '/')
 
   return (
-    <aside className="flex flex-col w-60 h-full bg-[#f0f2f8] border-r border-gray-200">
+    <aside className="flex flex-col w-60 h-full bg-slate-100 border-r border-gray-200">
       {/* Logo */}
       <Link
         href="/dashboard"

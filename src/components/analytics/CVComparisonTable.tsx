@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import type { CVComparisonRow } from '@/lib/services/analyticsService'
+import { TABLE_ROW_COLORS } from '@/lib/stages'
 
 type SortKey = keyof Pick<
   CVComparisonRow,
@@ -24,7 +25,7 @@ function fmt(value: number | null, suffix = '%'): string {
   return `${value}${suffix}`
 }
 
-const ROW_BORDER_COLORS = ['#2563EB', '#64748B', '#93C5FD', '#7C3AED', '#059669']
+const ROW_BORDER_COLORS = TABLE_ROW_COLORS
 
 export function CVComparisonTable({
   rows,

@@ -2,6 +2,7 @@
 
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import type { TimelinePoint } from '@/types/analytics'
+import { STAGE_HEX } from '@/lib/stages'
 
 interface TimelineChartProps {
   data: TimelinePoint[]
@@ -21,7 +22,7 @@ export function TimelineChart({ data }: TimelineChartProps) {
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
           <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
           <Tooltip contentStyle={{ fontSize: 12 }} />
-          <Line type="monotone" dataKey="count" stroke="#2563EB" strokeWidth={2} dot={{ r: 3 }} />
+          <Line type="monotone" dataKey="count" stroke={STAGE_HEX.applied} strokeWidth={2} dot={{ r: 3 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>
