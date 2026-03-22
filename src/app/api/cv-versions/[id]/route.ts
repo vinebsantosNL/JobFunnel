@@ -8,8 +8,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   try {
     const { id } = await params
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (!user || authError) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const version = await getCVVersion(supabase, id, user.id)
     return NextResponse.json(version)
@@ -22,8 +22,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const { id } = await params
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (!user || authError) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const parsed = updateCVVersionSchema.safeParse(await request.json())
     if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
@@ -39,8 +39,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   try {
     const { id } = await params
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (!user || authError) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     await deleteCVVersion(supabase, id, user.id)
     return new NextResponse(null, { status: 204 })

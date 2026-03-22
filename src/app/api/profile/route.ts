@@ -7,8 +7,8 @@ import { handleApiError } from '@/lib/utils/errors'
 export async function GET() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (!user || authError) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const profile = await getProfile(supabase, user.id)
     return NextResponse.json(profile)
@@ -20,8 +20,8 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (!user || authError) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const parsed = updateProfileSchema.safeParse(await request.json())
     if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })

@@ -7,8 +7,10 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CVComparisonChart } from '@/components/analytics/CVComparisonChart'
 import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
+import { ProGate } from '@/components/common/ProGate'
+import { useUserStore } from '@/store/userStore'
 import type { CVComparisonRow } from '@/lib/services/analyticsService'
-import type { CVVersion, Profile } from '@/types/database.types'
+import type { CVVersion } from '@/types/database.types'
 
 const EU_AVG_SCREENING_LABEL = '2–4%'
 const LOW_SAMPLE_THRESHOLD = 10
@@ -32,12 +34,6 @@ function formatDateRangeLabel(days: number): string {
   from.setDate(from.getDate() - days)
   const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
   return `${fmt(from)} – ${fmt(to)}`
-}
-
-async function fetchProfile(): Promise<Profile> {
-  const res = await fetch('/api/auth/me')
-  if (!res.ok) throw new Error('Failed to fetch profile')
-  return res.json()
 }
 
 async function fetchCVComparison(params: {
@@ -148,10 +144,7 @@ export function CVTestingPanel() {
   const preset = DATE_PRESETS[presetIndex]
   const dateRange = useMemo(() => getDateRange(preset.days), [preset.days])
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ['profile'],
-    queryFn: fetchProfile,
-  })
+  const profile = useUserStore((state) => state.profile)
 
   const { data: cvVersions, isLoading: versionsLoading } = useQuery({
     queryKey: ['cv-versions-all'],
@@ -163,8 +156,7 @@ export function CVTestingPanel() {
     queryFn: () => fetchCVComparison(dateRange),
   })
 
-  const isPro = profile?.subscription_tier === 'pro'
-  const isLoading = profileLoading || versionsLoading || comparisonLoading
+  const isLoading = versionsLoading || comparisonLoading
 
   // Build archived lookup for table
   const cvVersionDefaults: Record<string, boolean> = {}
@@ -260,46 +252,12 @@ export function CVTestingPanel() {
     </div>
   )
 
-  if (profileLoading) {
-    return (
-      <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
-        Loading...
-      </div>
-    )
-  }
-
-  if (!isPro) {
-    return (
-      <div className="space-y-4">
-        <div className="relative">
-          <div className="pointer-events-none select-none blur-sm opacity-60">
-            {dataSection}
-          </div>
-          <div className="absolute inset-0 backdrop-blur-sm bg-white/50 z-10 flex items-center justify-center">
-            <Card className="max-w-sm w-full mx-4 shadow-xl border-blue-100">
-              <CardContent className="pt-8 pb-8 text-center space-y-4">
-                <div className="text-3xl">🔒</div>
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900">
-                    Upgrade to Pro to unlock CV A/B Testing
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Compare how different CV versions perform across your job applications.
-                  </p>
-                </div>
-                <Link
-                  href="/settings/billing"
-                  className="inline-flex items-center justify-center px-5 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
-                >
-                  Upgrade to Pro
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  return dataSection
+  return (
+    <ProGate
+      feature="CV A/B Testing"
+      description="Compare how different CV versions perform across your job applications."
+    >
+      {dataSection}
+    </ProGate>
+  )
 }

@@ -170,22 +170,23 @@ export async function updateJobApplication(
     const fromIdx = STAGE_ORDER[current.stage] ?? -1
     const toIdx = STAGE_ORDER[data.stage] ?? -1
 
-    // Insert intermediate entries for skipped sequential stages
+    // Batch-insert intermediate entries for skipped sequential stages + the final transition
+    const historyRows: Array<{ job_id: string; from_stage: string | null; to_stage: string }> = []
     if (fromIdx >= 0 && toIdx > fromIdx + 1) {
       for (let i = fromIdx; i < toIdx - 1; i++) {
-        await supabase.from('stage_history').insert({
+        historyRows.push({
           job_id: jobId,
           from_stage: SEQUENTIAL_STAGES[i] as SequentialStage,
           to_stage: SEQUENTIAL_STAGES[i + 1] as SequentialStage,
         })
       }
     }
-
-    await supabase.from('stage_history').insert({
+    historyRows.push({
       job_id: jobId,
       from_stage: current.stage,
       to_stage: data.stage,
     })
+    await supabase.from('stage_history').insert(historyRows)
     updatePayload['stage_updated_at'] = new Date().toISOString()
   }
 

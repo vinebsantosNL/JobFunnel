@@ -1,9 +1,13 @@
 import { Sidebar } from '@/components/layout/sidebar'
 import { MobileNav } from '@/components/layout/mobile-nav'
+import { UserStoreHydrator } from '@/components/providers/UserStoreHydrator'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
+      {/* Hydrates the global Zustand user store on mount — no UI output */}
+      <UserStoreHydrator />
+
       {/* Desktop sidebar — fixed height, never scrolls */}
       <div className="hidden md:flex flex-shrink-0">
         <Sidebar />
