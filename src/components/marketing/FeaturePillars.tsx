@@ -1,3 +1,5 @@
+import { RevealWrapper } from './RevealWrapper'
+
 const pillars = [
   {
     badges: [{ label: 'Pro', color: '#2563EB' }],
@@ -44,8 +46,18 @@ export function FeaturePillars() {
     <section id="features" className="bg-white py-20 sm:py-28">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
 
-        {/* Header — centered, large display size */}
-        <div className="mb-16 text-center">
+        {/* Header with eyebrow + flanking lines */}
+        <RevealWrapper className="mb-16 text-center">
+          <div className="flex items-center gap-3 justify-center mb-5">
+            <div className="flex-1 max-w-[80px] h-px bg-[#E2E8F0]" />
+            <span
+              className="text-xs font-medium text-[#94A3B8] uppercase flex-shrink-0"
+              style={{ fontFamily: 'var(--font-dm-mono)', letterSpacing: '0.14em' }}
+            >
+              Features
+            </span>
+            <div className="flex-1 max-w-[80px] h-px bg-[#E2E8F0]" />
+          </div>
           <h2
             className="text-5xl sm:text-6xl font-black text-[#0F172A] leading-tight"
             style={{ letterSpacing: '-0.03em' }}
@@ -54,63 +66,65 @@ export function FeaturePillars() {
             <br />
             Zero guessing.
           </h2>
-        </div>
+        </RevealWrapper>
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {pillars.map((pillar) => (
-            <div
-              key={pillar.headline}
-              className="relative rounded-2xl bg-white border border-[#E2E8F0] shadow-sm overflow-hidden flex flex-col"
-            >
-              {/* Colored top accent bar */}
+          {pillars.map((pillar, i) => (
+            <RevealWrapper key={pillar.headline} delay={i * 100}>
               <div
-                className="h-1 w-full"
-                style={{ background: pillar.accentColor }}
-              />
-
-              <div className="p-7 flex flex-col flex-1">
-                {/* Icon */}
+                className="relative rounded-2xl bg-white border border-[#E2E8F0] shadow-sm overflow-hidden flex flex-col h-full"
+              >
+                {/* Colored top accent bar */}
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-6"
-                  style={{
-                    background: `${pillar.accentColor}14`,
-                    color: pillar.accentColor,
-                  }}
-                >
-                  {pillar.icon}
+                  className="h-1 w-full"
+                  style={{ background: pillar.accentColor }}
+                />
+
+                <div className="p-7 flex flex-col flex-1">
+                  {/* Icon */}
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-6"
+                    style={{
+                      background: `${pillar.accentColor}14`,
+                      color: pillar.accentColor,
+                    }}
+                  >
+                    {pillar.icon}
+                  </div>
+
+                  {/* Badges */}
+                  <div className="flex items-center gap-2 mb-5">
+                    {pillar.badges.map((badge) => (
+                      <span
+                        key={badge.label}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                        style={{
+                          fontFamily: 'var(--font-dm-mono)',
+                          color: badge.color,
+                          borderColor: `${badge.color}35`,
+                          background: `${badge.color}0a`,
+                        }}
+                      >
+                        {badge.label}
+                      </span>
+                    ))}
+                  </div>
+
+                  <h3
+                    className="text-xl font-bold text-[#0F172A] leading-snug mb-3"
+                    style={{ letterSpacing: '-0.02em' }}
+                  >
+                    {pillar.headline}
+                  </h3>
+
+                  <p className="text-sm text-[#64748B] leading-relaxed">{pillar.body}</p>
                 </div>
-
-                {/* Badges */}
-                <div className="flex items-center gap-2 mb-5">
-                  {pillar.badges.map((badge) => (
-                    <span
-                      key={badge.label}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
-                      style={{
-                        fontFamily: 'var(--font-dm-mono)',
-                        color: badge.color,
-                        borderColor: `${badge.color}35`,
-                        background: `${badge.color}0a`,
-                      }}
-                    >
-                      {badge.label}
-                    </span>
-                  ))}
-                </div>
-
-                <h3
-                  className="text-xl font-bold text-[#0F172A] leading-snug mb-3"
-                  style={{ letterSpacing: '-0.02em' }}
-                >
-                  {pillar.headline}
-                </h3>
-
-                <p className="text-sm text-[#64748B] leading-relaxed">{pillar.body}</p>
               </div>
-            </div>
+            </RevealWrapper>
           ))}
         </div>
+
       </div>
     </section>
   )

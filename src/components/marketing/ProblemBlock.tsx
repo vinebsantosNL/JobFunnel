@@ -258,7 +258,12 @@ export function ProblemBlock() {
         <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-            {/* Left — text */}
+            {/* Left — spreadsheet visual */}
+            <div className="hidden lg:block order-last lg:order-first">
+              <SpreadsheetVisual />
+            </div>
+
+            {/* Right — text */}
             <div>
               <ActLabel number={act02.number} />
               <h2
@@ -275,11 +280,6 @@ export function ProblemBlock() {
               <blockquote className="border-l-2 border-[#10B981] pl-5 text-base italic leading-relaxed text-[#1A3329]">
                 {act02.emphasis}
               </blockquote>
-            </div>
-
-            {/* Right — spreadsheet visual */}
-            <div className="hidden lg:block">
-              <SpreadsheetVisual />
             </div>
 
           </div>
