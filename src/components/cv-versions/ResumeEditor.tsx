@@ -27,8 +27,8 @@ import { EMPTY_RESUME_DATA } from '@/types/resume'
 import { cn } from '@/lib/utils'
 import { scoreResume } from '@/lib/ats-engine'
 import type { AtsScoreResult, AtsRuleResult } from '@/lib/ats-engine'
-import { useQuery } from '@tanstack/react-query'
-import type { JobApplication } from '@/types/database.types'
+import Link from 'next/link'
+import { useJobs } from '@/hooks/use-jobs'
 
 // PDFViewer uses browser-only APIs — must be loaded dynamically
 const ResumePreview = dynamic(
@@ -832,14 +832,7 @@ function buildCvKeywordSet(data: ResumeData): Set<string> {
 }
 
 function PipelineKeywordsTab({ data }: { data: ResumeData }) {
-  const { data: jobs, isLoading } = useQuery<JobApplication[]>({
-    queryKey: ['jobs-keywords'],
-    queryFn: async () => {
-      const res = await fetch('/api/jobs')
-      if (!res.ok) return []
-      return res.json()
-    },
-  })
+  const { data: jobs, isLoading } = useJobs()
 
   if (isLoading) {
     return (
@@ -860,7 +853,7 @@ function PipelineKeywordsTab({ data }: { data: ResumeData }) {
         <p className="text-xs text-gray-400 max-w-xs">
           Add jobs to your pipeline first. Keyword gaps will appear here once you have active applications.
         </p>
-        <a href="/pipeline" className="text-xs text-blue-600 underline">Go to Pipeline →</a>
+        <Link href="/pipeline" className="text-xs text-blue-600 underline">Go to Pipeline →</Link>
       </div>
     )
   }
@@ -1053,9 +1046,11 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
 
   // ── Download handlers ──────────────────────────────────────────────────────
   const [downloading, setDownloading] = useState<'pdf' | 'docx' | null>(null)
+  const [downloadError, setDownloadError] = useState<string | null>(null)
 
   async function handleDownload(format: 'pdf' | 'docx') {
     setDownloading(format)
+    setDownloadError(null)
     try {
       const res = await fetch(`/api/cv-versions/${version.id}/export/${format}`, { method: 'POST' })
       if (!res.ok) throw new Error(`Export failed: ${res.status}`)
@@ -1067,7 +1062,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
       a.click()
       URL.revokeObjectURL(url)
     } catch {
-      // silent — user sees button re-enable
+      setDownloadError(format)
     } finally {
       setDownloading(null)
     }
@@ -1125,7 +1120,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
           </Button>
         )}
 
-        {/* Download buttons */}
+        {/* Download buttons — desktop */}
         <Button
           size="sm"
           variant="outline"
@@ -1148,6 +1143,41 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
           <Download className="w-3.5 h-3.5" />
           {downloading === 'docx' ? 'Generating…' : 'DOCX'}
         </Button>
+      </div>
+
+      {/* ── Download error banner ─────────────────────────────────────────────── */}
+      {downloadError && (
+        <div className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-red-50 border-b border-red-200">
+          <p className="text-sm text-red-700">
+            {downloadError.toUpperCase()} generation failed — please try again.
+          </p>
+          <button
+            onClick={() => handleDownload(downloadError as 'pdf' | 'docx')}
+            className="text-sm font-semibold text-red-700 underline flex-shrink-0 min-h-[44px] px-2"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* ── Mobile download strip ─────────────────────────────────────────────── */}
+      <div className="sm:hidden flex-shrink-0 flex gap-2 px-4 py-2 border-b border-gray-100 bg-white">
+        <button
+          onClick={() => handleDownload('pdf')}
+          disabled={downloading !== null}
+          className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg py-2 min-h-[44px] hover:bg-gray-50 disabled:opacity-50"
+        >
+          <Download className="w-4 h-4" />
+          {downloading === 'pdf' ? 'Generating…' : 'Download PDF'}
+        </button>
+        <button
+          onClick={() => handleDownload('docx')}
+          disabled={downloading !== null}
+          className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg py-2 min-h-[44px] hover:bg-gray-50 disabled:opacity-50"
+        >
+          <Download className="w-4 h-4" />
+          {downloading === 'docx' ? 'Generating…' : 'Download DOCX'}
+        </button>
       </div>
 
       {/* ── Lock banner ─────────────────────────────────────────────────────── */}
