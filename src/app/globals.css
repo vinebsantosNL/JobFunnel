@@ -182,3 +182,16 @@
 .fade-in-up-2 { opacity: 0; animation: fadeInUp 0.55s ease 0.2s forwards; }
 .fade-in-up-3 { opacity: 0; animation: fadeInUp 0.55s ease 0.3s forwards; }
 .fade-in-up-4 { opacity: 0; animation: fadeInUp 0.55s ease 0.4s forwards; }
+
+/* ─── Scroll reveal ────────────────────────────────────────────── */
+
+.reveal-init {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.reveal-show {
+  opacity: 1;
+  transform: translateY(0);
+}
