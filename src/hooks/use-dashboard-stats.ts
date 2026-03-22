@@ -9,6 +9,7 @@ export interface DashboardStats {
   interviews: number
   storiesCreated: number
   hasFirstJob: boolean
+  hasCVVersion: boolean
 }
 
 export function useDashboardStats() {

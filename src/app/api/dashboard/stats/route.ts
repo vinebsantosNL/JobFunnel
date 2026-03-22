@@ -9,9 +9,10 @@ export async function GET() {
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-  const [{ data: jobs }, { count: storiesCreated }] = await Promise.all([
+  const [{ data: jobs }, { count: storiesCreated }, { count: cvVersionsCount }] = await Promise.all([
     supabase.from('job_applications').select('stage, created_at').eq('user_id', user.id),
     supabase.from('interview_stories').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    supabase.from('cv_versions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
   ])
 
   const allJobs = jobs ?? []
@@ -28,5 +29,6 @@ export async function GET() {
     interviews: interviewingCount,
     storiesCreated: storiesCreated ?? 0,
     hasFirstJob: allJobs.length > 0,
+    hasCVVersion: (cvVersionsCount ?? 0) > 0,
   })
 }

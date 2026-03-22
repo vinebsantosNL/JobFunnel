@@ -83,8 +83,8 @@ function CheckItem({ item }: { item: ChecklistItem }) {
 export function GettingStartedBlock() {
   const { data, isLoading } = useDashboardStats()
 
-  const completedCount = [data?.hasFirstJob, (data?.storiesCreated ?? 0) > 0].filter(Boolean).length
-  const totalCompletable = 2
+  const completedCount = [data?.hasFirstJob, (data?.storiesCreated ?? 0) > 0, data?.hasCVVersion].filter(Boolean).length
+  const totalCompletable = 3
   const pct = Math.round((completedCount / totalCompletable) * 100)
 
   const items: ChecklistItem[] = [
@@ -104,7 +104,7 @@ export function GettingStartedBlock() {
     {
       label: 'Set up CV Versions',
       subtitle: 'Track which resume performs best',
-      done: false,
+      done: data?.hasCVVersion ?? false,
       href: '/cv-versions',
     },
     {
