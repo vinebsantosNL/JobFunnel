@@ -20,11 +20,7 @@ export function ContactHeader({ data }: { data: ResumeData }) {
       <Text style={base.name}>{name}</Text>
       {contact.targetTitle ? <Text style={base.targetTitle}>{contact.targetTitle}</Text> : null}
       {contactItems.length > 0 && (
-        <View style={base.contactLine}>
-          {contactItems.map((item, i) => (
-            <Text key={i}>{item}</Text>
-          ))}
-        </View>
+        <Text style={base.contactLine}>{contactItems.join(' \u00B7 ')}</Text>
       )}
     </View>
   )
