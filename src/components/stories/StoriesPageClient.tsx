@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BookOpen, Plus } from 'lucide-react'
+import { BookOpen, ChevronLeft, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { StoryInlinePanel } from './StoryInlinePanel'
@@ -109,6 +109,8 @@ export function StoriesPageClient() {
       ? expandedView.storyId
       : null
 
+  const isDetailOpen = expandedView.type !== 'none'
+
   // Keyboard shortcuts: Escape closes panel, 'n' opens new story when no input focused
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -136,7 +138,11 @@ export function StoriesPageClient() {
   return (
     <main className="flex-1 flex h-full overflow-hidden">
       {/* Left panel — story list */}
-      <div className="w-80 border-r border-gray-200 flex flex-col bg-white overflow-y-auto flex-shrink-0">
+      <div className={cn(
+        'border-r border-gray-200 flex-col bg-white overflow-y-auto flex-shrink-0',
+        'w-full md:w-80',
+        isDetailOpen ? 'hidden md:flex' : 'flex'
+      )}>
         {/* Header */}
         <div className="px-4 pt-4 pb-3 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
@@ -248,7 +254,22 @@ export function StoriesPageClient() {
       </div>
 
       {/* Right panel — story detail */}
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className={cn(
+        'flex-1 overflow-y-auto bg-gray-50',
+        isDetailOpen ? 'flex flex-col' : 'hidden md:block'
+      )}>
+        {/* Mobile back button */}
+        {isDetailOpen && (
+          <div className="md:hidden flex items-center px-4 py-2 border-b border-gray-100 bg-white sticky top-0 z-10">
+            <button
+              onClick={closeExpanded}
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] pr-4"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back to Stories
+            </button>
+          </div>
+        )}
         <AnimatePresence>
           {expandedView.type !== 'none' ? (
             <div className="p-6">

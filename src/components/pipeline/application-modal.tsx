@@ -163,7 +163,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto max-h-[80vh] bg-white">
+        <div className="overflow-y-auto max-h-[calc(90dvh-52px)] sm:max-h-[80vh] bg-white">
           <div className="px-6 pt-6 pb-4">
             {/* Company row + stage badge */}
             <div className="flex items-start justify-between gap-4 mb-4">

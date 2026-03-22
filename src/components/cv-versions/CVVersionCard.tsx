@@ -147,7 +147,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
         <div className="flex items-center justify-between pt-1 gap-2">
           <Link
             href="/app/analytics"
-            className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors py-2.5 sm:py-0 -my-2.5 sm:my-0 inline-flex items-center"
           >
             View stats →
           </Link>
@@ -156,7 +156,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
               variant="ghost"
               size="sm"
               onClick={() => setEditOpen(true)}
-              className="h-7 px-2.5 text-xs text-gray-500"
+              className="h-9 sm:h-7 px-2.5 text-xs text-gray-500"
             >
               Edit
             </Button>
@@ -166,7 +166,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
                 size="sm"
                 onClick={handleSetDefault}
                 disabled={updateMutation.isPending}
-                className="h-7 px-2.5 text-xs text-gray-500"
+                className="h-9 sm:h-7 px-2.5 text-xs text-gray-500"
               >
                 Set default
               </Button>
@@ -176,7 +176,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setDeleteOpen(true)}
-                className="h-7 px-2.5 text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
+                className="h-9 sm:h-7 px-2.5 text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
               >
                 Delete
               </Button>
@@ -186,7 +186,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
                 size="sm"
                 onClick={handleArchiveToggle}
                 disabled={updateMutation.isPending}
-                className="h-7 px-2.5 text-xs text-gray-500"
+                className="h-9 sm:h-7 px-2.5 text-xs text-gray-500"
               >
                 {version.is_archived ? 'Unarchive' : 'Archive'}
               </Button>

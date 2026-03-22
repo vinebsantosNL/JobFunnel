@@ -16,6 +16,7 @@ import { KanbanColumn } from './kanban-column'
 import { ApplicationCard } from './application-card'
 import { ApplicationModal } from './application-modal'
 import { FilterBar } from './filter-bar'
+import { Button } from '@/components/ui/button'
 import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/use-jobs'
 import type { CreateJobInput, UpdateJobInput } from '@/lib/validations/job'
 import {
@@ -33,7 +34,7 @@ export function KanbanBoard() {
   const [activeJob, setActiveJob] = useState<JobApplication | null>(null)
   const [pendingMove, setPendingMove] = useState<{ job: JobApplication; newStage: Stage } | null>(null)
 
-  const { data: rawJobs = [], isLoading, error } = useJobs({ search, priority })
+  const { data: rawJobs = [], isLoading, error, refetch } = useJobs({ search, priority })
 
   // Client-side CV version filter (AND logic with server-side priority/search filters)
   const jobs = useMemo(() => {
@@ -114,8 +115,11 @@ export function KanbanBoard() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-red-500 text-sm">Failed to load jobs. Please refresh.</p>
+      <div className="flex flex-col items-center justify-center h-64 gap-3">
+        <p className="text-red-500 text-sm">Failed to load jobs.</p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          Retry
+        </Button>
       </div>
     )
   }

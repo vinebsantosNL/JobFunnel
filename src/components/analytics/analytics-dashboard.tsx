@@ -151,7 +151,13 @@ export function AnalyticsDashboard() {
                   ) : funnel ? (
                     <FunnelChart data={funnel} />
                   ) : (
-                    <div className="h-64 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
+                    <div className="h-64 flex flex-col items-center justify-center gap-2 text-center px-4">
+                      <p className="text-sm font-medium text-gray-600">No funnel data yet</p>
+                      <p className="text-xs text-gray-400">Start tracking applications to see your conversion funnel.</p>
+                      <Link href="/pipeline" className="text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors mt-1">
+                        Add your first application →
+                      </Link>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -248,7 +254,13 @@ export function AnalyticsDashboard() {
               ) : timeline && timeline.length > 0 ? (
                 <TimelineChart data={timeline} />
               ) : (
-                <div className="h-56 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
+                <div className="h-56 flex flex-col items-center justify-center gap-2 text-center px-4">
+                  <p className="text-sm font-medium text-gray-600">No timeline data yet</p>
+                  <p className="text-xs text-gray-400">Applications will appear here as you add them over time.</p>
+                  <Link href="/pipeline" className="text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors mt-1">
+                    Go to Pipeline →
+                  </Link>
+                </div>
               )}
             </CardContent>
           </Card>
