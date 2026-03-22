@@ -84,15 +84,6 @@ const ATS_LABELS: Record<ATSSystemKey, string> = {
   lever: 'Lever',
 }
 
-type FilterPill = 'all' | 'ats-safe' | 'eu-a4' | 'compact'
-
-const FILTER_LABELS: Record<FilterPill, string> = {
-  all: 'All',
-  'ats-safe': 'ATS-Safe',
-  'eu-a4': 'EU / A4',
-  compact: 'Compact',
-}
-
 // ─── Template thumbnail wireframes ───────────────────────────────────────────
 
 function GalleryThumbnail({ templateId }: { templateId: TemplateId }) {
@@ -346,7 +337,6 @@ function TemplateCard({
 
 export function TemplateGallery() {
   const router = useRouter()
-  const [activeFilter, setActiveFilter] = useState<FilterPill>('all')
   const [selectedId, setSelectedId] = useState<TemplateId | null>(null)
   const [namingOpen, setNamingOpen] = useState(false)
   const [resumeName, setResumeName] = useState('')
@@ -355,11 +345,6 @@ export function TemplateGallery() {
 
   const now = new Date()
   const monthYear = now.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
-
-  const filtered =
-    activeFilter === 'all'
-      ? TEMPLATES
-      : TEMPLATES.filter((t) => t.tags.includes(activeFilter as 'ats-safe' | 'eu-a4' | 'compact'))
 
   function handleSelectTemplate(id: TemplateId) {
     setSelectedId(id)
@@ -379,8 +364,8 @@ export function TemplateGallery() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Back + heading */}
-      <div className="flex items-center gap-3">
+      {/* Back button */}
+      <div>
         <button
           onClick={() => router.back()}
           className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
@@ -388,33 +373,11 @@ export function TemplateGallery() {
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <div>
-          <h2 className="text-lg font-bold text-gray-900">Choose a template</h2>
-          <p className="text-sm text-gray-500">All templates are ATS-optimised for European job applications.</p>
-        </div>
-      </div>
-
-      {/* Filter pills */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {(Object.keys(FILTER_LABELS) as FilterPill[]).map((pill) => (
-          <button
-            key={pill}
-            onClick={() => setActiveFilter(pill)}
-            className={cn(
-              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
-              activeFilter === pill
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            )}
-          >
-            {FILTER_LABELS[pill]}
-          </button>
-        ))}
       </div>
 
       {/* Template grid */}
       <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((tpl) => (
+        {TEMPLATES.map((tpl) => (
           <TemplateCard
             key={tpl.id}
             template={tpl}

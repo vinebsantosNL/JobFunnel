@@ -172,13 +172,7 @@ function relativeTime(iso: string): string {
 }
 
 function ScreeningRateBadge({ rate, count }: { rate: number | null; count: number }) {
-  if (count < LOW_DATA_THRESHOLD || rate === null) {
-    return (
-      <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500">
-        Low confidence
-      </span>
-    )
-  }
+  if (count < LOW_DATA_THRESHOLD || rate === null) return null
   if (rate >= SCREENING_RATE_HIGH) {
     return (
       <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700 border border-green-200">
@@ -294,12 +288,23 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             {version.is_locked && (
               <Lock className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
             )}
-            {version.is_default && (
-              <Star className="w-3.5 h-3.5 text-blue-500 fill-blue-500 mt-0.5 flex-shrink-0" />
-            )}
             <h3 className="text-[15px] font-bold text-gray-900 leading-snug truncate flex-1">
               {version.name}
             </h3>
+            {/* Set default — top right, only when not default */}
+            {!version.is_default && !version.is_locked && (
+              <button
+                onClick={handleSetDefault}
+                disabled={updateMutation.isPending}
+                title="Set as default"
+                className="hidden sm:flex flex-shrink-0 p-1 rounded-md text-gray-300 hover:text-amber-400 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              >
+                <Star className="w-4 h-4" />
+              </button>
+            )}
+            {version.is_default && (
+              <Star className="w-4 h-4 text-blue-500 fill-blue-500 flex-shrink-0" />
+            )}
             {/* Mobile actions trigger */}
             <button
               onClick={() => setMobileSheetOpen(true)}
@@ -396,19 +401,11 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
                 />
               </>
             ) : (
-              // Unlocked: open editor, Rename, Duplicate, Set default, Archive
+              // Unlocked: open editor, Rename, Duplicate, Archive
               <>
                 <ActionLinkButton href={`/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-3.5 h-3.5" />} label="Edit" />
                 <ActionButton icon={<Pencil className="w-3.5 h-3.5" />} label="Rename" onClick={openEdit} />
                 <ActionButton icon={<Copy className="w-3.5 h-3.5" />} label="Duplicate" onClick={openDuplicate} />
-                {!version.is_default && (
-                  <ActionButton
-                    icon={<Star className="w-3.5 h-3.5" />}
-                    label="Set default"
-                    onClick={handleSetDefault}
-                    disabled={updateMutation.isPending}
-                  />
-                )}
                 <ActionButton
                   icon={version.is_archived ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
                   label={version.is_archived ? 'Unarchive' : 'Archive'}
