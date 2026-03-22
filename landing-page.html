@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Funnel — Run your job search like a product funnel</title>
+  <meta name="description" content="Job Funnel tracks applications, measures conversion rates, and helps you find out exactly where your job search breaks down. Built for tech professionals in Europe.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────── */
+    :root {
+      --blue:       #2563EB;
+      --blue-h:     #1D4ED8;
+      --blue-light: #EFF6FF;
+      --navy:       #0C1A17;
+      --navy-mid:   #112219;
+      --navy-3:     #1A3329;
+      --green:      #10B981;
+      --amber:      #F59E0B;
+      --red:        #EF4444;
+      --purple:     #8B5CF6;
+      --gray:       #64748B;
+      --gray-2:     #94A3B8;
+      --gray-3:     #CBD5E1;
+      --border:     #E2E8F0;
+      --bg:         #F8FAFC;
+      --bg-2:       #F1F5F9;
+      --white:      #FFFFFF;
+      --text:       #0F172A;
+      --text-2:     #475569;
+      --text-3:     #94A3B8;
+
+      --r-sm:  4px;
+      --r-md:  8px;
+      --r-lg:  12px;
+      --r-xl:  16px;
+      --r-2xl: 24px;
+
+      --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-md: 0 4px 16px rgba(15,23,42,0.08), 0 2px 6px rgba(15,23,42,0.05);
+      --shadow-lg: 0 12px 40px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
+      --shadow-xl: 0 24px 64px rgba(15,23,42,0.18);
+
+      --grid-texture:
+        linear-gradient(rgba(16,185,129,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.07) 1px, transparent 1px);
+      --grid-size: 40px 40px;
+    }
+
+    /* ── RESET ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* ── TYPOGRAPHY ────────────────────────────────────── */
+    .f-display {
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.04em;
+    }
+    .f-mono {
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── LAYOUT ────────────────────────────────────────── */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+    @media (max-width: 768px) { .container { padding: 0 20px; } }
+    @media (max-width: 480px) { .container { padding: 0 16px; } }
+
+    /* ── SCROLL ANIMATIONS ─────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 1. NAVIGATION                                       */
+    /* ─────────────────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      padding: 0 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 250ms ease, border-color 250ms ease, box-shadow 250ms ease;
+      border-bottom: 1px solid transparent;
+    }
+    .nav.scrolled {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-color: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-logo {
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.02em;
+      transition: color 250ms ease;
+    }
+    .nav.scrolled .nav-logo { color: var(--navy); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.75);
+      transition: color 200ms ease;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav.scrolled .nav-links a { color: var(--gray); }
+    .nav.scrolled .nav-links a:hover { color: var(--navy); }
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      background: var(--blue);
+      color: var(--white) !important;
+      padding: 9px 20px;
+      border-radius: var(--r-lg);
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 150ms ease, transform 150ms ease;
+    }
+    .nav-cta:hover { background: var(--blue-h); transform: translateY(-1px); }
+    .nav-login {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.75);
+      padding: 9px 16px;
+      border-radius: var(--r-lg);
+      border: 1px solid rgba(255,255,255,0.18);
+      transition: all 150ms ease;
+    }
+    .nav-login:hover { color: var(--white); border-color: rgba(255,255,255,0.4); }
+    .nav.scrolled .nav-login { color: var(--gray); border-color: var(--border); }
+    .nav.scrolled .nav-login:hover { color: var(--navy); border-color: var(--gray-3); background: var(--bg); }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      padding: 8px;
+      cursor: pointer;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: background 250ms ease, transform 250ms ease, opacity 250ms ease;
+    }
+    .nav.scrolled .nav-hamburger span { background: var(--navy); }
+    .nav-mobile-menu {
+      display: none;
+      position: fixed;
+      top: 64px; left: 0; right: 0;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 20px;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow-lg);
+      z-index: 199;
+    }
+    .nav-mobile-menu.open { display: flex; }
+    .nav-mobile-menu a {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-2);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-mobile-menu .nav-cta {
+      justify-content: center;
+      margin-top: 4px;
+      padding: 12px;
+      font-size: 15px;
+    }
+    @media (max-width: 768px) {
+      .nav { padding: 0 20px; }
+      .nav-links, .nav-right > .nav-cta, .nav-right > .nav-login { display: none; }
+      .nav-hamburger { display: flex; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 2. HERO                                             */
+    /* ─────────────────────────────────────────────────── */
+    .hero {
+      background-color: var(--navy);
+      background-image: var(--grid-texture);
+      background-size: var(--grid-size);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 40px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; right: -100px;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 80px;
+      align-items: center;
+    }
+    .hero-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.2s forwards;
+    }
+    .hero-label::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--green);
+    }
+    .hero-headline {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(48px, 6vw, 80px);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.35s forwards;
+    }
+    .hero-headline .num {
+      color: var(--white);
+      display: inline-block;
+    }
+    .hero-headline .num-red { color: #FC4D4D; }
+    .hero-headline .line-3 {
+      color: var(--gray-2);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 0.78em;
+    }
+    .hero-subhead {
+      font-size: 18px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.65);
+      max-width: 440px;
+      margin-bottom: 40px;
+      font-weight: 400;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.5s forwards;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.65s forwards;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--blue);
+      color: var(--white);
+      padding: 14px 28px;
+      border-radius: var(--r-xl);
+      font-size: 15px;
+      font-weight: 600;
+      transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+      box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+    }
+    .btn-primary:hover {
+      background: var(--blue-h);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(37,99,235,0.45);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 150ms ease;
+    }
+    .btn-secondary:hover { color: var(--white); }
+    .btn-secondary svg { transition: transform 150ms ease; }
+    .btn-secondary:hover svg { transform: translateY(2px); }
+    .hero-trust {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.35);
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.8s forwards;
+    }
+    .hero-trust span { color: rgba(255,255,255,0.5); }
+    .hero-trust .dot {
+      display: inline-block;
+      width: 3px; height: 3px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 8px;
+    }
+
+    /* ── FUNNEL VIZ ── */
+    .funnel-viz {
+      opacity: 0;
+      animation: fadeIn 1s ease 0.7s forwards;
+    }
+    .funnel-svg {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      display: block;
+    }
+    .funnel-bar-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      fill: rgba(255,255,255,0.5);
+      letter-spacing: 0.04em;
+    }
+    .funnel-bar-count {
+      font-family: 'Inter', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      fill: var(--white);
+    }
+    .funnel-conversion {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      fill: var(--gray-2);
+    }
+
+    /* scroll bounce */
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 1.2s forwards;
+      cursor: pointer;
+    }
+    .scroll-hint span {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+    .scroll-chevron {
+      width: 20px; height: 20px;
+      border-right: 2px solid rgba(255,255,255,0.3);
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+      transform: rotate(45deg);
+      animation: bounce 2s ease infinite;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50%       { transform: rotate(45deg) translateY(4px); }
+    }
+
+    @media (max-width: 900px) {
+      .hero { padding: 100px 20px 80px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+      .funnel-viz { max-width: 320px; margin: 0 auto; }
+      .hero-subhead { max-width: 100%; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 3. STATS BAR                                        */
+    /* ─────────────────────────────────────────────────── */
+    .stats-bar {
+      background: var(--navy-mid);
+      padding: 48px 40px;
+    }
+    .stats-bar-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .stats-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 28px 32px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      position: relative;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 12px;
+      letter-spacing: -0.03em;
+    }
+    .stat-num sup {
+      font-size: 0.5em;
+      font-weight: 400;
+      vertical-align: super;
+      color: var(--green);
+    }
+    .stat-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.5;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+    @media (max-width: 640px) {
+      .stats-bar { padding: 40px 20px; }
+      .stats-grid { grid-template-columns: 1fr; gap: 0; }
+      .stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 24px 20px; }
+      .stat-item:last-child { border-bottom: none; }
+      .stat-num { font-size: 40px; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 4. PROBLEM ACTS                                     */
+    /* ─────────────────────────────────────────────────── */
+    .section-act {
+      padding: 96px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .act-1 { background: var(--white); }
+    .act-2 { background: var(--bg-2); }
+    .act-3 {
+      background: var(--navy-mid);
+      background-image: var(--grid-texture);
+      background-size: var(--grid-size);
+    }
+
+    .act-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .act-inner.reverse { direction: rtl; }
+    .act-inner.reverse > * { direction: ltr; }
+
+    .act-number {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(120px, 16vw, 180px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: var(--border);
+      position: absolute;
+      top: -20px;
+      opacity: 0.6;
+    }
+    .act-1 .act-number { right: -20px; color: var(--bg-2); opacity: 1; }
+    .act-2 .act-number { left: -20px; color: var(--border); opacity: 1; }
+    .act-3 .act-number { right: -10px; color: rgba(255,255,255,0.04); opacity: 1; font-size: clamp(120px, 18vw, 220px); }
+
+    .act-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray-2);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .act-1 .act-tag { color: var(--green); }
+    .act-2 .act-tag { color: var(--amber); }
+    .act-3 .act-tag { color: rgba(255,255,255,0.4); }
+
+    .act-tag::before {
+      content: '';
+      width: 20px; height: 1px;
+      background: currentColor;
+    }
+
+    .act-headline {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+    .act-3 .act-headline { color: var(--white); }
+
+    .act-body {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-2);
+    }
+    .act-3 .act-body { color: rgba(255,255,255,0.65); }
+    .act-body p { margin-bottom: 16px; }
+    .act-body p:last-child { margin-bottom: 0; }
+
+    .act-body .highlight {
+      font-family: 'Inter', sans-serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1.1em;
+      color: #0D3D2B;
+      display: block;
+      margin: 20px 0;
+      padding: 16px 20px;
+      border-left: 3px solid var(--green);
+      background: rgba(16,185,129,0.07);
+      border-radius: 0 var(--r-md) var(--r-md) 0;
+    }
+    .act-3 .act-body .highlight {
+      color: var(--white);
+      background: rgba(16,185,129,0.08);
+      border-color: var(--green);
+    }
+
+    .act-product-callout {
+      margin-top: 28px;
+      padding: 20px 24px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: var(--r-xl);
+    }
+    .act-product-callout p {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.8);
+      margin: 0;
+    }
+    .act-product-callout .rate-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+    .act-product-callout .rate-line:last-child { border-bottom: none; }
+    .rate-val { font-size: 14px; font-weight: 500; }
+    .rate-val.low { color: var(--red); }
+    .rate-val.ok { color: var(--green); }
+    .rate-val.bench { color: rgba(255,255,255,0.35); font-size: 11px; }
+    .act-product-callout .callout-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .act-brand-close {
+      margin-top: 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--white);
+    }
+
+    /* ── CHAOS VISUAL ── */
+    .chaos-visual {
+      position: relative;
+      height: 320px;
+    }
+    .tab-card {
+      position: absolute;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--text-2);
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+    .tab-card .tab-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── SPREADSHEET VISUAL ── */
+    .sheet-visual {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .sheet-header {
+      background: var(--bg-2);
+      padding: 10px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .sheet-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .sheet-header span { font-size: 12px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+    .sheet-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+    }
+    .sheet-row:last-child { border-bottom: none; }
+    .sheet-cell {
+      padding: 7px 10px;
+      border-right: 1px solid var(--border);
+      color: var(--text-2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sheet-cell:last-child { border-right: none; }
+    .sheet-cell.head { background: var(--bg-2); font-weight: 600; color: var(--text-3); font-size: 10px; letter-spacing: 0.04em; }
+    .sheet-cell.strike { text-decoration: line-through; color: var(--text-3); }
+    .sheet-cell.c1 { background: rgba(239,68,68,0.07); }
+    .sheet-cell.c2 { background: rgba(245,158,11,0.07); }
+    .sheet-cell.c3 { background: rgba(16,185,129,0.07); }
+    .sheet-cell.c4 { background: rgba(139,92,246,0.07); }
+    .sheet-status {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 20px;
+      font-size: 9px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 900px) {
+      .section-act { padding: 64px 20px; }
+      .act-inner { grid-template-columns: 1fr; gap: 40px; }
+      .act-inner.reverse { direction: ltr; }
+      .act-number { display: none; }
+      .chaos-visual { height: 240px; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 5. FEATURE PILLARS                                  */
+    /* ─────────────────────────────────────────────────── */
+    .section-features {
+      background: var(--white);
+      padding: 96px 40px;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .section-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .section-eyebrow::before, .section-eyebrow::after {
+      content: '';
+      width: 20px; height: 1px;
+      background: var(--blue);
+      opacity: 0.5;
+    }
+    .section-title {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--navy);
+    }
+    .section-title-dark { color: var(--white); }
+    .section-sub {
+      font-size: 17px;
+      color: var(--text-2);
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-2xl);
+      padding: 36px 32px;
+      transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+    }
+    .feature-card.blue::before { background: var(--blue); }
+    .feature-card.purple::before { background: var(--purple); }
+    .feature-card.green::before { background: var(--green); }
+    .feature-card:hover {
+      border-color: var(--gray-3);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+    .feature-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--r-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .feature-icon.blue { background: var(--blue-light); color: var(--blue); }
+    .feature-icon.purple { background: rgba(139,92,246,0.1); color: var(--purple); }
+    .feature-icon.green { background: rgba(16,185,129,0.1); color: var(--green); }
+    .feature-icon svg { width: 22px; height: 22px; }
+    .feature-badges {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
+    .badge-pro { background: var(--blue-light); color: var(--blue); }
+    .badge-unique { background: rgba(16,185,129,0.1); color: var(--green); }
+    .feature-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+    }
+    .feature-body {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-2);
+    }
+    @media (max-width: 900px) {
+      .section-features { padding: 64px 20px; }
+      .features-grid { grid-template-columns: 1fr; max-width: 480px; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 6. HOW IT WORKS                                     */
+    /* ─────────────────────────────────────────────────── */
+    .section-howitworks {
+      background: var(--bg);
+      padding: 96px 40px;
+    }
+    .steps-grid {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 32px;
+      left: calc(16.66% + 24px);
+      right: calc(16.66% + 24px);
+      height: 1px;
+      background: linear-gradient(90deg, var(--border) 0%, var(--green) 50%, var(--border) 100%);
+    }
+    .step-item {
+      padding: 0 32px;
+      text-align: center;
+      position: relative;
+    }
+    .step-item:first-child { padding-left: 0; }
+    .step-item:last-child { padding-right: 0; }
+    .step-num-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .step-num {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      position: relative;
+      z-index: 1;
+      box-shadow: var(--shadow-sm);
+    }
+    .step-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .step-body {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-2);
+    }
+    @media (max-width: 768px) {
+      .section-howitworks { padding: 64px 20px; }
+      .steps-grid { grid-template-columns: 1fr; gap: 40px; }
+      .steps-grid::before { display: none; }
+      .step-item { padding: 0; text-align: left; display: flex; gap: 20px; align-items: flex-start; }
+      .step-num-wrap { margin-bottom: 0; flex-shrink: 0; }
+      .step-num { width: 48px; height: 48px; font-size: 18px; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 7. DASHBOARD MOCKUP                                 */
+    /* ─────────────────────────────────────────────────── */
+    .section-mockup {
+      background: var(--navy);
+      background-image: var(--grid-texture);
+      background-size: var(--grid-size);
+      padding: 96px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .section-mockup::after {
+      content: '';
+      position: absolute;
+      bottom: -150px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .mockup-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .dashboard-card {
+      background: var(--navy-mid);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--r-2xl);
+      padding: 32px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+      position: relative;
+      z-index: 1;
+    }
+    .dashboard-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .dash-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .dash-period {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.05);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .dashboard-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .metric-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--r-xl);
+      padding: 20px;
+      transition: background 200ms ease;
+    }
+    .metric-card:hover { background: rgba(255,255,255,0.07); }
+    .metric-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 10px;
+    }
+    .metric-val {
+      font-family: 'Inter', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .metric-val span { font-size: 18px; font-weight: 400; color: rgba(255,255,255,0.5); }
+    .metric-delta {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+    .metric-delta.up { background: rgba(16,185,129,0.15); color: var(--green); }
+    .metric-delta.neutral { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.4); }
+
+    .funnel-chart {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--r-xl);
+      padding: 24px;
+    }
+    .funnel-chart-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 20px;
+    }
+    .funnel-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .funnel-row:last-child { margin-bottom: 0; }
+    .funnel-stage-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      width: 96px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .funnel-bar-wrap {
+      flex: 1;
+      height: 28px;
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      position: relative;
+    }
+    .funnel-bar-fill {
+      height: 100%;
+      border-radius: var(--r-sm);
+      transition: width 1.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+      width: 0;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+    }
+    .funnel-bar-fill .fill-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+      white-space: nowrap;
+    }
+    .funnel-rate {
+      width: 80px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .funnel-rate-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .funnel-rate-bench {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    @media (max-width: 900px) {
+      .section-mockup { padding: 64px 20px; }
+      .dashboard-metrics { grid-template-columns: repeat(2, 1fr); }
+      .funnel-stage-label { width: 70px; font-size: 10px; }
+    }
+    @media (max-width: 480px) {
+      .dashboard-metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .dashboard-card { padding: 20px; }
+      .metric-val { font-size: 28px; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 8. PRICING                                          */
+    /* ─────────────────────────────────────────────────── */
+    .section-pricing {
+      background: var(--white);
+      padding: 96px 40px;
+    }
+    .pricing-anchor {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-3);
+      margin-top: -32px;
+      margin-bottom: 56px;
+    }
+    .pricing-anchor strong { color: var(--text-2); }
+    .pricing-grid {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .pricing-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-2xl);
+      padding: 36px 32px;
+      position: relative;
+      transition: box-shadow 200ms ease, transform 200ms ease;
+    }
+    .pricing-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+    .pricing-card.featured {
+      border-color: var(--blue);
+      border-width: 2px;
+      background: var(--navy);
+      color: var(--white);
+    }
+    .pricing-card.featured:hover { box-shadow: 0 20px 60px rgba(37,99,235,0.25); }
+    .pricing-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--blue);
+      color: var(--white);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .pricing-tier {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 12px;
+    }
+    .pricing-card.featured .pricing-tier { color: rgba(255,255,255,0.5); }
+    .pricing-price {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .price-currency {
+      font-family: 'Inter', sans-serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--text-2);
+    }
+    .pricing-card.featured .price-currency { color: rgba(255,255,255,0.6); }
+    .price-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--navy);
+    }
+    .pricing-card.featured .price-num { color: var(--white); }
+    .price-period {
+      font-size: 14px;
+      color: var(--text-3);
+    }
+    .pricing-card.featured .price-period { color: rgba(255,255,255,0.45); }
+    .pricing-desc {
+      font-size: 14px;
+      color: var(--text-2);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .pricing-card.featured .pricing-desc { color: rgba(255,255,255,0.6); }
+    .pricing-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 24px;
+    }
+    .pricing-card.featured .pricing-divider { background: rgba(255,255,255,0.1); }
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pricing-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.4;
+    }
+    .pricing-card.featured .pricing-features li { color: rgba(255,255,255,0.75); }
+    .pricing-features li svg { flex-shrink: 0; margin-top: 2px; }
+    .pricing-features .check { color: var(--green); }
+    .pricing-features .dash { color: var(--text-3); }
+    .pricing-card.featured .pricing-features .check { color: var(--green); }
+    .btn-pricing {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 13px 24px;
+      border-radius: var(--r-xl);
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 150ms ease;
+    }
+    .btn-pricing-outline {
+      border: 1.5px solid var(--border);
+      color: var(--text);
+    }
+    .btn-pricing-outline:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+    .btn-pricing-primary {
+      background: var(--blue);
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    }
+    .btn-pricing-primary:hover { background: var(--blue-h); box-shadow: 0 6px 20px rgba(37,99,235,0.4); transform: translateY(-1px); }
+    .btn-pricing-ghost {
+      border: 1.5px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5);
+    }
+    .btn-pricing-ghost:hover { border-color: rgba(255,255,255,0.35); color: rgba(255,255,255,0.8); }
+    .pricing-note {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-3);
+    }
+    .pricing-card.featured .pricing-note { color: rgba(255,255,255,0.3); }
+    .pricing-footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: var(--text-3);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+    @media (max-width: 900px) {
+      .section-pricing { padding: 64px 20px; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+      .pricing-card.featured { order: -1; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 9. FAQ                                              */
+    /* ─────────────────────────────────────────────────── */
+    .section-faq {
+      background: var(--bg);
+      padding: 96px 40px;
+    }
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--r-2xl);
+      overflow: hidden;
+      background: var(--white);
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 28px;
+      cursor: pointer;
+      gap: 16px;
+      transition: background 150ms ease;
+      user-select: none;
+      min-height: 44px;
+    }
+    .faq-q:hover { background: var(--bg); }
+    .faq-q.open { background: var(--bg); }
+    .faq-q-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--navy);
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+    }
+    .faq-icon {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--bg-2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 150ms ease, transform 200ms ease;
+    }
+    .faq-q.open .faq-icon { background: var(--blue-light); transform: rotate(45deg); }
+    .faq-icon svg { width: 12px; height: 12px; color: var(--gray); }
+    .faq-q.open .faq-icon svg { color: var(--blue); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+    }
+    .faq-a.open { max-height: 600px; }
+    .faq-a-inner {
+      padding: 0 28px 24px;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-2);
+    }
+    .faq-a-inner p { margin-bottom: 12px; }
+    .faq-a-inner p:last-child { margin-bottom: 0; }
+    .faq-a-inner .mono-stat {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      padding: 14px 16px;
+      background: var(--bg);
+      border-radius: var(--r-lg);
+      margin: 12px 0;
+      color: var(--text);
+      line-height: 1.8;
+      border-left: 3px solid var(--blue);
+    }
+    @media (max-width: 640px) {
+      .section-faq { padding: 64px 20px; }
+      .faq-q { padding: 18px 20px; }
+      .faq-a-inner { padding: 0 20px 18px; }
+      .faq-q-text { font-size: 15px; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 10. FINAL CTA                                       */
+    /* ─────────────────────────────────────────────────── */
+    .section-cta {
+      background: var(--navy);
+      background-image: var(--grid-texture);
+      background-size: var(--grid-size);
+      padding: 120px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .section-cta::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(16,185,129,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-headline {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      color: var(--white);
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .cta-sub {
+      font-size: 18px;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 40px;
+      line-height: 1.5;
+    }
+    .cta-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .cta-trust {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.25);
+    }
+    .cta-trust .sep {
+      margin: 0 10px;
+      opacity: 0.4;
+    }
+    @media (max-width: 640px) {
+      .section-cta { padding: 80px 20px; }
+    }
+
+    /* ─────────────────────────────────────────────────── */
+    /* 11. FOOTER                                          */
+    /* ─────────────────────────────────────────────────── */
+    .footer {
+      background: var(--navy-mid);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 48px 40px;
+    }
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 40px;
+    }
+    .footer-brand {}
+    .footer-logo {
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .footer-tagline {
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
+      max-width: 260px;
+      line-height: 1.5;
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      transition: color 150ms ease;
+    }
+    .footer-links a:hover { color: rgba(255,255,255,0.8); }
+    .footer-bottom {
+      max-width: 1120px;
+      margin: 32px auto 0;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .footer-copy {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+    }
+    .gdpr-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 4px 10px;
+    }
+    .gdpr-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    @media (max-width: 640px) {
+      .footer { padding: 40px 20px; }
+      .footer-inner { flex-direction: column; gap: 24px; }
+      .footer-links { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─────────────────────────────────── NAV ── -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">Job Funnel</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/login" class="nav-login">Log in</a>
+    <a href="#" class="nav-cta">Start free</a>
+    <div class="nav-hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+<div class="nav-mobile-menu" id="mobile-menu">
+  <a href="#features" onclick="toggleMenu()">Features</a>
+  <a href="#pricing" onclick="toggleMenu()">Pricing</a>
+  <a href="#faq" onclick="toggleMenu()">FAQ</a>
+  <a href="/login" onclick="toggleMenu()">Log in</a>
+  <a href="#" class="nav-cta">Start free — no credit card</a>
+</div>
+
+<!-- ─────────────────────────────────── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <!-- Left: Copy -->
+    <div class="hero-content">
+      <div class="hero-label">Job search analytics · Built for Europe</div>
+      <h1 class="hero-headline f-display">
+        <span class="num">47</span> applications.<br>
+        <span class="num-red">3</span> screening calls.<br>
+        <span class="line-3">You still don't know why.</span>
+      </h1>
+      <p class="hero-subhead">
+        Job Funnel shows you exactly where your job search breaks down — and what to do about it.
+      </p>
+      <div class="hero-actions">
+        <a href="#" class="btn-primary">
+          Start free — no credit card
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+        <a href="#how-it-works" class="btn-secondary">
+          See how it works
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v10M4 9l4 4 4-4"/></svg>
+        </a>
+      </div>
+      <div class="hero-trust f-mono">
+        <span>Built for DACH + Benelux</span>
+        <span class="dot"></span>
+        <span>Works across the EU</span>
+        <span class="dot"></span>
+        <span>GDPR-compliant</span>
+      </div>
+    </div>
+
+    <!-- Right: Funnel visualization -->
+    <div class="funnel-viz">
+      <svg class="funnel-svg" viewBox="0 0 360 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Stage labels (left) -->
+        <text x="0" y="52" class="funnel-bar-label" font-family="'DM Mono',monospace" font-size="10" fill="rgba(255,255,255,0.4)" text-anchor="start">APPLIED</text>
+        <text x="0" y="162" class="funnel-bar-label" font-family="'DM Mono',monospace" font-size="10" fill="rgba(255,255,255,0.4)" text-anchor="start">SCREENING</text>
+        <text x="0" y="272" class="funnel-bar-label" font-family="'DM Mono',monospace" font-size="10" fill="rgba(255,255,255,0.4)" text-anchor="start">INTERVIEW</text>
+        <text x="0" y="382" class="funnel-bar-label" font-family="'DM Mono',monospace" font-size="10" fill="rgba(255,255,255,0.4)" text-anchor="start">OFFER</text>
+
+        <!-- Applied bar — full width -->
+        <rect x="80" y="34" width="272" height="36" rx="4" fill="#2563EB" opacity="0.9">
+          <animate attributeName="width" from="0" to="272" dur="0.8s" begin="0.8s" fill="freeze" calcMode="spline" keySplines="0.34 1.56 0.64 1"/>
+        </rect>
+        <text x="94" y="57" font-family="'Inter',sans-serif" font-size="18" font-weight="700" fill="white">47</text>
+
+        <!-- Conversion arrow: 17% -->
+        <text x="340" y="88" font-family="'DM Mono',monospace" font-size="10" fill="#EF4444" text-anchor="end" opacity="0.9">→ 17%</text>
+        <line x1="216" y1="70" x2="216" y2="108" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Lost bar (red ghost) -->
+        <rect x="80" y="74" width="272" height="8" rx="2" fill="rgba(239,68,68,0.15)"/>
+        <rect x="80" y="74" width="227" height="8" rx="2" fill="rgba(239,68,68,0.25)">
+          <animate attributeName="width" from="0" to="227" dur="0.8s" begin="1.0s" fill="freeze"/>
+        </rect>
+        <text x="340" y="81" font-family="'DM Mono',monospace" font-size="9" fill="rgba(239,68,68,0.5)" text-anchor="end">−40 lost</text>
+
+        <!-- Screening bar — 17% of 272 = ~46px -->
+        <rect x="80" y="144" width="46" height="36" rx="4" fill="#8B5CF6" opacity="0.85">
+          <animate attributeName="width" from="0" to="46" dur="0.8s" begin="1.1s" fill="freeze" calcMode="spline" keySplines="0.34 1.56 0.64 1"/>
+        </rect>
+        <text x="94" y="167" font-family="'Inter',sans-serif" font-size="18" font-weight="700" fill="white">8</text>
+
+        <!-- Conversion arrow: 37% -->
+        <text x="340" y="198" font-family="'DM Mono',monospace" font-size="10" fill="#F59E0B" text-anchor="end" opacity="0.9">→ 37%</text>
+        <line x1="103" y1="180" x2="103" y2="218" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Lost at screening -->
+        <rect x="80" y="184" width="46" height="8" rx="2" fill="rgba(245,158,11,0.15)"/>
+        <rect x="80" y="184" width="29" height="8" rx="2" fill="rgba(245,158,11,0.25)">
+          <animate attributeName="width" from="0" to="29" dur="0.7s" begin="1.3s" fill="freeze"/>
+        </rect>
+        <text x="340" y="191" font-family="'DM Mono',monospace" font-size="9" fill="rgba(245,158,11,0.5)" text-anchor="end">−5 lost</text>
+
+        <!-- Interviews bar — 3 apps = ~17px -->
+        <rect x="80" y="254" width="17" height="36" rx="4" fill="#F59E0B" opacity="0.85">
+          <animate attributeName="width" from="0" to="17" dur="0.8s" begin="1.4s" fill="freeze" calcMode="spline" keySplines="0.34 1.56 0.64 1"/>
+        </rect>
+        <text x="94" y="277" font-family="'Inter',sans-serif" font-size="18" font-weight="700" fill="white">3</text>
+
+        <!-- Conversion arrow: 33% -->
+        <text x="340" y="308" font-family="'DM Mono',monospace" font-size="10" fill="rgba(255,255,255,0.4)" text-anchor="end">→ 33%</text>
+        <line x1="88" y1="290" x2="88" y2="328" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Offer bar — 1 app -->
+        <rect x="80" y="364" width="9" height="36" rx="3" fill="#10B981" opacity="0.9">
+          <animate attributeName="width" from="0" to="9" dur="0.6s" begin="1.6s" fill="freeze"/>
+        </rect>
+        <text x="94" y="387" font-family="'Inter',sans-serif" font-size="18" font-weight="700" fill="white">1</text>
+
+        <!-- Benchmark line for applied -->
+        <line x1="80" y1="164" x2="160" y2="164" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="163" y="168" font-family="'DM Mono',monospace" font-size="9" fill="rgba(255,255,255,0.25)">bench 20%</text>
+
+        <!-- Summary callout -->
+        <rect x="80" y="415" width="272" height="20" rx="4" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.2)" stroke-width="1"/>
+        <text x="216" y="429" font-family="'DM Mono',monospace" font-size="10" fill="rgba(239,68,68,0.7)" text-anchor="middle">screening rate 9% · benchmark 20%</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="scroll-hint" onclick="document.getElementById('stats').scrollIntoView({behavior:'smooth'})">
+    <span>scroll</span>
+    <div class="scroll-chevron"></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── STATS BAR ── -->
+<section class="stats-bar" id="stats">
+  <div class="stats-bar-inner">
+    <p class="stats-label">The problem is real. The data confirms it.</p>
+    <div class="stats-grid">
+      <div class="stat-item reveal">
+        <div class="stat-num">10M<sup>+</sup></div>
+        <p class="stat-desc">ICT specialists in Europe change jobs every year</p>
+      </div>
+      <div class="stat-item reveal reveal-delay-2">
+        <div class="stat-num">6/10</div>
+        <p class="stat-desc">Applications never reach a human reviewer</p>
+      </div>
+      <div class="stat-item reveal reveal-delay-4">
+        <div class="stat-num">57<sup>%</sup></div>
+        <p class="stat-desc">Of candidates abandon applications mid-process</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── PROBLEM: ACT 1 ── -->
+<section class="section-act act-1" id="problem">
+  <span class="act-number f-display">01</span>
+  <div class="act-inner">
+    <!-- Copy -->
+    <div class="reveal">
+      <div class="act-tag">Act one</div>
+      <h2 class="act-headline f-display">You're running a €100,000 search on a €0 system.</h2>
+      <div class="act-body">
+        <p>You have 40 browser tabs open. A spreadsheet with 60 rows that made sense three weeks ago. A notes file that is technically organised but practically useless.</p>
+        <p>You know you applied to that company in Amsterdam. You think it was for a Senior PM role. You're not sure what stage you're at or whether they even opened your CV.</p>
+        <p>Meanwhile, you're writing the same cover letter for the fourth time this week. From scratch. Again.</p>
+        <p>This is how most tech professionals run their job search. Not because they're not smart — they run data pipelines at work, track OKRs, instrument everything they ship.</p>
+        <p>It's because nobody handed them a system built for how the job search actually works.</p>
+      </div>
+    </div>
+    <!-- Visual: Chaos tabs -->
+    <div class="chaos-visual reveal reveal-delay-3">
+      <div class="tab-card" style="top:0;left:20px;transform:rotate(-3deg)">
+        <span class="tab-dot" style="background:#2563EB"></span>
+        Spotify – Senior PM – Amsterdam
+      </div>
+      <div class="tab-card" style="top:30px;left:140px;transform:rotate(2deg)">
+        <span class="tab-dot" style="background:#10B981"></span>
+        N26 – Product Lead – Berlin
+      </div>
+      <div class="tab-card" style="top:80px;left:10px;transform:rotate(-1deg)">
+        <span class="tab-dot" style="background:#F59E0B"></span>
+        Booking.com – PM II – Amsterdam ??
+      </div>
+      <div class="tab-card" style="top:110px;left:160px;transform:rotate(3deg)">
+        <span class="tab-dot" style="background:#8B5CF6"></span>
+        Zalando – Group PM – Berlin
+      </div>
+      <div class="tab-card" style="top:164px;left:30px;transform:rotate(-2deg);opacity:0.7">
+        <span class="tab-dot" style="background:#64748B"></span>
+        cover_letter_final_v3_REAL.docx
+      </div>
+      <div class="tab-card" style="top:192px;left:180px;transform:rotate(1deg);opacity:0.6">
+        <span class="tab-dot" style="background:#EF4444"></span>
+        job_search.xlsx — 60 rows
+      </div>
+      <div class="tab-card" style="top:248px;left:50px;transform:rotate(-2deg);opacity:0.5;font-style:italic">
+        <span class="tab-dot" style="background:#94A3B8"></span>
+        Did I follow up on this one?
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── PROBLEM: ACT 2 ── -->
+<section class="section-act act-2">
+  <span class="act-number f-display">02</span>
+  <div class="act-inner reverse">
+    <!-- Visual: Broken spreadsheet -->
+    <div class="sheet-visual reveal">
+      <div class="sheet-header">
+        <div class="dot" style="background:#EF4444"></div>
+        <div class="dot" style="background:#F59E0B"></div>
+        <div class="dot" style="background:#10B981"></div>
+        <span>job_search_v4_FINAL.xlsx</span>
+      </div>
+      <div class="sheet-row">
+        <div class="sheet-cell head">Company</div>
+        <div class="sheet-cell head">Role</div>
+        <div class="sheet-cell head">Status</div>
+        <div class="sheet-cell head">Notes</div>
+      </div>
+      <div class="sheet-row">
+        <div class="sheet-cell c1">Spotify</div>
+        <div class="sheet-cell c1">Sr PM</div>
+        <div class="sheet-cell c1"><span class="sheet-status" style="background:rgba(239,68,68,0.1);color:#EF4444">???</span></div>
+        <div class="sheet-cell c1 strike">applied?</div>
+      </div>
+      <div class="sheet-row">
+        <div class="sheet-cell c2">N26</div>
+        <div class="sheet-cell c2">PL</div>
+        <div class="sheet-cell c2"><span class="sheet-status" style="background:rgba(245,158,11,0.12);color:#D97706">yellow</span></div>
+        <div class="sheet-cell c2">follow up</div>
+      </div>
+      <div class="sheet-row">
+        <div class="sheet-cell c3 strike">Booking</div>
+        <div class="sheet-cell c3 strike">PM II</div>
+        <div class="sheet-cell c3"><span class="sheet-status" style="background:rgba(16,185,129,0.1);color:#10B981">green?</span></div>
+        <div class="sheet-cell c3 strike">dunno</div>
+      </div>
+      <div class="sheet-row">
+        <div class="sheet-cell c4">Zalando</div>
+        <div class="sheet-cell c4">GPM</div>
+        <div class="sheet-cell c4"><span class="sheet-status" style="background:rgba(139,92,246,0.1);color:#8B5CF6">purple</span></div>
+        <div class="sheet-cell c4">check email</div>
+      </div>
+      <div class="sheet-row">
+        <div class="sheet-cell" style="opacity:0.4">Adyen</div>
+        <div class="sheet-cell" style="opacity:0.4">??</div>
+        <div class="sheet-cell" style="opacity:0.4">blue2</div>
+        <div class="sheet-cell" style="opacity:0.4">idk</div>
+      </div>
+      <div class="sheet-row" style="opacity:0.3">
+        <div class="sheet-cell">…</div>
+        <div class="sheet-cell">…</div>
+        <div class="sheet-cell">…</div>
+        <div class="sheet-cell">55 more rows</div>
+      </div>
+    </div>
+    <!-- Copy -->
+    <div class="reveal reveal-delay-2">
+      <div class="act-tag">Act two</div>
+      <h2 class="act-headline f-display">You've tried to fix it. It didn't stick.</h2>
+      <div class="act-body">
+        <p>You built a spreadsheet. It worked for two weeks. Then you had 40 rows, six colour codes, and no idea what any of the statuses meant anymore.</p>
+        <p>You tried keeping track in your notes app. You added columns. You added tabs. You spent more time maintaining the system than actually running your search.</p>
+        <p>You told yourself you'd get organised once you had more applications. That was three months and thirty applications ago.</p>
+        <span class="highlight">The problem isn't discipline. The problem is none of these approaches treat your job search as what it actually is: a funnel — with measurable stages, conversion rates, and diagnosable leaks.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── PROBLEM: ACT 3 ── -->
+<section class="section-act act-3">
+  <span class="act-number f-display">03</span>
+  <div class="act-inner">
+    <!-- Copy -->
+    <div class="reveal">
+      <div class="act-tag">Act three</div>
+      <h2 class="act-headline f-display">What if you could actually see where your funnel breaks?</h2>
+      <div class="act-body">
+        <p>What if you could open a dashboard and see:</p>
+        <div class="act-product-callout">
+          <span class="callout-label">Your funnel — this week</span>
+          <div class="rate-line">
+            <span>Applied → Screening</span>
+            <span><span class="rate-val low">9%</span> <span class="rate-val bench">bench 18%</span></span>
+          </div>
+          <div class="rate-line">
+            <span>Screening → Interviewing</span>
+            <span><span class="rate-val ok">55%</span> <span class="rate-val bench">bench 50%</span></span>
+          </div>
+          <div class="rate-line" style="border-bottom:none">
+            <span>Interviewing → Offer</span>
+            <span><span class="rate-val" style="color:var(--amber)">22%</span> <span class="rate-val bench">bench 28%</span></span>
+          </div>
+        </div>
+        <p>The gap is most likely at the CV or targeting layer — not your interview performance.</p>
+        <p>And then do something about it: run two CV versions against the same role type and watch which one gets callbacks.</p>
+        <p>That's not a career coach. That's not motivation. That's a measurement system — built for how tech professionals already think.</p>
+        <div class="act-brand-close">That's Job Funnel.</div>
+      </div>
+    </div>
+    <!-- Visual: mini funnel mockup -->
+    <div class="reveal reveal-delay-3">
+      <svg viewBox="0 0 300 320" style="width:100%;max-width:300px;margin:0 auto;display:block">
+        <text x="0" y="20" font-family="'DM Mono',monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.1em">APPLIED</text>
+        <rect x="0" y="28" width="300" height="28" rx="3" fill="#2563EB" opacity="0.8"/>
+        <text x="8" y="47" font-family="'Inter',sans-serif" font-size="16" font-weight="700" fill="white">42</text>
+        <text x="280" y="47" font-family="'DM Mono',monospace" font-size="9" fill="rgba(255,255,255,0.5)" text-anchor="end">100%</text>
+
+        <text x="0" y="82" font-family="'DM Mono',monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.1em">SCREENING</text>
+        <rect x="0" y="90" width="54" height="28" rx="3" fill="#8B5CF6" opacity="0.8"/>
+        <text x="8" y="109" font-family="'Inter',sans-serif" font-size="16" font-weight="700" fill="white">8</text>
+        <text x="58" y="109" font-family="'DM Mono',monospace" font-size="10" fill="#EF4444">→ 19%</text>
+
+        <text x="0" y="144" font-family="'DM Mono',monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.1em">INTERVIEWING</text>
+        <rect x="0" y="152" width="28" height="28" rx="3" fill="#F59E0B" opacity="0.85"/>
+        <text x="8" y="171" font-family="'Inter',sans-serif" font-size="16" font-weight="700" fill="white">4</text>
+        <text x="32" y="171" font-family="'DM Mono',monospace" font-size="10" fill="rgba(255,255,255,0.5)">→ 50%</text>
+
+        <text x="0" y="206" font-family="'DM Mono',monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.1em">OFFER</text>
+        <rect x="0" y="214" width="14" height="28" rx="3" fill="#10B981" opacity="0.9"/>
+        <text x="18" y="233" font-family="'DM Mono',monospace" font-size="10" fill="rgba(255,255,255,0.5)">→ 25%</text>
+
+        <!-- CV versions comparison -->
+        <rect x="0" y="272" width="300" height="40" rx="6" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+        <text x="12" y="288" font-family="'DM Mono',monospace" font-size="9" fill="rgba(255,255,255,0.4)">CV v2 Skills-first</text>
+        <rect x="200" y="278" width="44" height="10" rx="2" fill="#EF4444" opacity="0.7"/>
+        <text x="248" y="288" font-family="'DM Mono',monospace" font-size="9" fill="rgba(239,68,68,0.7)">11%</text>
+        <text x="12" y="305" font-family="'DM Mono',monospace" font-size="9" fill="rgba(255,255,255,0.4)">CV v3 Impact-first</text>
+        <rect x="200" y="295" width="76" height="10" rx="2" fill="#10B981" opacity="0.7"/>
+        <text x="280" y="305" font-family="'DM Mono',monospace" font-size="9" fill="rgba(16,185,129,0.7)">19%</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── FEATURES ── -->
+<section class="section-features" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">The system</div>
+      <h2 class="section-title f-display">Three tools. One system.<br>Zero guessing.</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card blue reveal reveal-delay-1">
+        <div class="feature-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="feature-badges"><span class="badge badge-pro">Pro</span></div>
+        <h3 class="feature-title f-display">Know your numbers. Fix the right thing.</h3>
+        <p class="feature-body">Stage-by-stage conversion rates, time-in-stage analysis, and benchmarks against EU market data. You see exactly which stage is killing your search — not just a total count.</p>
+      </div>
+      <div class="feature-card purple reveal reveal-delay-2">
+        <div class="feature-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <div class="feature-badges"><span class="badge badge-pro">Pro</span></div>
+        <h3 class="feature-title f-display">Build a story bank that compounds.</h3>
+        <p class="feature-body">Store your interview answers in STAR format, tagged by competency. Write once, refine after every interview, reuse forever. Walk into every call with the right story ready — not a blank.</p>
+      </div>
+      <div class="feature-card green reveal reveal-delay-3">
+        <div class="feature-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+          </svg>
+        </div>
+        <div class="feature-badges"><span class="badge badge-pro">Pro</span><span class="badge badge-unique">Unique</span></div>
+        <h3 class="feature-title f-display">Find out which CV actually gets responses.</h3>
+        <p class="feature-body">Tag applications with a CV version and track outcomes per version. See which CV gets more screening calls. The only job search tool that lets you run a proper experiment on your own application.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── HOW IT WORKS ── -->
+<section class="section-howitworks" id="how-it-works">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">The process</div>
+      <h2 class="section-title f-display">From chaos to clarity<br>in three steps.</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-item reveal reveal-delay-1">
+        <div class="step-num-wrap">
+          <div class="step-num f-display">1</div>
+        </div>
+        <div>
+          <h3 class="step-title f-display">Build your pipeline</h3>
+          <p class="step-body">Add applications in seconds. Seven stages from Saved to Offer. Drag to move. Full visibility across every company in one place.</p>
+        </div>
+      </div>
+      <div class="step-item reveal reveal-delay-2">
+        <div class="step-num-wrap">
+          <div class="step-num f-display">2</div>
+        </div>
+        <div>
+          <h3 class="step-title f-display">Read your funnel</h3>
+          <p class="step-body">Conversion rates update automatically. See where applications stall. Compare your rates against EU market benchmarks and understand exactly what to fix.</p>
+        </div>
+      </div>
+      <div class="step-item reveal reveal-delay-3">
+        <div class="step-num-wrap">
+          <div class="step-num f-display">3</div>
+        </div>
+        <div>
+          <h3 class="step-title f-display">Prepare smarter</h3>
+          <p class="step-body">Write STAR stories as you go. A/B test your CV versions. Walk into every interview with data, not hope — and a story bank ready to deploy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── DASHBOARD MOCKUP ── -->
+<section class="section-mockup">
+  <div class="mockup-inner">
+    <div class="section-header reveal" style="margin-bottom:48px">
+      <div class="section-eyebrow" style="color:rgba(255,255,255,0.4)">
+        <span style="background:rgba(255,255,255,0.08);display:inline-block;width:20px;height:1px;opacity:0.5"></span>
+        Product preview
+        <span style="background:rgba(255,255,255,0.08);display:inline-block;width:20px;height:1px;opacity:0.5"></span>
+      </div>
+      <h2 class="section-title f-display section-title-dark">Your search analytics,<br>in real time.</h2>
+    </div>
+    <div class="dashboard-card reveal">
+      <div class="dashboard-topbar">
+        <span class="dash-title">Funnel Analytics</span>
+        <span class="dash-period f-mono">Last 30 days · DACH + Benelux</span>
+      </div>
+      <div class="dashboard-metrics">
+        <div class="metric-card">
+          <div class="metric-label">Applications</div>
+          <div class="metric-val f-display">42</div>
+          <span class="metric-delta up">↑ +8 this week</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Screening Rate</div>
+          <div class="metric-val f-display">18<span>%</span></div>
+          <span class="metric-delta up">↑ +6% vs last month</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Active Interviews</div>
+          <div class="metric-val f-display">4</div>
+          <span class="metric-delta neutral">→ steady</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">CV Versions</div>
+          <div class="metric-val f-display">2</div>
+          <span class="metric-delta up" style="background:rgba(139,92,246,0.15);color:#A78BFA">A/B active</span>
+        </div>
+      </div>
+      <div class="funnel-chart">
+        <div class="funnel-chart-title f-mono">Stage Conversion Funnel</div>
+        <div class="funnel-row">
+          <span class="funnel-stage-label f-mono">Applied</span>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar-fill" style="background:#2563EB;width:0" data-width="100%">
+              <span class="fill-label">42 applications</span>
+            </div>
+          </div>
+          <div class="funnel-rate"><div class="funnel-rate-val" style="color:rgba(255,255,255,0.6)">—</div></div>
+        </div>
+        <div class="funnel-row">
+          <span class="funnel-stage-label f-mono">Screening</span>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar-fill" style="background:#8B5CF6;width:0" data-width="19%">
+              <span class="fill-label">8</span>
+            </div>
+          </div>
+          <div class="funnel-rate">
+            <div class="funnel-rate-val" style="color:#10B981">19%</div>
+            <div class="funnel-rate-bench f-mono">bench 18%</div>
+          </div>
+        </div>
+        <div class="funnel-row">
+          <span class="funnel-stage-label f-mono">Interviewing</span>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar-fill" style="background:#F59E0B;width:0" data-width="10%">
+              <span class="fill-label">4</span>
+            </div>
+          </div>
+          <div class="funnel-rate">
+            <div class="funnel-rate-val" style="color:#F59E0B">50%</div>
+            <div class="funnel-rate-bench f-mono">bench 50%</div>
+          </div>
+        </div>
+        <div class="funnel-row">
+          <span class="funnel-stage-label f-mono">Offer</span>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar-fill" style="background:#10B981;width:0" data-width="2.4%">
+              <span class="fill-label">1</span>
+            </div>
+          </div>
+          <div class="funnel-rate">
+            <div class="funnel-rate-val" style="color:rgba(255,255,255,0.4)">25%</div>
+            <div class="funnel-rate-bench f-mono">bench 28%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── PRICING ── -->
+<section class="section-pricing" id="pricing">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">Pricing</div>
+      <h2 class="section-title f-display">Less than one hour<br>with a career coach.</h2>
+    </div>
+    <p class="pricing-anchor reveal">Most searches complete in 4–6 months. Total Pro cost: <strong>€60–90.</strong></p>
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="pricing-card reveal reveal-delay-1">
+        <div class="pricing-tier f-mono">Free</div>
+        <div class="pricing-price">
+          <span class="price-currency f-display">€</span>
+          <span class="price-num f-display">0</span>
+        </div>
+        <p class="pricing-desc">Get started with no commitment. Useful for the first weeks of a search.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            5 active applications
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Kanban pipeline
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Basic stage tracking
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="dash"><line x1="4" y1="8" x2="12" y2="8"/></svg>
+            <span style="color:var(--text-3)">No funnel analytics</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="dash"><line x1="4" y1="8" x2="12" y2="8"/></svg>
+            <span style="color:var(--text-3)">No interview vault</span>
+          </li>
+        </ul>
+        <a href="#" class="btn-pricing btn-pricing-outline">Get started free</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card featured reveal reveal-delay-2">
+        <div class="pricing-badge">Most popular</div>
+        <div class="pricing-tier f-mono">Pro</div>
+        <div class="pricing-price">
+          <span class="price-currency f-display">€</span>
+          <span class="price-num f-display">15</span>
+          <span class="price-period">/month</span>
+        </div>
+        <p class="pricing-desc">The full system. Unlimited applications, analytics, story vault, and CV testing.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Unlimited applications
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Full funnel analytics
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            EU conversion benchmarks
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Interview Vault (story bank)
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            CV versioning + A/B testing
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            AI assistance
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            14-day free trial
+          </li>
+        </ul>
+        <a href="#" class="btn-pricing btn-pricing-primary">Start Pro free</a>
+        <p class="pricing-note">Cancel anytime. No lock-in.</p>
+      </div>
+
+      <!-- Team -->
+      <div class="pricing-card reveal reveal-delay-3">
+        <div class="pricing-tier f-mono">Team</div>
+        <div class="pricing-price">
+          <span class="price-currency f-display">€</span>
+          <span class="price-num f-display" style="font-size:40px;color:var(--text-3)">40+</span>
+          <span class="price-period">/month</span>
+        </div>
+        <p class="pricing-desc">Coming soon. Group benchmarking, coaching integrations, and shared story reviews.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Everything in Pro
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Team pipeline benchmarking
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Coaching integrations
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="check"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+            Group story reviews
+          </li>
+        </ul>
+        <a href="#" class="btn-pricing btn-pricing-outline">Join waitlist</a>
+      </div>
+    </div>
+    <p class="pricing-footer reveal">At EU tech salaries, one extra week of searching costs more than a full Pro cycle.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────── FAQ ── -->
+<section class="section-faq" id="faq">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">FAQ</div>
+      <h2 class="section-title f-display">Questions worth asking<br>before you sign up.</h2>
+    </div>
+    <div class="faq-list reveal">
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text f-display">Is this just another job tracker?</span>
+          <div class="faq-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></div>
+        </div>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            <p>Most job trackers give you a Kanban board and a count of how many applications you've sent. That's useful for staying organised. It's not a funnel.</p>
+            <p>Job Funnel tracks stage-by-stage conversion rates, time in stage, and lets you A/B test which CV version gets more screenings. If you've outgrown a tracker and want data that actually drives decisions, that's the difference.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text f-display">What kind of insights does it actually give me?</span>
+          <div class="faq-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></div>
+        </div>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            <p>Concrete ones. Instead of "you have 47 open applications", you see:</p>
+            <span class="mono-stat f-mono">Applied → Screening: 9% (bench: 18%) — likely CV or targeting issue<br>Screening → Interviewing: 55% (bench: 50%) — performing above average<br>Interviewing → Offer: 22% (bench: 28%) — small gap, worth reviewing</span>
+            <p>You know exactly which stage to fix. Not a guess — a diagnosis.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text f-display">I only have 5–8 applications right now. Is it too early?</span>
+          <div class="faq-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></div>
+        </div>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            <p>The free tier handles that comfortably — 5 active applications, full pipeline view, no credit card.</p>
+            <p>The honest answer: conversion analytics get meaningful at 10–15 applications. But the story bank and CV versioning are useful from day one, even with 3 applications. Starting early means your first 20 applications are producing signal, not just noise.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text f-display">How long until I actually see useful conversion data?</span>
+          <div class="faq-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></div>
+        </div>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            <p>For funnel rates: 10–15 applications across at least 3–4 stages gives you a first read. Most active searchers hit that in 2–3 weeks.</p>
+            <p>For CV A/B testing: you need enough applications on each version to trust the numbers — usually 10+ per version. We flag low-confidence results with a "not enough data" badge so you don't optimise on noise.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text f-display">I'm based in the EU — what about GDPR and my data?</span>
+          <div class="faq-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></div>
+        </div>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            <p>Job Funnel is built in Europe, for Europe. GDPR compliance is built into the data model — not bolted on afterward. Your job search data is yours, it's not sold, and it's not used to train AI models. You can export or delete everything at any time.</p>
+            <p>We'll publish a full data practices page before launch. If you have specific questions, email us directly at privacy@jobfunnel.io.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text f-display">What happens when I find a job? Do I keep paying?</span>
+          <div class="faq-icon"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></div>
+        </div>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            <p>Cancel the moment you land the role — no penalty, no retention dark patterns.</p>
+            <p>Most users complete a search in 4–6 months. When you start your next search in 2–3 years, your story bank and pipeline history will still be there. About half of our users come back when they search again — which is why we'd rather you cancel cleanly and come back than feel trapped in a subscription you're not using.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── FINAL CTA ── -->
+<section class="section-cta">
+  <div class="container">
+    <h2 class="cta-headline f-display reveal">Your search deserves<br>a system.</h2>
+    <p class="cta-sub reveal reveal-delay-2">Start free. Add your first application in 60 seconds.</p>
+    <div class="cta-actions reveal reveal-delay-3">
+      <a href="#" class="btn-primary" style="font-size:16px;padding:16px 36px">
+        Start free — no credit card
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <div class="cta-trust f-mono">
+        GDPR-compliant<span class="sep">·</span>Built in Europe<span class="sep">·</span>Cancel anytime
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────── FOOTER ── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo f-display">Job Funnel</div>
+      <p class="footer-tagline">The job search platform for tech professionals who think in funnels.</p>
+    </div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 Job Funnel. Built for Europe.</span>
+    <div class="gdpr-badge f-mono">
+      <span class="dot"></span>
+      GDPR Compliant
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── NAV SCROLL BEHAVIOR ─────────────────────────────
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 60) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  }, { passive: true });
+
+  // ── MOBILE MENU ─────────────────────────────────────
+  function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    menu.classList.toggle('open');
+  }
+
+  // ── FAQ ACCORDION ────────────────────────────────────
+  function toggleFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const isOpen = btn.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-q.open').forEach(q => {
+      q.classList.remove('open');
+      q.nextElementSibling.classList.remove('open');
+    });
+    // Open clicked (if not already open)
+    if (!isOpen) {
+      btn.classList.add('open');
+      answer.classList.add('open');
+    }
+  }
+
+  // ── SCROLL REVEAL ────────────────────────────────────
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // ── FUNNEL BAR ANIMATION ─────────────────────────────
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const fills = entry.target.querySelectorAll('.funnel-bar-fill');
+        fills.forEach((fill, i) => {
+          setTimeout(() => {
+            fill.style.width = fill.dataset.width;
+          }, i * 200 + 300);
+        });
+        barObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const dashboardCard = document.querySelector('.dashboard-card');
+  if (dashboardCard) barObserver.observe(dashboardCard);
+
+  // ── SMOOTH SCROLL FOR ANCHOR LINKS ──────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', e => {
+      const target = document.querySelector(anchor.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const menu = document.getElementById('mobile-menu');
+        if (menu.classList.contains('open')) menu.classList.remove('open');
+      }
+    });
+  });
+</script>
+</body>
+</html>

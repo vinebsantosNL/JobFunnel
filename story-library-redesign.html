@@ -1,1187 +1,1282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Story Library — Redesign Prototype</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<style>
-  * { font-family: 'Inter', sans-serif; }
-  body { background: #FAFAFA; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Library — JobFunnel OS</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue:    #2563EB;
+      --blue-h:  #1D4ED8;
+      --blue-bg: #EFF6FF;
+      --purple:  #8B5CF6;
+      --purple-bg: #F5F3FF;
+      --green:   #10B981;
+      --green-bg: #ECFDF5;
+      --amber:   #F59E0B;
+      --amber-bg: #FFFBEB;
+      --red:     #EF4444;
+      --red-bg:  #FEF2F2;
+      --gray:    #64748B;
+      --gray-bg: #F1F5F9;
+      --bg:      #F8FAFC;
+      --card:    #FFFFFF;
+      --border:  #E2E8F0;
+      --border-d:#CBD5E1;
+      --text:    #0F172A;
+      --text-2:  #475569;
+      --text-3:  #94A3B8;
+      --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-md: 0 4px 16px rgba(15,23,42,0.08), 0 2px 6px rgba(15,23,42,0.05);
+      --shadow-lg: 0 12px 40px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
+    }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 9999px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* Active nav */
-  .nav-active { background: #EFF6FF; color: #2563EB; font-weight: 600; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
 
-  /* Story card hover */
-  .story-card { transition: all 150ms ease-out; cursor: pointer; }
-  .story-card:hover { background: #F8FAFC; }
-  .story-card.active { border-left: 3px solid #2563EB; background: #EFF6FF; }
+    /* ── TOPBAR ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(248,250,252,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+    .topbar-title { font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; }
+    .topbar-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      background: var(--gray-bg);
+      color: var(--gray);
+      padding: 2px 7px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .search-trigger {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-3);
+      transition: all 150ms ease;
+      min-width: 180px;
+    }
+    .search-trigger:hover { border-color: var(--blue); color: var(--text-2); }
+    .search-trigger kbd {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      background: var(--gray-bg);
+      border: 1px solid var(--border-d);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: var(--text-3);
+      margin-left: auto;
+    }
 
-  /* Competency pill */
-  .pill { transition: all 150ms ease-out; cursor: pointer; }
-  .pill.active { background: #1E293B; color: white; }
-  .pill:not(.active):hover { background: #F1F5F9; }
+    .view-switcher {
+      display: flex;
+      background: var(--gray-bg);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .view-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 150ms ease;
+      white-space: nowrap;
+    }
+    .view-btn.active { background: var(--card); color: var(--text); box-shadow: var(--shadow-sm); }
+    .view-btn:hover:not(.active) { color: var(--text-2); }
+    .view-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-  /* STAR badge colors */
-  .badge-s { background: #DBEAFE; color: #1D4ED8; }
-  .badge-t { background: #EDE9FE; color: #6D28D9; }
-  .badge-a { background: #FEF3C7; color: #B45309; }
-  .badge-r { background: #D1FAE5; color: #065F46; }
+    .btn-new {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 150ms ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-new:hover { background: var(--blue-h); }
+    .btn-new kbd {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
 
-  /* Coverage bars */
-  .bar-fill { transition: width 600ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+    /* ── MAIN LAYOUT ── */
+    .main { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 56px); }
 
-  /* Completeness ring */
-  .ring-complete { color: #10B981; }
-  .ring-partial { color: #F59E0B; }
-  .ring-empty { color: #E2E8F0; }
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      min-width: 220px;
+      border-right: 1px solid var(--border);
+      background: var(--card);
+      padding: 16px 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+      padding: 8px 16px 4px;
+    }
+    .sidebar-item {
+      display: flex; align-items: center;
+      padding: 7px 16px;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-2);
+      transition: all 120ms ease;
+      position: relative;
+    }
+    .sidebar-item:hover { background: var(--bg); color: var(--text); }
+    .sidebar-item.active { background: var(--blue-bg); color: var(--blue); font-weight: 500; }
+    .sidebar-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 4px; bottom: 4px;
+      width: 3px;
+      background: var(--blue);
+      border-radius: 0 2px 2px 0;
+    }
+    .sidebar-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sidebar-count {
+      margin-left: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text-3);
+      background: var(--gray-bg);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+    .sidebar-divider { height: 1px; background: var(--border); margin: 8px 16px; }
 
-  /* View toggle */
-  .view-btn.active { background: #F1F5F9; }
+    /* ── CONTENT AREA ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
 
-  /* Tab underline */
-  .tab-active { border-bottom: 2px solid #2563EB; color: #2563EB; font-weight: 600; }
+    /* ── COVERAGE MATRIX ── */
+    .coverage-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .coverage-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-3);
+    }
+    .coverage-score {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-2);
+    }
+    .coverage-score span { color: var(--blue); font-weight: 500; }
+    .coverage-grid { display: flex; flex-direction: column; gap: 6px; }
+    .coverage-row { display: flex; align-items: center; gap: 8px; }
+    .coverage-category {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-2);
+      width: 88px;
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 4px;
+    }
+    .coverage-cells { display: flex; gap: 4px; flex-wrap: wrap; }
+    .coverage-cell {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 150ms ease;
+      border: 1.5px solid transparent;
+      white-space: nowrap;
+      gap: 4px;
+    }
+    .coverage-cell.filled { border-style: solid; }
+    .coverage-cell.gap {
+      background: transparent !important;
+      border-style: dashed;
+      border-color: var(--border-d);
+      color: var(--text-3);
+    }
+    .coverage-cell.gap:hover { border-color: var(--text-2); color: var(--text-2); }
+    .coverage-cell .cell-count { font-family: 'DM Mono', monospace; font-size: 9px; opacity: 0.7; }
+    .coverage-cell.active-filter { outline: 2px solid currentColor; outline-offset: 2px; }
+    .coverage-section.filter-active .coverage-cell:not(.active-filter) { opacity: 0.35; }
 
-  /* Card grid */
-  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    /* ── GALLERY VIEW ── */
+    .stories-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .stories-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-3);
+    }
+    .sort-select {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      color: var(--text-2);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      outline: none;
+    }
 
-  /* Tooltip */
-  [data-tooltip]:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1E293B;
-    color: white;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    margin-bottom: 4px;
-    pointer-events: none;
-    z-index: 50;
-  }
-  [data-tooltip] { position: relative; }
+    .stories-masonry {
+      columns: 3 260px;
+      column-gap: 16px;
+    }
 
-  /* Animated entrance */
-  @keyframes fadeSlideIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .animate-in { animation: fadeSlideIn 200ms ease-out both; }
+    /* ── STORY CARD ── */
+    .story-card {
+      break-inside: avoid;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 200ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .story-card:hover {
+      border-color: var(--border-d);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .card-accent {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      border-radius: 12px 0 0 12px;
+    }
+    .card-inner { padding: 14px 14px 14px 18px; }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; flex: 1; }
+    .card-favorite {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); padding: 2px;
+      transition: color 150ms ease, transform 150ms ease;
+      flex-shrink: 0;
+    }
+    .card-favorite:hover { color: var(--amber); transform: scale(1.2); }
+    .card-favorite.active { color: var(--amber); }
+    .card-favorite svg { width: 14px; height: 14px; display: block; }
 
-  /* Gap highlight */
-  .gap-badge { background: #FEF9C3; color: #854D0E; border: 1px solid #FDE68A; }
+    .card-preview {
+      font-size: 12px;
+      color: var(--text-2);
+      line-height: 1.55;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
-  /* Quality score ring SVG */
-  .quality-ring { transform: rotate(-90deg); transform-origin: center; }
-</style>
+    .card-star-wrap { margin-bottom: 10px; }
+    .card-star-row { display: flex; gap: 3px; }
+    .star-pip { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 3px; }
+    .star-pip-bar { height: 3px; width: 100%; border-radius: 2px; background: var(--border); }
+    .star-pip-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--text-3); letter-spacing: 0.05em; }
+
+    .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .card-competency {
+      font-size: 10px; font-weight: 500;
+      padding: 2px 8px; border-radius: 20px;
+      border: 1.5px solid transparent;
+    }
+    .card-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3); }
+
+    /* ── BOARD VIEW ── */
+    .board-container {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 16px;
+    }
+    .board-col { min-width: 250px; max-width: 270px; flex-shrink: 0; }
+    .board-col-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0 12px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: 12px;
+    }
+    .board-col-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .board-col-title { font-size: 13px; font-weight: 600; }
+    .board-col-count {
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3);
+      background: var(--gray-bg); padding: 1px 6px; border-radius: 10px; margin-left: auto;
+    }
+    .board-add-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; padding: 8px;
+      border: 1.5px dashed var(--border-d); border-radius: 8px;
+      background: transparent; color: var(--text-3);
+      font-family: 'DM Sans', sans-serif; font-size: 12px;
+      cursor: pointer; transition: all 150ms ease; margin-top: 8px;
+    }
+    .board-add-btn:hover { border-color: var(--text-2); color: var(--text-2); background: var(--bg); }
+
+    .story-card-sm {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 0; margin-bottom: 10px; cursor: pointer;
+      transition: all 150ms ease; overflow: hidden; position: relative;
+    }
+    .story-card-sm:hover { border-color: var(--border-d); box-shadow: var(--shadow-sm); }
+    .card-sm-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 10px 0 0 10px; }
+    .card-sm-inner { padding: 10px 10px 10px 13px; }
+    .card-sm-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .card-sm-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-sm-comp { font-size: 10px; color: var(--text-3); }
+    .card-sm-star { display: flex; gap: 2px; }
+    .sm-pip { width: 14px; height: 3px; border-radius: 2px; background: var(--border); }
+
+    /* ── MATRIX VIEW ── */
+    .matrix-view { overflow-x: auto; }
+    .matrix-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .matrix-table th {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      padding: 8px 12px; text-align: left; white-space: nowrap;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .matrix-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .matrix-table tr:hover td { background: var(--bg); cursor: pointer; }
+    .matrix-star-mini { display: flex; gap: 3px; align-items: center; }
+    .matrix-pip { width: 12px; height: 3px; border-radius: 2px; }
+
+    /* ── COMMAND PALETTE ── */
+    .cmd-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 120px;
+    }
+    .cmd-overlay.open { display: flex; }
+    .cmd-palette {
+      width: 100%; max-width: 540px;
+      background: var(--card); border-radius: 14px;
+      box-shadow: var(--shadow-lg); overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .cmd-input-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+    }
+    .cmd-input-row svg { color: var(--text-3); width: 16px; height: 16px; flex-shrink: 0; }
+    .cmd-input {
+      flex: 1; border: none; outline: none;
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
+      color: var(--text); background: transparent;
+    }
+    .cmd-input::placeholder { color: var(--text-3); }
+    .cmd-results { max-height: 320px; overflow-y: auto; }
+    .cmd-group-title {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-3); padding: 10px 16px 4px;
+    }
+    .cmd-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 16px; cursor: pointer;
+      transition: background 100ms ease; font-size: 13px; color: var(--text);
+    }
+    .cmd-item:hover { background: var(--bg); }
+    .cmd-item-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 13px; font-weight: 600;
+    }
+    .cmd-item-meta { margin-left: auto; font-size: 11px; color: var(--text-3); }
+    .cmd-footer {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; border-top: 1px solid var(--border); background: var(--bg);
+    }
+    .cmd-hint { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-3); }
+    .cmd-hint kbd {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      background: var(--card); border: 1px solid var(--border-d);
+      border-radius: 4px; padding: 1px 5px; color: var(--text-2);
+    }
+
+    /* ── DETAIL PANEL ── */
+    .detail-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.25);
+      backdrop-filter: blur(2px);
+      z-index: 150; display: none;
+    }
+    .detail-overlay.open { display: block; }
+    .detail-panel {
+      position: fixed; right: 0; top: 0; bottom: 0; width: 460px;
+      background: var(--card); border-left: 1px solid var(--border);
+      box-shadow: -8px 0 40px rgba(15,23,42,0.08);
+      z-index: 151;
+      transform: translateX(100%);
+      transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .detail-panel.open { transform: translateX(0); }
+    .detail-header {
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .detail-header-content { flex: 1; }
+    .detail-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .detail-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .detail-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); padding: 4px; transition: color 150ms ease; flex-shrink: 0;
+    }
+    .detail-close:hover { color: var(--text); }
+    .detail-close svg { width: 18px; height: 18px; display: block; }
+    .detail-body { flex: 1; overflow-y: auto; padding: 24px; }
+    .detail-star-progress { display: flex; gap: 6px; margin-bottom: 20px; }
+    .detail-star-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .detail-star-bar { height: 4px; width: 100%; border-radius: 2px; }
+    .detail-star-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-3); letter-spacing: 0.08em; }
+    .detail-section { margin-bottom: 20px; }
+    .detail-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .detail-section-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; padding: 2px 8px; border-radius: 4px;
+    }
+    .detail-section-text { font-size: 13px; color: var(--text-2); line-height: 1.65; }
+    .detail-actions {
+      padding: 16px 24px; border-top: 1px solid var(--border);
+      display: flex; gap: 10px;
+    }
+    .detail-btn {
+      flex: 1; padding: 9px 16px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--card);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; color: var(--text-2); transition: all 150ms ease;
+    }
+    .detail-btn:hover { border-color: var(--border-d); color: var(--text); }
+    .detail-btn.primary { background: var(--blue); color: white; border-color: var(--blue); }
+    .detail-btn.primary:hover { background: var(--blue-h); border-color: var(--blue-h); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      display: none; flex-direction: column; align-items: center;
+      text-align: center; padding: 48px 24px; gap: 16px;
+    }
+    .empty-icon {
+      width: 56px; height: 56px; background: var(--gray-bg);
+      border-radius: 16px; display: flex; align-items: center;
+      justify-content: center; font-size: 24px;
+    }
+    .empty-title { font-size: 18px; font-weight: 600; color: var(--text); }
+    .empty-desc { font-size: 13px; color: var(--text-2); max-width: 380px; line-height: 1.6; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text); color: white;
+      padding: 10px 18px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: var(--shadow-lg); z-index: 300;
+      transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap; pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── SHORTCUTS BAR ── */
+    .shortcuts-bar {
+      position: fixed; bottom: 24px; right: 24px;
+      display: flex; gap: 6px; align-items: center;
+    }
+    .shortcut-hint {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; color: var(--text-3);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 9px; box-shadow: var(--shadow-sm);
+    }
+    .shortcut-hint kbd {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      background: var(--gray-bg); border-radius: 3px; padding: 0 4px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-d); border-radius: 3px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) { .sidebar { display: none; } }
+    @media (max-width: 800px) { .stories-masonry { columns: 2 200px; } }
+    @media (max-width: 640px) {
+      .content { padding: 16px; }
+      .stories-masonry { columns: 1; }
+      .coverage-category { width: 72px; font-size: 10px; }
+      .coverage-cell { font-size: 9px; padding: 0 6px; height: 24px; }
+      .shortcuts-bar { display: none; }
+      .topbar { padding: 0 12px; gap: 8px; }
+      .view-btn span { display: none; }
+      .search-trigger { min-width: 0; }
+      .detail-panel { width: 100%; }
+    }
+  </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-<!-- ============================================================
-     LAYOUT SHELL
-     ============================================================ -->
-<div class="flex h-screen overflow-hidden">
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-title">Story Library</span>
+    <span class="topbar-count" id="story-count">5</span>
+    <button class="search-trigger" onclick="openCmd()">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="7" cy="7" r="5"/><path d="m11 11 3 3"/>
+      </svg>
+      Search stories…
+      <kbd>/</kbd>
+    </button>
+  </div>
+
+  <div class="view-switcher">
+    <button class="view-btn active" id="btn-gallery" onclick="setView('gallery')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+        <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+      </svg>
+      <span>Gallery</span>
+    </button>
+    <button class="view-btn" id="btn-board" onclick="setView('board')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="1" y="1" width="4" height="14" rx="1"/><rect x="6" y="1" width="4" height="10" rx="1"/>
+        <rect x="11" y="1" width="4" height="12" rx="1"/>
+      </svg>
+      <span>Board</span>
+    </button>
+    <button class="view-btn" id="btn-matrix" onclick="setView('matrix')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="1" y="1" width="14" height="14" rx="2"/>
+        <line x1="1" y1="5.5" x2="15" y2="5.5"/><line x1="1" y1="10.5" x2="15" y2="10.5"/>
+        <line x1="5.5" y1="1" x2="5.5" y2="15"/><line x1="10.5" y1="1" x2="10.5" y2="15"/>
+      </svg>
+      <span>Table</span>
+    </button>
+  </div>
+
+  <button class="btn-new" onclick="showToast('New story form — coming soon!')">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
+    </svg>
+    New Story
+    <kbd>N</kbd>
+  </button>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
 
   <!-- SIDEBAR -->
-  <aside class="w-[220px] flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
-    <!-- Logo -->
-    <div class="px-5 py-4 border-b border-gray-100">
-      <span class="font-bold text-lg"><span class="text-blue-600">Job</span>Funnel</span>
+  <aside class="sidebar">
+    <div class="sidebar-section-title">Browse</div>
+    <div class="sidebar-item active" onclick="filterSidebar('all', this)">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+        <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+      </svg>
+      All stories
+      <span class="sidebar-count">5</span>
     </div>
-    <!-- Nav -->
-    <nav class="flex-1 px-3 py-3 space-y-0.5 text-sm text-slate-600">
-      <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.5"/></svg>
-        Home
-      </a>
-      <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
-        Pipeline
-      </a>
-      <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        Analytics
-      </a>
-      <a href="#" class="nav-active flex items-center gap-2.5 px-3 py-2 rounded-lg">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-        STAR Stories
-      </a>
-      <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Resume Builder
-      </a>
-    </nav>
-    <!-- User -->
-    <div class="p-3 border-t border-gray-100">
-      <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer">
-        <div class="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center text-xs font-semibold text-amber-700">VB</div>
-        <div class="flex-1 min-w-0">
-          <p class="text-xs font-medium text-slate-800 truncate">Vinicius Barbosa</p>
-          <p class="text-[10px] text-blue-600 font-medium uppercase tracking-wide">Pro</p>
-        </div>
-      </div>
+    <div class="sidebar-item" onclick="filterSidebar('favorite', this)">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <polygon points="8,1.5 10,6 15,6 11,9.5 12.5,14.5 8,11.5 3.5,14.5 5,9.5 1,6 6,6"/>
+      </svg>
+      Favorites
+      <span class="sidebar-count">2</span>
+    </div>
+    <div class="sidebar-item" onclick="filterSidebar('complete', this)">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/>
+      </svg>
+      Full STAR
+      <span class="sidebar-count">3</span>
+    </div>
+    <div class="sidebar-item" onclick="filterSidebar('incomplete', this)">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="8" cy="8" r="7"/><line x1="8" y1="5" x2="8" y2="9"/>
+        <circle cx="8" cy="11.5" r="0.5" fill="currentColor"/>
+      </svg>
+      Incomplete
+      <span class="sidebar-count">2</span>
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">By Category</div>
+    <div class="sidebar-item" onclick="filterSidebar('leadership', this)">
+      <span class="sidebar-dot" style="background:#2563EB"></span>
+      Leadership
+      <span class="sidebar-count">2</span>
+    </div>
+    <div class="sidebar-item" onclick="filterSidebar('technical', this)">
+      <span class="sidebar-dot" style="background:#8B5CF6"></span>
+      Technical
+      <span class="sidebar-count">1</span>
+    </div>
+    <div class="sidebar-item" onclick="filterSidebar('collaboration', this)">
+      <span class="sidebar-dot" style="background:#10B981"></span>
+      Collaboration
+      <span class="sidebar-count">1</span>
+    </div>
+    <div class="sidebar-item" onclick="filterSidebar('execution', this)">
+      <span class="sidebar-dot" style="background:#F59E0B"></span>
+      Execution
+      <span class="sidebar-count">1</span>
+    </div>
+    <div class="sidebar-item" onclick="filterSidebar('growth', this)">
+      <span class="sidebar-dot" style="background:#EC4899"></span>
+      Growth
+      <span class="sidebar-count">0</span>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT AREA -->
-  <div class="flex-1 flex overflow-hidden">
+  <!-- CONTENT -->
+  <main class="content">
 
-    <!-- LEFT PANEL: Library -->
-    <div class="w-[340px] flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
-
-      <!-- Panel Header -->
-      <div class="px-4 pt-4 pb-3 border-b border-gray-100">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h1 class="font-semibold text-slate-900 text-base">Story Library</h1>
-            <p class="text-xs text-slate-400 mt-0.5">7 stories · 3 competency gaps</p>
-          </div>
-          <button onclick="showPanel('new')" class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            New
-          </button>
-        </div>
-
-        <!-- Search -->
-        <div class="relative">
-          <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-          <input type="text" placeholder="Search stories…" class="w-full pl-8 pr-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 placeholder-slate-400" />
-        </div>
+    <!-- COVERAGE MATRIX -->
+    <section class="coverage-section" id="coverage-section">
+      <div class="coverage-header">
+        <span class="coverage-title">Competency Coverage</span>
+        <span class="coverage-score"><span id="covered-count">4</span> / 15 competencies covered — click a tag to filter</span>
       </div>
+      <div class="coverage-grid" id="coverage-grid"></div>
+    </section>
 
-      <!-- View Toggle + Sort -->
-      <div class="px-4 py-2 flex items-center justify-between border-b border-gray-100">
-        <!-- View toggle -->
-        <div class="flex items-center gap-1 bg-gray-100 rounded-md p-0.5">
-          <button onclick="setView('list')" id="btn-list" class="view-btn active p-1.5 rounded" title="List view">
-            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          </button>
-          <button onclick="setView('grid')" id="btn-grid" class="view-btn p-1.5 rounded" title="Card view">
-            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>
-          </button>
-          <button onclick="setView('matrix')" id="btn-matrix" class="view-btn p-1.5 rounded" title="Coverage matrix">
-            <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          </button>
-        </div>
-
-        <!-- Sort -->
-        <select class="text-xs text-slate-500 bg-transparent border-none outline-none cursor-pointer">
-          <option>Most recent</option>
-          <option>Favorites first</option>
-          <option>By competency</option>
-          <option>Completeness</option>
+    <!-- GALLERY VIEW -->
+    <div id="view-gallery">
+      <div class="stories-header">
+        <span class="stories-label" id="stories-label">5 stories</span>
+        <select class="sort-select" onchange="sortStories(this.value)">
+          <option value="recent">Most recent</option>
+          <option value="title">Title A–Z</option>
+          <option value="complete">By completeness</option>
         </select>
       </div>
-
-      <!-- Competency Filter Tabs -->
-      <div class="px-4 py-2.5 border-b border-gray-100 overflow-x-auto">
-        <div class="flex items-center gap-1.5 text-xs whitespace-nowrap">
-          <button class="pill active px-2.5 py-1 rounded-full border border-gray-200 text-slate-700 font-medium">All</button>
-          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>Leadership
-            <span class="text-[10px] text-slate-400">2</span>
-          </button>
-          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-violet-500 inline-block"></span>Technical
-            <span class="text-[10px] text-slate-400">3</span>
-          </button>
-          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>Execution
-            <span class="text-[10px] text-slate-400">1</span>
-          </button>
-          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1 gap-badge rounded-full px-2.5 py-1" style="background:#FEF9C3;border-color:#FDE68A;color:#854D0E;">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            Growth · gap
-          </button>
-          <button class="pill px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1 gap-badge rounded-full px-2.5 py-1" style="background:#FEF9C3;border-color:#FDE68A;color:#854D0E;">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            Collaboration · gap
-          </button>
-        </div>
-      </div>
-
-      <!-- Story List / Grid -->
-      <div class="flex-1 overflow-y-auto" id="list-area">
-
-        <!-- === LIST VIEW === -->
-        <div id="view-list" class="py-1">
-
-          <!-- Story Item 1 — Active -->
-          <div class="story-card active px-4 py-3 border-b border-gray-50" onclick="showPanel('detail')">
-            <div class="flex items-start gap-2.5">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
-                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Execution</span>
-                  <!-- STAR completeness -->
-                  <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 rounded-full">4/4 ★</span>
-                </div>
-                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">KYC — Onboarding redesign</p>
-                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Led the complete redesign of KYC flow, reducing drop-off by 34% in 6 weeks…</p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[10px] text-slate-400">17 Mar</span>
-                  <span class="text-[10px] text-slate-300">·</span>
-                  <span class="text-[10px] text-slate-400">~320 words</span>
-                </div>
-              </div>
-              <button class="text-amber-400 hover:text-amber-500 flex-shrink-0 mt-0.5">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Story Item 2 -->
-          <div class="story-card px-4 py-3 border-b border-gray-50" onclick="showPanel('detail2')">
-            <div class="flex items-start gap-2.5">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span class="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></span>
-                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Technical</span>
-                  <span class="ml-auto text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 rounded-full">2/4 ★</span>
-                </div>
-                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Migrating to microservices at scale</p>
-                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Architected and led the migration of a monolith to microservices, handling…</p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[10px] text-slate-400">12 Mar</span>
-                  <span class="text-[10px] text-slate-300">·</span>
-                  <span class="text-[10px] text-amber-500 font-medium">Incomplete</span>
-                </div>
-              </div>
-              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Story Item 3 -->
-          <div class="story-card px-4 py-3 border-b border-gray-50">
-            <div class="flex items-start gap-2.5">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
-                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Leadership</span>
-                  <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 rounded-full">4/4 ★</span>
-                </div>
-                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Turning around an underperforming team</p>
-                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Inherited a team with low morale and missed deadlines. Within 3 months…</p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[10px] text-slate-400">5 Mar</span>
-                  <span class="text-[10px] text-slate-300">·</span>
-                  <span class="text-[10px] text-slate-400">~450 words</span>
-                </div>
-              </div>
-              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Story Item 4 -->
-          <div class="story-card px-4 py-3 border-b border-gray-50">
-            <div class="flex items-start gap-2.5">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span class="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></span>
-                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Technical</span>
-                  <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 rounded-full">4/4 ★</span>
-                </div>
-                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Building real-time event pipeline</p>
-                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Designed and shipped a Kafka-based event pipeline processing 50k events/sec…</p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[10px] text-slate-400">28 Feb</span>
-                  <span class="text-[10px] text-slate-300">·</span>
-                  <span class="text-[10px] text-slate-400">~280 words</span>
-                </div>
-              </div>
-              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Story Item 5 -->
-          <div class="story-card px-4 py-3 border-b border-gray-50">
-            <div class="flex items-start gap-2.5">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
-                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Leadership</span>
-                  <span class="ml-auto text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 rounded-full">3/4 ★</span>
-                </div>
-                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Stakeholder alignment on roadmap pivot</p>
-                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Navigated competing priorities from 4 senior stakeholders to align on a quarterly…</p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[10px] text-slate-400">20 Feb</span>
-                  <span class="text-[10px] text-slate-300">·</span>
-                  <span class="text-[10px] text-amber-500 font-medium">Incomplete</span>
-                </div>
-              </div>
-              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- GAP PROMPT — inline CTA -->
-          <div class="mx-3 my-3 px-3 py-2.5 rounded-xl border border-amber-200 bg-amber-50 flex items-start gap-2.5">
-            <svg class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <div class="flex-1">
-              <p class="text-xs font-medium text-amber-800">No Growth stories yet</p>
-              <p class="text-[11px] text-amber-600 mt-0.5">Senior roles often ask about learning agility.</p>
-              <button class="mt-1.5 text-[11px] font-medium text-amber-700 underline underline-offset-2">+ Add a Growth story</button>
-            </div>
-          </div>
-
-          <!-- Story 6 -->
-          <div class="story-card px-4 py-3 border-b border-gray-50">
-            <div class="flex items-start gap-2.5">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span class="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0"></span>
-                  <span class="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Technical</span>
-                  <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 rounded-full">4/4 ★</span>
-                </div>
-                <p class="text-sm font-medium text-slate-800 leading-snug mb-0.5 truncate">Reducing API latency by 60%</p>
-                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">Diagnosed a performance bottleneck in our critical checkout path. Implemented…</p>
-                <div class="flex items-center gap-2 mt-1.5">
-                  <span class="text-[10px] text-slate-400">10 Feb</span>
-                  <span class="text-[10px] text-slate-300">·</span>
-                  <span class="text-[10px] text-slate-400">~190 words</span>
-                </div>
-              </div>
-              <button class="text-slate-200 hover:text-amber-400 flex-shrink-0 mt-0.5">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-              </button>
-            </div>
-          </div>
-
-        </div><!-- /view-list -->
-
-        <!-- === GRID VIEW === (hidden by default) -->
-        <div id="view-grid" class="hidden p-4">
-          <div class="card-grid">
-            <!-- Card 1 -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onclick="showPanel('detail')">
-              <div class="h-1.5 bg-amber-500 w-full"></div>
-              <div class="p-4">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[10px] font-medium text-amber-600 uppercase tracking-wide">Execution</span>
-                  <span class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">4/4 STAR</span>
-                </div>
-                <p class="text-sm font-semibold text-slate-800 mb-2">KYC — Onboarding redesign</p>
-                <p class="text-xs text-slate-400 line-clamp-3">Led the complete redesign of KYC flow, reducing drop-off by 34% in 6 weeks at Fintech startup…</p>
-                <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <span class="text-[10px] text-slate-400">~320 words · 17 Mar</span>
-                  <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 2 — incomplete -->
-            <div class="bg-white rounded-xl border border-amber-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-              <div class="h-1.5 bg-violet-500 w-full"></div>
-              <div class="p-4">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[10px] font-medium text-violet-600 uppercase tracking-wide">Technical</span>
-                  <span class="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">2/4 STAR</span>
-                </div>
-                <p class="text-sm font-semibold text-slate-800 mb-2">Migrating to microservices at scale</p>
-                <p class="text-xs text-slate-400 line-clamp-3">Architected and led migration of monolith to microservices…</p>
-                <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <span class="text-[10px] text-amber-500 font-medium">Missing: Action, Result</span>
-                  <button class="text-[10px] font-medium text-blue-600 hover:underline">Complete →</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-              <div class="h-1.5 bg-blue-500 w-full"></div>
-              <div class="p-4">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Leadership</span>
-                  <span class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">4/4 STAR</span>
-                </div>
-                <p class="text-sm font-semibold text-slate-800 mb-2">Turning around an underperforming team</p>
-                <p class="text-xs text-slate-400 line-clamp-3">Inherited a team with low morale and missed deadlines. Within 3 months…</p>
-                <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <span class="text-[10px] text-slate-400">~450 words · 5 Mar</span>
-                  <svg class="w-3.5 h-3.5 text-slate-200 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                </div>
-              </div>
-            </div>
-
-            <!-- Gap CTA Card -->
-            <div class="bg-amber-50 rounded-xl border border-amber-200 border-dashed overflow-hidden hover:shadow-sm transition-shadow cursor-pointer flex flex-col items-center justify-center p-6 text-center gap-2">
-              <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              </div>
-              <p class="text-xs font-semibold text-amber-800">Growth gap</p>
-              <p class="text-[11px] text-amber-600">You have 0 Growth stories. Senior roles ask about learning agility.</p>
-              <button class="mt-1 text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1 rounded-full transition-colors">+ Add story</button>
-            </div>
-          </div>
-        </div><!-- /view-grid -->
-
-        <!-- === MATRIX VIEW === (hidden by default) -->
-        <div id="view-matrix" class="hidden p-4 space-y-4">
-          <p class="text-xs text-slate-500 mb-1">Your interview coverage across all 5 competency areas:</p>
-
-          <!-- Leadership -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                <span class="text-xs font-medium text-slate-700">Leadership</span>
-              </div>
-              <span class="text-xs text-slate-400">2 stories</span>
-            </div>
-            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-blue-500 rounded-full bar-fill" style="width:50%"></div>
-            </div>
-            <div class="flex gap-1 mt-1.5">
-              <span class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Team Mgmt ✓</span>
-              <span class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Decision Making ✓</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Mentoring</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Conflict Res.</span>
-            </div>
-          </div>
-
-          <!-- Technical -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-violet-500"></span>
-                <span class="text-xs font-medium text-slate-700">Technical</span>
-              </div>
-              <span class="text-xs text-slate-400">3 stories</span>
-            </div>
-            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-violet-500 rounded-full bar-fill" style="width:75%"></div>
-            </div>
-            <div class="flex gap-1 mt-1.5 flex-wrap">
-              <span class="text-[10px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded">Problem Solving ✓</span>
-              <span class="text-[10px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded">System Design ✓</span>
-              <span class="text-[10px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded">Innovation ✓</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Tech Excellence</span>
-            </div>
-          </div>
-
-          <!-- Collaboration — gap -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span class="text-xs font-medium text-slate-700">Collaboration</span>
-                <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">gap</span>
-              </div>
-              <span class="text-xs text-slate-400">0 stories</span>
-            </div>
-            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-emerald-500 rounded-full bar-fill" style="width:0%"></div>
-            </div>
-            <div class="flex gap-1 mt-1.5 flex-wrap">
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Cross-functional</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Stakeholder Mgmt</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Communication</span>
-            </div>
-            <button class="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-              Add a Collaboration story
-            </button>
-          </div>
-
-          <!-- Execution -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                <span class="text-xs font-medium text-slate-700">Execution</span>
-              </div>
-              <span class="text-xs text-slate-400">1 story</span>
-            </div>
-            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-amber-500 rounded-full bar-fill" style="width:25%"></div>
-            </div>
-            <div class="flex gap-1 mt-1.5 flex-wrap">
-              <span class="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">Project Delivery ✓</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Prioritization</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Under Pressure</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Adaptability</span>
-            </div>
-          </div>
-
-          <!-- Growth — gap -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                <span class="text-xs font-medium text-slate-700">Growth</span>
-                <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">gap</span>
-              </div>
-              <span class="text-xs text-slate-400">0 stories</span>
-            </div>
-            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-rose-500 rounded-full bar-fill" style="width:0%"></div>
-            </div>
-            <div class="flex gap-1 mt-1.5 flex-wrap">
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Learning Agility</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Feedback Reception</span>
-              <span class="text-[10px] bg-gray-100 text-slate-400 px-1.5 py-0.5 rounded">Self-improvement</span>
-            </div>
-            <button class="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-              Add a Growth story
-            </button>
-          </div>
-
-          <!-- Summary score -->
-          <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-gray-200">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs font-semibold text-slate-700">Library completeness</p>
-                <p class="text-[11px] text-slate-400 mt-0.5">Cover all 5 areas to be interview-ready</p>
-              </div>
-              <div class="text-right">
-                <p class="text-xl font-bold text-amber-600">48%</p>
-                <p class="text-[10px] text-slate-400">interview ready</p>
-              </div>
-            </div>
-            <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div class="h-full bg-amber-500 rounded-full" style="width:48%"></div>
-            </div>
-          </div>
-        </div><!-- /view-matrix -->
-
-      </div><!-- /list-area -->
-
-    </div><!-- /LEFT PANEL -->
-
-    <!-- RIGHT PANEL: Detail / Editor -->
-    <div class="flex-1 overflow-y-auto bg-white" id="right-panel">
-
-      <!-- DEFAULT: Story Detail -->
-      <div id="panel-detail" class="h-full flex flex-col">
-
-        <!-- Detail header -->
-        <div class="px-8 py-5 border-b border-gray-100 flex items-start justify-between">
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-1.5">
-              <span class="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-wide">Execution</span>
-              <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">Complete — 4/4 STAR</span>
-            </div>
-            <h2 class="text-2xl font-semibold text-slate-900">KYC — Onboarding redesign</h2>
-          </div>
-          <div class="flex items-center gap-2 ml-4 flex-shrink-0">
-            <button class="p-2 rounded-lg text-amber-400 hover:bg-amber-50 transition-colors" title="Favorite">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-            </button>
-            <button onclick="showPanel('edit')" class="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-              Edit
-            </button>
-            <button class="flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-600 border border-red-100 hover:border-red-200 px-3 py-1.5 rounded-lg transition-colors">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-              Delete
-            </button>
-          </div>
-        </div>
-
-        <!-- Competency tags -->
-        <div class="px-8 py-3 border-b border-gray-100 flex items-center gap-2">
-          <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wide mr-1">Tags</span>
-          <span class="text-xs bg-amber-500 text-white px-2.5 py-0.5 rounded-full font-medium">Project Delivery</span>
-          <span class="text-xs bg-gray-100 text-slate-600 px-2.5 py-0.5 rounded-full">Prioritization</span>
-          <span class="text-xs bg-gray-100 text-slate-600 px-2.5 py-0.5 rounded-full">Stakeholder Mgmt</span>
-          <span class="ml-auto text-[11px] text-slate-400">~320 words · Created 17 Mar 2026</span>
-        </div>
-
-        <!-- STAR content -->
-        <div class="flex-1 px-8 py-6 space-y-6 overflow-y-auto">
-
-          <!-- S -->
-          <div class="animate-in" style="animation-delay:0ms">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="w-6 h-6 rounded-md badge-s flex items-center justify-center text-xs font-bold">S</span>
-              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Situation</span>
-            </div>
-            <p class="text-sm text-slate-700 leading-relaxed pl-8">At my previous fintech company, we had a 68% drop-off rate during the KYC (Know Your Customer) onboarding flow. Users were abandoning the identity verification step because it required too many document uploads and had confusing error states. This was directly impacting our activation rate and costing us approximately €40k/month in lost conversions.</p>
-          </div>
-
-          <!-- T -->
-          <div class="animate-in" style="animation-delay:50ms">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="w-6 h-6 rounded-md badge-t flex items-center justify-center text-xs font-bold">T</span>
-              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Task</span>
-            </div>
-            <p class="text-sm text-slate-700 leading-relaxed pl-8">As the PM owning onboarding, I was tasked with redesigning the KYC flow to reduce drop-off by at least 20% within one quarter, without compromising compliance requirements or adding engineering scope beyond 2 sprints.</p>
-          </div>
-
-          <!-- A -->
-          <div class="animate-in" style="animation-delay:100ms">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="w-6 h-6 rounded-md badge-a flex items-center justify-center text-xs font-bold">A</span>
-              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Action</span>
-            </div>
-            <p class="text-sm text-slate-700 leading-relaxed pl-8">I ran 8 moderated user sessions to map where confusion occurred, then partnered with our compliance team to understand the minimum viable document requirements. I redesigned the flow in Figma with three key changes: progressive disclosure (step-by-step instead of all-at-once), clearer error recovery states, and a "save and continue later" option. I also wrote the PRD, led the 2-sprint build, and tracked daily drop-off metrics via Amplitude to catch regressions early.</p>
-          </div>
-
-          <!-- R -->
-          <div class="animate-in" style="animation-delay:150ms">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="w-6 h-6 rounded-md badge-r flex items-center justify-center text-xs font-bold">R</span>
-              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Result</span>
-            </div>
-            <p class="text-sm text-slate-700 leading-relaxed pl-8">KYC drop-off fell from 68% to 34% within 6 weeks of launch — a 50% improvement, double our target. Monthly revenue recovered approximately €22k of the previously lost conversions. The "save and continue" feature alone accounted for 18% of completions. The redesign became the template for our subsequent market expansion flows in Germany and the Netherlands.</p>
-          </div>
-
-        </div><!-- /STAR content -->
-
-      </div><!-- /panel-detail -->
-
-      <!-- EDITOR VIEW (hidden) -->
-      <div id="panel-edit" class="hidden h-full flex flex-col">
-        <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between">
-          <h2 class="text-base font-semibold text-slate-900">Edit Story</h2>
-          <div class="flex items-center gap-2">
-            <button onclick="showPanel('detail')" class="text-xs font-medium text-slate-500 hover:text-slate-700 border border-gray-200 px-3 py-1.5 rounded-lg">Cancel</button>
-            <button onclick="showPanel('detail')" class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition-colors">Save changes</button>
-          </div>
-        </div>
-        <div class="flex-1 px-8 py-6 overflow-y-auto space-y-4">
-          <!-- Mode toggle -->
-          <div class="flex items-center gap-2 mb-4">
-            <div class="flex bg-gray-100 rounded-lg p-0.5 text-xs">
-              <button class="px-3 py-1.5 rounded-md bg-white shadow-sm font-medium text-slate-800">STAR Format</button>
-              <button class="px-3 py-1.5 rounded-md text-slate-500">Free Form</button>
-            </div>
-          </div>
-          <!-- Title -->
-          <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1.5">Title <span class="text-red-400">*</span></label>
-            <input type="text" value="KYC — Onboarding redesign" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400" />
-          </div>
-          <!-- S field -->
-          <div>
-            <div class="flex items-center gap-2 mb-1.5">
-              <span class="w-5 h-5 rounded badge-s flex items-center justify-center text-[10px] font-bold">S</span>
-              <label class="text-xs font-medium text-slate-600">Situation</label>
-              <span class="ml-auto text-[10px] text-slate-400">284 words</span>
-            </div>
-            <textarea rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none leading-relaxed">At my previous fintech company, we had a 68% drop-off rate during the KYC onboarding flow...</textarea>
-          </div>
-          <!-- T field -->
-          <div>
-            <div class="flex items-center gap-2 mb-1.5">
-              <span class="w-5 h-5 rounded badge-t flex items-center justify-center text-[10px] font-bold">T</span>
-              <label class="text-xs font-medium text-slate-600">Task</label>
-            </div>
-            <textarea rows="2" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none leading-relaxed">As the PM owning onboarding, I was tasked with redesigning the KYC flow...</textarea>
-          </div>
-          <!-- Competency -->
-          <div>
-            <label class="block text-xs font-medium text-slate-600 mb-2">Competency tags</label>
-            <div class="flex flex-wrap gap-1.5">
-              <button class="text-xs px-2.5 py-1 rounded-full bg-amber-500 text-white font-medium">Project Delivery</button>
-              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500">Prioritization</button>
-              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500">Stakeholder Mgmt</button>
-              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Add tag
-              </button>
-            </div>
-          </div>
-        </div>
-      </div><!-- /panel-edit -->
-
-      <!-- NEW STORY (hidden) -->
-      <div id="panel-new" class="hidden h-full flex flex-col">
-        <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h2 class="text-base font-semibold text-slate-900">New story</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Use STAR format to structure your story for interviews</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="showPanel('empty')" class="text-xs font-medium text-slate-500 hover:text-slate-700 border border-gray-200 px-3 py-1.5 rounded-lg">Cancel</button>
-            <button class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition-colors">Save story</button>
-          </div>
-        </div>
-
-        <!-- Guided prompt bar -->
-        <div class="px-8 py-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-          <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <p class="text-xs text-blue-700">You have no <strong>Collaboration</strong> or <strong>Growth</strong> stories. Consider adding one to cover interview gaps.</p>
-        </div>
-
-        <div class="flex-1 px-8 py-6 overflow-y-auto space-y-4">
-          <div class="flex items-center gap-2 mb-4">
-            <div class="flex bg-gray-100 rounded-lg p-0.5 text-xs">
-              <button class="px-3 py-1.5 rounded-md bg-white shadow-sm font-medium text-slate-800">STAR Format</button>
-              <button class="px-3 py-1.5 rounded-md text-slate-500">Free Form</button>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1.5">Title <span class="text-red-400">*</span></label>
-            <input type="text" placeholder="e.g. Launching the growth experiment that 10x'd signups" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 placeholder-slate-300" />
-          </div>
-          <div>
-            <div class="flex items-center gap-2 mb-1.5">
-              <span class="w-5 h-5 rounded badge-s flex items-center justify-center text-[10px] font-bold">S</span>
-              <label class="text-xs font-medium text-slate-600">Situation</label>
-            </div>
-            <textarea rows="3" placeholder="Set the scene. What was happening? What was the context or problem?" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none placeholder-slate-300 leading-relaxed"></textarea>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="w-5 h-5 rounded badge-t flex items-center justify-center text-[10px] font-bold">T</span>
-                <label class="text-xs font-medium text-slate-600">Task</label>
-              </div>
-              <textarea rows="3" placeholder="What was your specific responsibility?" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none placeholder-slate-300 leading-relaxed"></textarea>
-            </div>
-            <div>
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="w-5 h-5 rounded badge-a flex items-center justify-center text-[10px] font-bold">A</span>
-                <label class="text-xs font-medium text-slate-600">Action</label>
-              </div>
-              <textarea rows="3" placeholder="What did you specifically do?" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none placeholder-slate-300 leading-relaxed"></textarea>
-            </div>
-          </div>
-          <div>
-            <div class="flex items-center gap-2 mb-1.5">
-              <span class="w-5 h-5 rounded badge-r flex items-center justify-center text-[10px] font-bold">R</span>
-              <label class="text-xs font-medium text-slate-600">Result</label>
-            </div>
-            <textarea rows="2" placeholder="What was the measurable outcome? Numbers = credibility." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none placeholder-slate-300 leading-relaxed"></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-600 mb-2">Competency tags</label>
-            <div class="flex flex-wrap gap-1.5">
-              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 hover:bg-gray-50">Team Management</button>
-              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 hover:bg-gray-50">Decision Making</button>
-              <button class="text-xs px-2.5 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100">Project Delivery</button>
-              <button class="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-slate-500 hover:bg-gray-50">Problem Solving</button>
-              <button class="text-xs px-2.5 py-1 rounded-full border border-dashed border-gray-300 text-slate-400 hover:bg-gray-50 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                More tags
-              </button>
-            </div>
-          </div>
-        </div>
-      </div><!-- /panel-new -->
-
-      <!-- EMPTY STATE (shown when nothing selected) -->
-      <div id="panel-empty" class="hidden h-full flex items-center justify-center">
-        <div class="text-center max-w-xs">
-          <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-          </div>
-          <p class="text-sm font-semibold text-slate-700 mb-1">Select a story</p>
-          <p class="text-xs text-slate-400">Choose from the list, or press <kbd class="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] font-mono">N</kbd> to create a new one</p>
-        </div>
-      </div>
-
-    </div><!-- /RIGHT PANEL -->
-
-  </div><!-- /MAIN CONTENT -->
-</div><!-- /LAYOUT SHELL -->
-
-<!-- ============================================================
-     ANALYSIS OVERLAY — shown on load
-     ============================================================ -->
-<div id="analysis-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="closeAnalysis(event)">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onclick="e => e.stopPropagation()">
-
-    <!-- Modal header -->
-    <div class="sticky top-0 bg-white border-b border-gray-100 px-8 py-5 flex items-center justify-between rounded-t-2xl z-10">
-      <div>
-        <h2 class="text-lg font-bold text-slate-900">Story Library — Product Analysis</h2>
-        <p class="text-sm text-slate-400 mt-0.5">Market analysis · Problem framing · UI prototype · PRD</p>
-      </div>
-      <button onclick="document.getElementById('analysis-modal').remove()" class="p-2 rounded-lg hover:bg-gray-100 text-slate-400 hover:text-slate-600 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
-    </div>
-
-    <div class="px-8 py-6 space-y-10">
-
-      <!-- ========== SECTION 1: MARKET ANALYSIS ========== -->
-      <section>
-        <div class="flex items-center gap-2 mb-4">
-          <span class="w-6 h-6 rounded-md bg-blue-600 text-white text-xs font-bold flex items-center justify-center">1</span>
-          <h3 class="text-base font-bold text-slate-900">Market Analysis — How Outstanding SaaS Manage Content Libraries</h3>
-        </div>
-
-        <p class="text-sm text-slate-600 mb-4 leading-relaxed">The core problem of Story Library is a <strong>gallery management + coverage tracking</strong> challenge. The closest analogues in the SaaS world are knowledge base tools, content libraries, and portfolio managers. Here's how the best solve it:</p>
-
-        <!-- Competitor table -->
-        <div class="grid grid-cols-1 gap-3 mb-6">
-
-          <div class="border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">N</div>
-                <span class="font-semibold text-sm text-slate-800">Notion — Database Views</span>
-              </div>
-              <span class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">Most relevant</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-2">Notion solves gallery management by offering <strong>multiple views of the same dataset</strong>: List, Table, Board (Kanban), Gallery, Calendar, and Timeline. Users choose the mental model that fits their use case. The Gallery view shows rich card previews with cover images and key properties visible. The Filter + Group-By system lets users slice any way they need.</p>
-            <div class="flex flex-wrap gap-1">
-              <span class="text-[11px] bg-green-50 text-green-700 px-2 py-0.5 rounded">Multi-view (list/grid/board)</span>
-              <span class="text-[11px] bg-green-50 text-green-700 px-2 py-0.5 rounded">Property filters</span>
-              <span class="text-[11px] bg-green-50 text-green-700 px-2 py-0.5 rounded">Group-by any field</span>
-              <span class="text-[11px] bg-green-50 text-green-700 px-2 py-0.5 rounded">Card previews</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel steal:</strong> Multi-view toggle (List / Card / Coverage Matrix)</p>
-          </div>
-
-          <div class="border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 bg-violet-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">L</div>
-                <span class="font-semibold text-sm text-slate-800">Linear — Issue Library</span>
-              </div>
-              <span class="text-xs text-slate-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">UI patterns</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-2">Linear's issue list excels at <strong>richness without noise</strong>: each list item shows status, priority, assignee, labels, and a one-line description — all scannable in a single row. Keyboard-first navigation (J/K to move, N to create), instant search, and label-based grouping make it feel fast even with hundreds of items. The completeness of a ticket (has description? has estimate?) is visible via subtle icons.</p>
-            <div class="flex flex-wrap gap-1">
-              <span class="text-[11px] bg-violet-50 text-violet-700 px-2 py-0.5 rounded">Rich list items</span>
-              <span class="text-[11px] bg-violet-50 text-violet-700 px-2 py-0.5 rounded">Keyboard-first</span>
-              <span class="text-[11px] bg-violet-50 text-violet-700 px-2 py-0.5 rounded">Completeness signals</span>
-              <span class="text-[11px] bg-violet-50 text-violet-700 px-2 py-0.5 rounded">Instant filter</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel steal:</strong> STAR completeness badge (4/4), incomplete warning inline</p>
-          </div>
-
-          <div class="border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">A</div>
-                <span class="font-semibold text-sm text-slate-800">Airtable — Gallery Base</span>
-              </div>
-              <span class="text-xs text-slate-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">Layout</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-2">Airtable's Gallery view renders records as visual cards with an image or color header, making the content scannable at a glance. The grouping feature (Group by field) is the key insight: users can view all records grouped by category, seeing the distribution. An empty group explicitly shows "0 records" — which is a gap signal.</p>
-            <div class="flex flex-wrap gap-1">
-              <span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-0.5 rounded">Color-coded headers</span>
-              <span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-0.5 rounded">Group-by category</span>
-              <span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-0.5 rounded">Empty group = gap signal</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel steal:</strong> Coverage Matrix view with explicit 0-story gap prompts</p>
-          </div>
-
-          <div class="border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 bg-pink-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">P</div>
-                <span class="font-semibold text-sm text-slate-800">Pitch — Slide Library</span>
-              </div>
-              <span class="text-xs text-slate-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">Gallery UX</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-2">Pitch manages a gallery of reusable slide templates and decks. Key patterns: visual thumbnail preview (user understands content without clicking), tag-based organization, and <strong>usage count</strong> on each template ("used 12 times"). This usage signal tells users what's proven vs. untested.</p>
-            <div class="flex flex-wrap gap-1">
-              <span class="text-[11px] bg-pink-50 text-pink-700 px-2 py-0.5 rounded">Usage count</span>
-              <span class="text-[11px] bg-pink-50 text-pink-700 px-2 py-0.5 rounded">Rich preview</span>
-              <span class="text-[11px] bg-pink-50 text-pink-700 px-2 py-0.5 rounded">Tag organization</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel steal (Phase 2):</strong> "Used in 3 interviews" badge when linked to applications</p>
-          </div>
-
-          <div class="border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 bg-teal-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">I</div>
-                <span class="font-semibold text-sm text-slate-800">Interviewing.io / Exponent — Story Banks</span>
-              </div>
-              <span class="text-xs text-slate-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">Direct competitor</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-2">Interview coaching tools like Exponent have "story banks" where users save STAR answers by question type. Their approach: <strong>question-first</strong> (e.g., "Tell me about a conflict you resolved") → link to saved stories. The gap here: they don't tell users <em>which competency areas are uncovered</em>, they just list stories linearly. No coverage analytics.</p>
-            <div class="flex flex-wrap gap-1">
-              <span class="text-[11px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded">Question-linked stories</span>
-              <span class="text-[11px] bg-red-50 text-red-600 px-2 py-0.5 rounded">No coverage analytics ✗</span>
-              <span class="text-[11px] bg-red-50 text-red-600 px-2 py-0.5 rounded">No gap detection ✗</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">→ <strong>JobFunnel advantage:</strong> Coverage matrix + gap detection is a genuine differentiator</p>
-          </div>
-
-        </div>
-
-        <!-- Key insight box -->
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <p class="text-xs font-bold text-blue-800 mb-1">Key insight from market analysis:</p>
-          <p class="text-xs text-blue-700 leading-relaxed">No tool at the intersection of <strong>interview prep + content management</strong> currently offers <strong>competency coverage analytics</strong>. Notion-style multi-view + Linear-style completeness signals + Airtable-style gap visibility = a story library that actively coaches the user toward interview readiness, not just stores content.</p>
-        </div>
-      </section>
-
-      <!-- ========== SECTION 2: HOW TO SOLVE IT ========== -->
-      <section>
-        <div class="flex items-center gap-2 mb-4">
-          <span class="w-6 h-6 rounded-md bg-violet-600 text-white text-xs font-bold flex items-center justify-center">2</span>
-          <h3 class="text-base font-bold text-slate-900">How This Problem Can Be Solved — 6 Design Bets</h3>
-        </div>
-
-        <div class="space-y-4">
-
-          <div class="flex gap-3">
-            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">1</span>
-            <div>
-              <p class="text-sm font-semibold text-slate-800">Multi-view: List / Card / Coverage Matrix</p>
-              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Different users need different mental models. List = scan quickly. Card = rich preview for low volume. Coverage Matrix = the strategic view that tells you "am I interview-ready?" — something completely absent today. The view should be persistable per user.</p>
-              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: M · Impact: H</p>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">2</span>
-            <div>
-              <p class="text-sm font-semibold text-slate-800">STAR Completeness Indicators</p>
-              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Every story should surface how complete it is (0/4, 1/4, 2/4, 3/4, 4/4 STAR sections filled). Incomplete stories are interview liabilities. The indicator should appear in every view, and incomplete stories should have a "Complete this story →" CTA in the detail panel. This is a Linear-inspired UX pattern applied to interview prep.</p>
-              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: S · Impact: H</p>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">3</span>
-            <div>
-              <p class="text-sm font-semibold text-slate-800">Inline Gap Prompts — Coaching in Context</p>
-              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">When a user has 0 stories in a competency, surface a contextual prompt inside the list ("No Growth stories yet — senior roles often ask about learning agility") with a direct "+ Add story" CTA. This turns the library from passive storage to an active interview prep coach. The prompt should be dismissable but reappear after 7 days.</p>
-              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: S · Impact: H (retention + engagement)</p>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">4</span>
-            <div>
-              <p class="text-sm font-semibold text-slate-800">Richer Story List Items (Information Density Upgrade)</p>
-              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Current list items show: title, 1 tag, date. This is too sparse for a library. Add: category (colored dot + label), excerpt (2 lines), STAR completeness badge, word count (proxy for story depth), favorite. This gives the user enough signal to pick the right story without opening it.</p>
-              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: S · Impact: M</p>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">5</span>
-            <div>
-              <p class="text-sm font-semibold text-slate-800">New Story Form: Guided Prompt + Gap Awareness</p>
-              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">When creating a new story, show a banner if the user has uncovered gaps: "You have no Collaboration stories — consider adding one." The competency picker should visually highlight uncovered categories. Field labels should include contextual hints ("Situation: Set the scene. What was happening?") to scaffold good writing.</p>
-              <p class="text-xs text-blue-600 mt-1 font-medium">Effort: S · Impact: M</p>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <span class="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5">6</span>
-            <div>
-              <p class="text-sm font-semibold text-slate-800">(Phase 2) Usage Tracking — "Used in X interviews"</p>
-              <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Once stories can be linked to job applications, surface a "Used in 3 interviews" badge on each story. This tells the user which stories are battle-tested vs. untested. Proven stories get a subtle green highlight. Stories never used get a "Never used — try it in your next interview" nudge.</p>
-              <p class="text-xs text-violet-600 mt-1 font-medium">Effort: M · Impact: H · Phase 2</p>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- ========== SECTION 3: PRD ========== -->
-      <section>
-        <div class="flex items-center gap-2 mb-4">
-          <span class="w-6 h-6 rounded-md bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">3</span>
-          <h3 class="text-base font-bold text-slate-900">PRD — Story Library v2</h3>
-        </div>
-
-        <div class="space-y-5">
-
-          <!-- Problem statement -->
-          <div class="bg-slate-50 rounded-xl p-4 border border-gray-200">
-            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Problem Statement</p>
-            <p class="text-sm text-slate-600 leading-relaxed">The Story Library currently functions as passive storage — users can add and retrieve stories, but the product does not help them understand <em>whether they are interview-ready</em>. There is no signal for story completeness (partial STAR vs. full STAR), no coverage visibility (which competency areas are missing), and no coaching prompts. The result: users store 1–3 stories and stop adding more because the product does not show them the value of a comprehensive library.</p>
-          </div>
-
-          <!-- Goals -->
-          <div>
-            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Goals</p>
-            <ul class="text-sm text-slate-600 space-y-1.5">
-              <li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>Increase average stories per user from ~2 to 5+ within first 30 days</li>
-              <li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>Increase story completeness rate (4/4 STAR) from unknown to measurable baseline &gt;60%</li>
-              <li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>Create a coverage matrix that becomes a Pro feature differentiator</li>
-              <li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>Reduce time to find the right story before an interview (&lt;10 seconds)</li>
-            </ul>
-          </div>
-
-          <!-- Features -->
-          <div>
-            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Features — Prioritized</p>
-            <table class="w-full text-xs border-collapse">
-              <thead>
-                <tr class="bg-gray-50">
-                  <th class="text-left px-3 py-2 text-slate-600 font-semibold border-b border-gray-200">Feature</th>
-                  <th class="text-left px-3 py-2 text-slate-600 font-semibold border-b border-gray-200">Priority</th>
-                  <th class="text-left px-3 py-2 text-slate-600 font-semibold border-b border-gray-200">Tier</th>
-                  <th class="text-left px-3 py-2 text-slate-600 font-semibold border-b border-gray-200">Effort</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                <tr class="hover:bg-gray-50">
-                  <td class="px-3 py-2.5 text-slate-700">STAR completeness badge on list items</td>
-                  <td class="px-3 py-2.5"><span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">P0</span></td>
-                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
-                  <td class="px-3 py-2.5 text-slate-500">XS (1d)</td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-3 py-2.5 text-slate-700">Richer list item (category dot, excerpt, word count)</td>
-                  <td class="px-3 py-2.5"><span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">P0</span></td>
-                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
-                  <td class="px-3 py-2.5 text-slate-500">S (2d)</td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-3 py-2.5 text-slate-700">Inline gap prompts in list (per missing competency)</td>
-                  <td class="px-3 py-2.5"><span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">P0</span></td>
-                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
-                  <td class="px-3 py-2.5 text-slate-500">S (2d)</td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-3 py-2.5 text-slate-700">Card / Gallery view mode</td>
-                  <td class="px-3 py-2.5"><span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">P1</span></td>
-                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
-                  <td class="px-3 py-2.5 text-slate-500">M (3d)</td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-3 py-2.5 text-slate-700">Coverage Matrix view (bar chart per category)</td>
-                  <td class="px-3 py-2.5"><span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">P1</span></td>
-                  <td class="px-3 py-2.5 text-slate-500">Pro only</td>
-                  <td class="px-3 py-2.5 text-slate-500">M (3d)</td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-3 py-2.5 text-slate-700">New story form: gap awareness banner + field hints</td>
-                  <td class="px-3 py-2.5"><span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">P1</span></td>
-                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
-                  <td class="px-3 py-2.5 text-slate-500">S (1d)</td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-3 py-2.5 text-slate-700">View preference persistence (Zustand + localStorage)</td>
-                  <td class="px-3 py-2.5"><span class="bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium">P2</span></td>
-                  <td class="px-3 py-2.5 text-slate-500">Free + Pro</td>
-                  <td class="px-3 py-2.5 text-slate-500">XS (0.5d)</td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-3 py-2.5 text-slate-700">Story interview usage tracking (Phase 2)</td>
-                  <td class="px-3 py-2.5"><span class="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-medium">P3</span></td>
-                  <td class="px-3 py-2.5 text-slate-500">Pro only</td>
-                  <td class="px-3 py-2.5 text-slate-500">L (requires schema)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Schema changes -->
-          <div>
-            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Schema Changes Required</p>
-            <div class="bg-gray-950 rounded-xl p-4 text-xs font-mono text-gray-300 overflow-x-auto">
-              <p class="text-slate-500 mb-1">-- No schema change for P0 features</p>
-              <p class="text-slate-500 mb-1">-- Completeness is computed from existing columns (situation, task, action, result)</p>
-              <p class="text-slate-500 mb-3">-- Gap detection is derived from competencies[] array and user's full story set</p>
-              <p class="text-green-400">-- Phase 2: story_usages table (links story_id → job_application_id)</p>
-              <p class="text-slate-400">CREATE TABLE story_usages (</p>
-              <p class="text-slate-400 pl-4">id UUID PRIMARY KEY,</p>
-              <p class="text-slate-400 pl-4">story_id UUID REFERENCES interview_stories(id) ON DELETE CASCADE,</p>
-              <p class="text-slate-400 pl-4">job_application_id UUID REFERENCES job_applications(id) ON DELETE CASCADE,</p>
-              <p class="text-slate-400 pl-4">user_id UUID REFERENCES profiles(id),</p>
-              <p class="text-slate-400 pl-4">used_at TIMESTAMPTZ DEFAULT now()</p>
-              <p class="text-slate-400">);</p>
-            </div>
-          </div>
-
-          <!-- Acceptance criteria -->
-          <div>
-            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Acceptance Criteria (P0 + P1)</p>
-            <ul class="text-xs text-slate-600 space-y-1.5">
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Each story item in the list displays: category dot + label, excerpt (2 lines), STAR completeness badge (n/4), word count, date, favorite toggle</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Completeness badge: green "4/4 ✓" for complete, amber "n/4" for partial, red "0/4" for empty (freeform stories show "Full" badge)</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> At most 1 gap prompt visible in list at a time (for the highest-priority missing competency). Dismissable, reappears after 7 days.</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> View toggle (List / Card / Matrix) persists to localStorage via Zustand middleware</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Card view: renders color-coded top border (category color), title, excerpt, completeness, word count, date. Click opens detail panel.</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Coverage Matrix: 1 bar per competency, filled proportionally, shows covered sub-tags (✓) and uncovered sub-tags (gray). Overall completeness score shown at bottom.</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> Coverage Matrix is behind <code class="bg-gray-100 px-1 rounded">ProGate</code> for free users — shows blurred preview + upgrade CTA</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> New story form shows blue banner with uncovered gaps when user has ≥1 gap</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5">✓</span> All views are mobile-responsive: Card view wraps to 1 column at &lt;640px, Coverage Matrix scrolls horizontally never — stacks vertically</li>
-            </ul>
-          </div>
-
-          <!-- Metrics -->
-          <div>
-            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Success Metrics (4 weeks post-launch)</p>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <p class="text-lg font-bold text-blue-600">5+</p>
-                <p class="text-xs text-slate-500">avg stories/user (vs. ~2 baseline)</p>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <p class="text-lg font-bold text-blue-600">60%</p>
-                <p class="text-xs text-slate-500">stories with 4/4 STAR complete</p>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <p class="text-lg font-bold text-blue-600">25%</p>
-                <p class="text-xs text-slate-500">gap prompt CTR (click → new story)</p>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <p class="text-lg font-bold text-blue-600">40%</p>
-                <p class="text-xs text-slate-500">users using Coverage Matrix (Pro)</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- CTA -->
-      <div class="border-t border-gray-100 pt-6 flex items-center justify-between">
-        <p class="text-xs text-slate-400">Prototype below: interact with the list, toggle views (List / Card / Coverage Matrix), click stories to see detail, try the New button</p>
-        <button onclick="document.getElementById('analysis-modal').remove()" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
-          View prototype
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      <div class="stories-masonry" id="stories-masonry"></div>
+      <div class="empty-state" id="empty-gallery">
+        <div class="empty-icon">📖</div>
+        <div class="empty-title">No stories here</div>
+        <div class="empty-desc">No stories match this filter. Try a different category, or start building out a new competency.</div>
+        <button class="btn-new" onclick="showToast('New story!')">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
+          </svg>
+          Add a story
         </button>
       </div>
+    </div>
 
-    </div><!-- /modal content -->
+    <!-- BOARD VIEW -->
+    <div id="view-board" style="display:none">
+      <div class="board-container" id="board-container"></div>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <div id="view-matrix" style="display:none">
+      <div class="matrix-view">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Story</th>
+              <th>Category</th>
+              <th>Competency</th>
+              <th>STAR</th>
+              <th>Fav</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody id="matrix-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── COMMAND PALETTE ── -->
+<div class="cmd-overlay" id="cmd-overlay" onclick="closeCmdIfBg(event)">
+  <div class="cmd-palette">
+    <div class="cmd-input-row">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="7" cy="7" r="5"/><path d="m11 11 3 3"/>
+      </svg>
+      <input class="cmd-input" id="cmd-input" placeholder="Search stories, competencies…" oninput="filterCmd(this.value)">
+      <kbd style="font-family:'DM Mono';font-size:10px;background:var(--gray-bg);border:1px solid var(--border-d);border-radius:4px;padding:2px 6px;color:var(--text-3);flex-shrink:0">Esc</kbd>
+    </div>
+    <div class="cmd-results" id="cmd-results"></div>
+    <div class="cmd-footer">
+      <span class="cmd-hint"><kbd>↑↓</kbd> navigate</span>
+      <span class="cmd-hint"><kbd>↵</kbd> open</span>
+      <span class="cmd-hint"><kbd>Esc</kbd> close</span>
+      <span class="cmd-hint" style="margin-left:auto"><kbd>N</kbd> new story</span>
+    </div>
   </div>
 </div>
 
+<!-- ── DETAIL PANEL ── -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-header-content">
+      <div class="detail-title" id="detail-title"></div>
+      <div class="detail-badges" id="detail-badges"></div>
+    </div>
+    <button class="detail-close" onclick="closeDetail()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/>
+      </svg>
+    </button>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+  <div class="detail-actions">
+    <button class="detail-btn" onclick="closeDetail()">Close</button>
+    <button class="detail-btn primary" onclick="showToast('Edit mode coming soon!')">Edit story</button>
+  </div>
+</div>
+
+<!-- ── SHORTCUTS BAR ── -->
+<div class="shortcuts-bar">
+  <div class="shortcut-hint"><kbd>/</kbd> search</div>
+  <div class="shortcut-hint"><kbd>N</kbd> new</div>
+  <div class="shortcut-hint"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> views</div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
 <script>
-  // Panel switching
-  function showPanel(name) {
-    const panels = ['detail', 'edit', 'new', 'empty', 'detail2'];
-    panels.forEach(p => {
-      const el = document.getElementById('panel-' + p);
-      if (el) el.classList.add('hidden');
+// ── DATA ──────────────────────────────────────────────────────────
+const CATEGORIES = {
+  leadership:    { label: 'Leadership',    color: '#2563EB', bg: '#EFF6FF', competencies: ['Team Management','Decision Making','Mentoring','Conflict Resolution'] },
+  technical:     { label: 'Technical',     color: '#8B5CF6', bg: '#F5F3FF', competencies: ['Problem Solving','System Design','Technical Excellence','Innovation'] },
+  collaboration: { label: 'Collaboration', color: '#10B981', bg: '#ECFDF5', competencies: ['Cross-functional Work','Stakeholder Management','Communication'] },
+  execution:     { label: 'Execution',     color: '#F59E0B', bg: '#FFFBEB', competencies: ['Project Delivery','Prioritization','Working Under Pressure','Adaptability'] },
+  growth:        { label: 'Growth',        color: '#EC4899', bg: '#FDF2F8', competencies: ['Learning Agility','Feedback Reception','Self-improvement'] }
+};
+
+const STORIES = [
+  {
+    id: 1,
+    title: 'KYC Onboarding Redesign',
+    category: 'leadership',
+    competency: 'Decision Making',
+    star: { s: true, t: true, a: true, r: true },
+    favorite: false,
+    date: '17 Mar',
+    dateSort: new Date('2025-03-17'),
+    preview: 'Led the complete overhaul of our KYC onboarding flow at a fintech company. The existing process had a 34% drop-off rate at document upload, costing roughly €120k/month in lost activations.',
+    situation: 'Our fintech KYC funnel had a 34% drop-off at document upload, costing €120k/month in lost activations. Regulation required the step but UX was punishing users.',
+    task: 'As PM I was tasked with reducing drop-off by 15% within Q3 without impacting compliance quality or introducing legal risk.',
+    action: 'Ran 12 user interviews, identified confusion around document types. Redesigned the upload UI with live validation, added a format guide tooltip, and introduced async processing so users weren\'t blocked waiting. Shipped in 3 sprints.',
+    result: 'Drop-off fell from 34% to 18% in 6 weeks — exceeding the target. Monthly activation revenue impact: +€80k. Zero compliance flags from legal review.'
+  },
+  {
+    id: 2,
+    title: 'Scaling the ML Pipeline to 10× Volume',
+    category: 'technical',
+    competency: 'System Design',
+    star: { s: true, t: true, a: true, r: false },
+    favorite: true,
+    date: '2 Mar',
+    dateSort: new Date('2025-03-02'),
+    preview: 'Our recommendation system was hitting a wall at 1M events/day. Designed the architecture migration from a monolithic batch process to a Kafka + Flink stream-first approach ahead of a 10× traffic event.',
+    situation: 'Our batch ML pipeline could only process 1M events/day. Black Friday traffic was 10×. We had 8 weeks.',
+    task: 'Design an architecture that could handle 10M events/day with <200ms latency for real-time recommendations.',
+    action: 'Designed a migration from batch Spark to a Kafka + Flink streaming architecture. Broke migration into 4 phases to maintain 99.9% uptime. Coordinated across 3 teams (ML, Platform, Product).',
+    result: ''
+  },
+  {
+    id: 3,
+    title: 'Aligning 4 Teams on a Single API Contract',
+    category: 'collaboration',
+    competency: 'Cross-functional Work',
+    star: { s: true, t: true, a: true, r: true },
+    favorite: false,
+    date: '22 Feb',
+    dateSort: new Date('2025-02-22'),
+    preview: 'Four engineering teams had diverging API specs for a shared data model, blocking 3 product launches. I facilitated alignment over 2 weeks without top-down mandates.',
+    situation: '4 teams had built diverging API specs for the same customer data model, blocking 3 product launches and creating integration debt.',
+    task: 'As the IC PM, facilitate technical alignment without mandating a solution — teams needed to own the outcome.',
+    action: 'Ran a structured 2-week API design sprint. Created a shared RFC template, hosted daily async reviews in Notion, escalated only one unresolvable conflict to engineering leads.',
+    result: 'Single API contract agreed in 2 weeks. All 3 product launches unblocked. The RFC process became the company standard for cross-team technical decisions.'
+  },
+  {
+    id: 4,
+    title: 'Q4 Product Launch Under Tight Deadline',
+    category: 'execution',
+    competency: 'Project Delivery',
+    star: { s: true, t: true, a: false, r: false },
+    favorite: false,
+    date: '10 Feb',
+    dateSort: new Date('2025-02-10'),
+    preview: 'Delivered a strategic enterprise feature in 6 weeks against a 12-week estimate. Still need to write the Action and Result sections — what I actually did to hit the deadline and the measured outcome.',
+    situation: 'Enterprise client contract required a custom reporting feature in 6 weeks. Original estimate was 12 weeks.',
+    task: 'Deliver on time without burning out the team or dropping below the client\'s stated acceptance criteria.',
+    action: '',
+    result: ''
+  },
+  {
+    id: 5,
+    title: 'Building a Cross-border Squad from Zero',
+    category: 'leadership',
+    competency: 'Team Management',
+    star: { s: true, t: true, a: true, r: true },
+    favorite: true,
+    date: '28 Jan',
+    dateSort: new Date('2025-01-28'),
+    preview: 'Hired and onboarded an 8-person distributed squad across 4 EU countries. Built rituals, comms norms, and sprint process from scratch while hitting the first milestone in 10 weeks.',
+    situation: 'Company expanded from Berlin to 4 EU offices. I was asked to build a new distributed product squad with 8 engineers across DE, NL, PL, ES — all remote-first.',
+    task: 'Get the team operational and ship our first milestone in 10 weeks while establishing durable working norms.',
+    action: 'Ran a 2-day async "team charter" workshop. Established working agreements, defined a timezone-friendly sprint cadence (no syncs before 10am CET / after 4pm CET), and set up a lightweight docs culture in Notion.',
+    result: 'Team shipped first milestone on week 10. Voluntary attrition: 0 in first year. Squad became the company\'s internal model for remote team setup.'
+  }
+];
+
+// ── COVERAGE ──────────────────────────────────────────────────────
+function getCoveredCompetencies() {
+  const covered = new Set();
+  STORIES.forEach(s => covered.add(s.competency));
+  return covered;
+}
+
+function buildCoverageGrid() {
+  const covered = getCoveredCompetencies();
+  const grid = document.getElementById('coverage-grid');
+  grid.innerHTML = '';
+  let coveredCount = 0;
+  Object.entries(CATEGORIES).forEach(([catKey, cat]) => {
+    const row = document.createElement('div');
+    row.className = 'coverage-row';
+    const catLabel = document.createElement('div');
+    catLabel.className = 'coverage-category';
+    catLabel.style.color = cat.color;
+    catLabel.textContent = cat.label;
+    row.appendChild(catLabel);
+    const cells = document.createElement('div');
+    cells.className = 'coverage-cells';
+    cat.competencies.forEach(comp => {
+      const count = STORIES.filter(s => s.competency === comp).length;
+      const isFilled = count > 0;
+      if (isFilled) coveredCount++;
+      const cell = document.createElement('div');
+      cell.className = 'coverage-cell ' + (isFilled ? 'filled' : 'gap');
+      if (isFilled) {
+        cell.style.background = cat.bg;
+        cell.style.color = cat.color;
+        cell.style.borderColor = cat.color + '50';
+      }
+      cell.innerHTML = comp + (isFilled ? ` <span class="cell-count">${count}</span>` : ' <span class="cell-count">+</span>');
+      cell.title = isFilled ? `${count} stor${count>1?'ies':'y'} — ${comp}` : `Gap: no story for ${comp}`;
+      cell.dataset.competency = comp;
+      cell.onclick = () => filterByCompetency(comp, cell);
+      cells.appendChild(cell);
     });
-    const target = document.getElementById('panel-' + name);
-    if (target) target.classList.remove('hidden');
-  }
+    row.appendChild(cells);
+    grid.appendChild(row);
+  });
+  document.getElementById('covered-count').textContent = coveredCount;
+}
 
-  // View switching
-  function setView(view) {
-    ['list', 'grid', 'matrix'].forEach(v => {
-      document.getElementById('view-' + v).classList.add('hidden');
-      document.getElementById('btn-' + v).classList.remove('active');
+let activeCompFilter = null;
+function filterByCompetency(comp, cell) {
+  const section = document.getElementById('coverage-section');
+  if (activeCompFilter === comp) {
+    activeCompFilter = null;
+    document.querySelectorAll('.coverage-cell').forEach(c => c.classList.remove('active-filter'));
+    section.classList.remove('filter-active');
+    renderAll(STORIES);
+  } else {
+    activeCompFilter = comp;
+    document.querySelectorAll('.coverage-cell').forEach(c => c.classList.remove('active-filter'));
+    cell.classList.add('active-filter');
+    section.classList.add('filter-active');
+    renderAll(STORIES.filter(s => s.competency === comp));
+  }
+}
+
+// ── STAR HELPERS ──────────────────────────────────────────────────
+function starPipsHtml(star, color, size) {
+  const keys = ['s','t','a','r'], labels = ['S','T','A','R'];
+  if (size === 'sm') {
+    return keys.map(k =>
+      `<div class="sm-pip" style="${star[k]?`background:${color}`:''}" title="${labels[keys.indexOf(k)]}"></div>`
+    ).join('');
+  }
+  return `<div class="card-star-wrap"><div class="card-star-row">${
+    keys.map((k,i) => `<div class="star-pip">
+      <div class="star-pip-bar" style="${star[k]?`background:${color}`:''}" title="${labels[i]}"></div>
+      <span class="star-pip-label">${labels[i]}</span>
+    </div>`).join('')
+  }</div></div>`;
+}
+
+function starComplete(star) { return Object.values(star).filter(Boolean).length; }
+
+// ── GALLERY ───────────────────────────────────────────────────────
+let currentSort = 'recent';
+
+function buildCard(story) {
+  const cat = CATEGORIES[story.category];
+  const div = document.createElement('div');
+  div.className = 'story-card';
+  div.innerHTML = `
+    <div class="card-accent" style="background:${cat.color}"></div>
+    <div class="card-inner">
+      <div class="card-header">
+        <div class="card-title">${story.title}</div>
+        <button class="card-favorite${story.favorite?' active':''}" data-id="${story.id}" title="Favorite">
+          <svg viewBox="0 0 16 16" fill="${story.favorite?'#F59E0B':'none'}" stroke="${story.favorite?'#F59E0B':'currentColor'}" stroke-width="1.6">
+            <polygon points="8,1.5 10,6 15,6 11,9.5 12.5,14.5 8,11.5 3.5,14.5 5,9.5 1,6 6,6"/>
+          </svg>
+        </button>
+      </div>
+      <div class="card-preview">${story.preview}</div>
+      ${starPipsHtml(story.star, cat.color)}
+      <div class="card-footer">
+        <span class="card-competency" style="color:${cat.color};background:${cat.bg};border-color:${cat.color}40">${story.competency}</span>
+        <span class="card-date">${story.date}</span>
+      </div>
+    </div>`;
+  div.querySelector('.card-favorite').addEventListener('click', e => { e.stopPropagation(); toggleFav(story.id); });
+  div.addEventListener('click', () => openDetail(story.id));
+  return div;
+}
+
+function renderGallery(stories) {
+  const container = document.getElementById('stories-masonry');
+  const empty = document.getElementById('empty-gallery');
+  const label = document.getElementById('stories-label');
+  container.innerHTML = '';
+  const sorted = sortList(stories, currentSort);
+  label.textContent = `${sorted.length} ${sorted.length === 1 ? 'story' : 'stories'}`;
+  if (sorted.length === 0) { empty.style.display = 'flex'; return; }
+  empty.style.display = 'none';
+  sorted.forEach(s => container.appendChild(buildCard(s)));
+}
+
+function sortList(stories, mode) {
+  const arr = [...stories];
+  if (mode === 'recent') return arr.sort((a,b) => b.dateSort - a.dateSort);
+  if (mode === 'title') return arr.sort((a,b) => a.title.localeCompare(b.title));
+  if (mode === 'complete') return arr.sort((a,b) => starComplete(b.star) - starComplete(a.star));
+  return arr;
+}
+
+function sortStories(val) {
+  currentSort = val;
+  const stories = activeCompFilter ? STORIES.filter(s => s.competency === activeCompFilter) : STORIES;
+  renderGallery(stories);
+}
+
+// ── BOARD ─────────────────────────────────────────────────────────
+function renderBoard(stories) {
+  const container = document.getElementById('board-container');
+  container.innerHTML = '';
+  Object.entries(CATEGORIES).forEach(([catKey, cat]) => {
+    const catStories = stories.filter(s => s.category === catKey);
+    const col = document.createElement('div');
+    col.className = 'board-col';
+    let html = `<div class="board-col-header" style="border-color:${cat.color}">
+      <span class="board-col-dot" style="background:${cat.color}"></span>
+      <span class="board-col-title">${cat.label}</span>
+      <span class="board-col-count">${catStories.length}</span>
+    </div>`;
+    col.innerHTML = html;
+    catStories.forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'story-card-sm';
+      card.innerHTML = `<div class="card-sm-accent" style="background:${cat.color}"></div>
+        <div class="card-sm-inner">
+          <div class="card-sm-title">${s.title}</div>
+          <div class="card-sm-footer">
+            <span class="card-sm-comp">${s.competency}</span>
+            <div class="card-sm-star">${starPipsHtml(s.star, cat.color, 'sm')}</div>
+          </div>
+        </div>`;
+      card.onclick = () => openDetail(s.id);
+      col.appendChild(card);
     });
-    document.getElementById('view-' + view).classList.remove('hidden');
-    document.getElementById('btn-' + view).classList.add('active');
-  }
+    const addBtn = document.createElement('button');
+    addBtn.className = 'board-add-btn';
+    addBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
+    </svg> Add ${cat.label} story`;
+    addBtn.onclick = () => showToast(`New ${cat.label} story`);
+    col.appendChild(addBtn);
+    container.appendChild(col);
+  });
+}
 
-  function closeAnalysis(e) {
-    if (e.target === document.getElementById('analysis-modal')) {
-      document.getElementById('analysis-modal').remove();
-    }
-  }
+// ── TABLE ─────────────────────────────────────────────────────────
+function renderMatrix(stories) {
+  const tbody = document.getElementById('matrix-body');
+  tbody.innerHTML = '';
+  sortList(stories, 'recent').forEach(s => {
+    const cat = CATEGORIES[s.category];
+    const comp = starComplete(s.star);
+    const row = document.createElement('tr');
+    row.onclick = () => openDetail(s.id);
+    row.innerHTML = `
+      <td style="font-weight:500">${s.title}</td>
+      <td><span style="font-size:11px;font-weight:500;color:${cat.color};background:${cat.bg};padding:2px 8px;border-radius:20px">${cat.label}</span></td>
+      <td style="font-size:12px;color:var(--text-2)">${s.competency}</td>
+      <td><div class="matrix-star-mini">
+        ${['s','t','a','r'].map(k=>`<div class="matrix-pip" style="background:${s.star[k]?cat.color:'#E2E8F0'}"></div>`).join('')}
+        <span style="font-family:'DM Mono';font-size:10px;color:var(--text-3);margin-left:4px">${comp}/4</span>
+      </div></td>
+      <td>${s.favorite ? '⭐' : '—'}</td>
+      <td style="font-family:'DM Mono';font-size:11px;color:var(--text-3)">${s.date}</td>`;
+    tbody.appendChild(row);
+  });
+}
 
-  // Start on detail view
-  showPanel('detail');
+function renderAll(stories) {
+  renderGallery(stories);
+  renderBoard(stories);
+  renderMatrix(stories);
+}
+
+// ── VIEW SWITCHING ─────────────────────────────────────────────────
+function setView(view) {
+  ['gallery','board','matrix'].forEach(v => {
+    document.getElementById('view-'+v).style.display = v===view ? 'block' : 'none';
+    document.getElementById('btn-'+v).classList.toggle('active', v===view);
+  });
+}
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────
+function openDetail(id) {
+  const story = STORIES.find(s => s.id === id);
+  if (!story) return;
+  const cat = CATEGORIES[story.category];
+  document.getElementById('detail-title').textContent = story.title;
+  document.getElementById('detail-badges').innerHTML = `
+    <span style="font-size:11px;font-weight:500;color:${cat.color};background:${cat.bg};padding:2px 8px;border-radius:20px;border:1.5px solid ${cat.color}30">${cat.label}</span>
+    <span style="font-size:11px;font-weight:500;color:var(--text-2);background:var(--gray-bg);padding:2px 8px;border-radius:20px;border:1.5px solid var(--border)">${story.competency}</span>
+    <span style="font-family:'DM Mono';font-size:10px;color:var(--text-3)">${story.date}</span>`;
+
+  const comp = starComplete(story.star);
+  const starLabels = ['SITUATION','TASK','ACTION','RESULT'];
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-star-progress">
+      ${['s','t','a','r'].map((k,i)=>`<div class="detail-star-item">
+        <div class="detail-star-bar" style="background:${story.star[k]?cat.color:'#E2E8F0'}"></div>
+        <div class="detail-star-label">${starLabels[i]}</div>
+      </div>`).join('')}
+    </div>
+    ${comp < 4 ? `<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 12px;margin-bottom:20px;font-size:12px;color:#92400E;display:flex;align-items:center;gap:8px">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#F59E0B" stroke-width="2"><circle cx="8" cy="8" r="7"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.5" fill="#F59E0B"/></svg>
+      Missing ${4-comp} section${4-comp>1?'s':''}. Complete it to strengthen your answer.
+    </div>` : `<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:10px 12px;margin-bottom:20px;font-size:12px;color:#065F46;display:flex;align-items:center;gap:8px">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#10B981" stroke-width="2"><circle cx="8" cy="8" r="7"/><path d="m5 8 2.5 2.5L11 5"/></svg>
+      Full STAR story — ready to use in interviews.
+    </div>`}
+    ${['situation','task','action','result'].map(key => {
+      const labels = {situation:'Situation',task:'Task',action:'Action',result:'Result'};
+      const text = story[key];
+      return `<div class="detail-section">
+        <div class="detail-section-header">
+          <span class="detail-section-label" style="background:${text?cat.bg:'var(--gray-bg)'};color:${text?cat.color:'var(--text-3)'}">${labels[key].toUpperCase()}</span>
+        </div>
+        ${text
+          ? `<div class="detail-section-text">${text}</div>`
+          : `<div style="border:1.5px dashed var(--border-d);border-radius:8px;padding:14px;font-size:12px;color:var(--text-3);text-align:center">
+              No ${labels[key].toLowerCase()} written yet — <a href="#" onclick="showToast('Edit mode coming soon!');return false" style="color:var(--blue);text-decoration:none">add it now →</a>
+             </div>`}
+      </div>`;
+    }).join('')}`;
+
+  document.getElementById('detail-overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+}
+
+// ── FAVORITES ─────────────────────────────────────────────────────
+function toggleFav(id) {
+  const story = STORIES.find(s => s.id === id);
+  if (!story) return;
+  story.favorite = !story.favorite;
+  showToast(story.favorite ? '⭐ Added to favorites' : 'Removed from favorites');
+  const stories = activeCompFilter ? STORIES.filter(s => s.competency === activeCompFilter) : STORIES;
+  renderAll(stories);
+}
+
+// ── SIDEBAR FILTER ─────────────────────────────────────────────────
+function filterSidebar(filter, el) {
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  activeCompFilter = null;
+  document.querySelectorAll('.coverage-cell').forEach(c => c.classList.remove('active-filter'));
+  document.getElementById('coverage-section').classList.remove('filter-active');
+  let filtered = STORIES;
+  if (filter === 'favorite') filtered = STORIES.filter(s => s.favorite);
+  else if (filter === 'complete') filtered = STORIES.filter(s => starComplete(s.star) === 4);
+  else if (filter === 'incomplete') filtered = STORIES.filter(s => starComplete(s.star) < 4);
+  else if (CATEGORIES[filter]) filtered = STORIES.filter(s => s.category === filter);
+  renderAll(filtered);
+}
+
+// ── COMMAND PALETTE ────────────────────────────────────────────────
+function openCmd() {
+  document.getElementById('cmd-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('cmd-input').focus(), 40);
+  filterCmd('');
+}
+function closeCmdIfBg(e) {
+  if (e.target === document.getElementById('cmd-overlay')) {
+    document.getElementById('cmd-overlay').classList.remove('open');
+    document.getElementById('cmd-input').value = '';
+  }
+}
+function filterCmd(query) {
+  const q = query.toLowerCase().trim();
+  const matches = STORIES.filter(s =>
+    s.title.toLowerCase().includes(q) ||
+    s.competency.toLowerCase().includes(q) ||
+    CATEGORIES[s.category].label.toLowerCase().includes(q)
+  );
+  const results = document.getElementById('cmd-results');
+  if (matches.length === 0) {
+    results.innerHTML = `<div class="cmd-group-title">No stories found</div>
+      <div style="padding:24px;text-align:center;font-size:12px;color:var(--text-3)">Try a different search, or press N to create a new story.</div>`;
+    return;
+  }
+  results.innerHTML = `<div class="cmd-group-title">Stories (${matches.length})</div>` +
+    matches.map(s => {
+      const cat = CATEGORIES[s.category];
+      const comp = starComplete(s.star);
+      return `<div class="cmd-item" onclick="document.getElementById('cmd-overlay').classList.remove('open');openDetail(${s.id})">
+        <div class="cmd-item-icon" style="background:${cat.bg};color:${cat.color}">${s.title.charAt(0)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.title}</div>
+          <div style="font-size:11px;color:var(--text-3)">${cat.label} · ${s.competency} · ${comp}/4 STAR</div>
+        </div>
+        <span class="cmd-item-meta">${s.date}</span>
+      </div>`;
+    }).join('');
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── KEYBOARD SHORTCUTS ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  const inInput = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
+  const cmdOpen = document.getElementById('cmd-overlay').classList.contains('open');
+  if (e.key === 'Escape') {
+    if (cmdOpen) { document.getElementById('cmd-overlay').classList.remove('open'); return; }
+    closeDetail(); return;
+  }
+  if ((e.key === '/' || (e.key === 'k' && (e.metaKey||e.ctrlKey))) && !inInput) {
+    e.preventDefault(); openCmd(); return;
+  }
+  if (inInput) return;
+  if (e.key === 'n' || e.key === 'N') { showToast('New story — coming soon'); return; }
+  if (e.key === '1') { setView('gallery'); showToast('Gallery view'); return; }
+  if (e.key === '2') { setView('board');   showToast('Board view'); return; }
+  if (e.key === '3') { setView('matrix');  showToast('Table view'); return; }
+});
+
+// ── INIT ───────────────────────────────────────────────────────────
+buildCoverageGrid();
+renderAll(STORIES);
 </script>
 </body>
 </html>
