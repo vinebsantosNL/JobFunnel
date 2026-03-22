@@ -194,7 +194,7 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
           name="competencies"
           control={control}
           render={({ field }) => (
-            <CompetencyPicker selected={field.value} onChange={field.onChange} />
+            <CompetencyPicker selected={field.value ?? []} onChange={field.onChange} />
           )}
         />
       </div>
