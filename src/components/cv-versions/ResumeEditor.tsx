@@ -808,7 +808,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
       {/* ── Top bar ─────────────────────────────────────────────────────────── */}
       <div className="flex-shrink-0 flex items-center gap-3 px-4 sm:px-6 h-14 border-b border-gray-200 bg-white">
         <button
-          onClick={() => router.push('/app/cv-versions')}
+          onClick={() => router.push('/cv-versions')}
           className="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors flex-shrink-0"
           aria-label="Back to library"
         >
@@ -868,7 +868,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
                 id: version.id,
                 name: `${cvName} – Copy`,
               })
-              router.push(`/app/cv-versions/${copy.id}/edit`)
+              router.push(`/cv-versions/${copy.id}/edit`)
             }}
             disabled={duplicateMutation.isPending}
           >

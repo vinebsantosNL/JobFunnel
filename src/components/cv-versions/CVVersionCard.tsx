@@ -273,7 +273,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
       >
         {/* Thumbnail — click to open full editor */}
         <Link
-          href={`/app/cv-versions/${version.id}/edit`}
+          href={`/cv-versions/${version.id}/edit`}
           className="p-3 pb-0 block group/thumb"
         >
           <div className="relative">
@@ -385,7 +385,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             {version.is_locked ? (
               // Locked: view editor (read-only), Rename, Duplicate, Archive
               <>
-                <ActionLinkButton href={`/app/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-3.5 h-3.5" />} label="View" />
+                <ActionLinkButton href={`/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-3.5 h-3.5" />} label="View" />
                 <ActionButton icon={<Pencil className="w-3.5 h-3.5" />} label="Rename" onClick={openEdit} />
                 <ActionButton icon={<Copy className="w-3.5 h-3.5" />} label="Duplicate" onClick={openDuplicate} />
                 <ActionButton
@@ -398,7 +398,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             ) : (
               // Unlocked: open editor, Rename, Duplicate, Set default, Archive
               <>
-                <ActionLinkButton href={`/app/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-3.5 h-3.5" />} label="Edit" />
+                <ActionLinkButton href={`/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-3.5 h-3.5" />} label="Edit" />
                 <ActionButton icon={<Pencil className="w-3.5 h-3.5" />} label="Rename" onClick={openEdit} />
                 <ActionButton icon={<Copy className="w-3.5 h-3.5" />} label="Duplicate" onClick={openDuplicate} />
                 {!version.is_default && (
@@ -432,7 +432,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             <SheetTitle className="text-left truncate">{version.name}</SheetTitle>
           </SheetHeader>
           <div className="flex flex-col gap-1">
-            <SheetActionLink href={`/app/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-4 h-4" />} label={version.is_locked ? 'View resume' : 'Open editor'} onClick={() => setMobileSheetOpen(false)} />
+            <SheetActionLink href={`/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-4 h-4" />} label={version.is_locked ? 'View resume' : 'Open editor'} onClick={() => setMobileSheetOpen(false)} />
             <SheetAction icon={<Pencil className="w-4 h-4" />} label="Rename" onClick={openEdit} />
             <SheetAction icon={<Copy className="w-4 h-4" />} label="Duplicate" onClick={openDuplicate} />
             {!version.is_default && !version.is_locked && (

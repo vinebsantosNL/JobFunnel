@@ -12,7 +12,7 @@ import type { CVComparisonRow } from '@/lib/services/analyticsService'
 import { cn } from '@/lib/utils'
 
 const FREE_TIER_LIMIT = 2
-const NEW_RESUME_HREF = '/app/cv-versions/new'
+const NEW_RESUME_HREF = '/cv-versions/new'
 
 type FilterTab = 'all' | 'active' | 'archived'
 

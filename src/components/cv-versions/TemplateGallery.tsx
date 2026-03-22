@@ -374,7 +374,7 @@ export function TemplateGallery() {
       name: resumeName.trim(),
       template_id: selectedId,
     })
-    router.push(`/app/cv-versions/${version.id}/edit`)
+    router.push(`/cv-versions/${version.id}/edit`)
   }
 
   return (
