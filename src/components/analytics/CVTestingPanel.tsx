@@ -7,8 +7,6 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CVComparisonChart } from '@/components/analytics/CVComparisonChart'
 import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
-import { ProGate } from '@/components/common/ProGate'
-import { useUserStore } from '@/store/userStore'
 import type { CVComparisonRow } from '@/lib/services/analyticsService'
 import type { CVVersion } from '@/types/database.types'
 
@@ -144,8 +142,6 @@ export function CVTestingPanel() {
   const preset = DATE_PRESETS[presetIndex]
   const dateRange = useMemo(() => getDateRange(preset.days), [preset.days])
 
-  const profile = useUserStore((state) => state.profile)
-
   const { data: cvVersions, isLoading: versionsLoading } = useQuery({
     queryKey: ['cv-versions-all'],
     queryFn: fetchAllCVVersions,
@@ -252,12 +248,5 @@ export function CVTestingPanel() {
     </div>
   )
 
-  return (
-    <ProGate
-      feature="CV A/B Testing"
-      description="Compare how different CV versions perform across your job applications."
-    >
-      {dataSection}
-    </ProGate>
-  )
+  return dataSection
 }
