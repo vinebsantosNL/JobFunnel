@@ -66,6 +66,18 @@ export function useCVVersions(includeArchived = false) {
   })
 }
 
+export function useCVVersion(id: string) {
+  return useQuery({
+    queryKey: ['cv-versions', id],
+    queryFn: async (): Promise<CVVersion> => {
+      const res = await fetch(`/api/cv-versions/${id}`)
+      if (!res.ok) throw new Error('CV version not found')
+      return res.json()
+    },
+    enabled: !!id,
+  })
+}
+
 export function useCreateCVVersion() {
   const queryClient = useQueryClient()
   return useMutation({

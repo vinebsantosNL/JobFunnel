@@ -1,23 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { FileText, Lock, Sparkles } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useCVVersions } from '@/hooks/useCVVersions'
 import { useSubscription } from '@/hooks/use-subscription'
 import { CVVersionCard } from './CVVersionCard'
-import { CVVersionForm } from './CVVersionForm'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Button, buttonVariants } from '@/components/ui/button'
 import type { CVComparisonRow } from '@/lib/services/analyticsService'
 import { cn } from '@/lib/utils'
 
 const FREE_TIER_LIMIT = 2
+const NEW_RESUME_HREF = '/app/cv-versions/new'
 
 type FilterTab = 'all' | 'active' | 'archived'
 
@@ -29,7 +24,6 @@ async function fetchCVComparison(): Promise<CVComparisonRow[]> {
 
 export function CVVersionList() {
   const [filter, setFilter] = useState<FilterTab>('active')
-  const [createOpen, setCreateOpen] = useState(false)
 
   const { data: allVersions, isLoading } = useCVVersions(true)
   const { tier } = useSubscription()
@@ -108,15 +102,20 @@ export function CVVersionList() {
           })}
         </div>
 
-        <Button
-          onClick={() => setCreateOpen(true)}
-          disabled={atFreeLimit}
-          title={atFreeLimit ? 'Upgrade to Pro for unlimited resume versions' : undefined}
-          size="sm"
-          className="flex-shrink-0"
-        >
-          + New resume
-        </Button>
+        {atFreeLimit ? (
+          <Button
+            disabled
+            size="sm"
+            className="flex-shrink-0"
+            title="Upgrade to Pro for unlimited resume versions"
+          >
+            + New resume
+          </Button>
+        ) : (
+          <Link href={NEW_RESUME_HREF} className={cn(buttonVariants({ size: 'sm' }), 'flex-shrink-0')}>
+            + New resume
+          </Link>
+        )}
       </div>
 
       {/* Free tier warning */}
@@ -131,7 +130,7 @@ export function CVVersionList() {
 
       {/* Grid */}
       {displayVersions.length === 0 && !atFreeLimit ? (
-        <EmptyState filter={filter} onCreateClick={() => setCreateOpen(true)} />
+        <EmptyState filter={filter} />
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {displayVersions.map((version) => (
@@ -144,41 +143,27 @@ export function CVVersionList() {
 
           {/* "+ New" dashed card — shown in active/all when not at limit */}
           {(filter === 'active' || filter === 'all') && !atFreeLimit && (
-            <button
-              onClick={() => setCreateOpen(true)}
+            <Link
+              href={NEW_RESUME_HREF}
               className="rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 py-12 text-gray-400 hover:border-blue-300 hover:text-blue-400 transition-colors min-h-[200px]"
             >
               <span className="text-2xl font-light leading-none">+</span>
               <span className="text-sm">New resume version</span>
-            </button>
+            </Link>
           )}
 
           {/* Pro-locked placeholder for free users at limit */}
-          {(filter === 'active' || filter === 'all') && atFreeLimit && (
-            <ProLockedCard />
-          )}
+          {(filter === 'active' || filter === 'all') && atFreeLimit && <ProLockedCard />}
         </div>
       )}
 
-      {/* Create Dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent size="md">
-          <DialogHeader>
-            <DialogTitle>New Resume Version</DialogTitle>
-          </DialogHeader>
-          <CVVersionForm
-            onSuccess={() => setCreateOpen(false)}
-            onCancel={() => setCreateOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
 
 // ─── Empty state ───────────────────────────────────────────────────────────────
 
-function EmptyState({ filter, onCreateClick }: { filter: FilterTab; onCreateClick: () => void }) {
+function EmptyState({ filter }: { filter: FilterTab }) {
   if (filter === 'archived') {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 py-16 text-center">
@@ -200,7 +185,7 @@ function EmptyState({ filter, onCreateClick }: { filter: FilterTab; onCreateClic
       <p className="text-sm text-gray-400 mb-5 max-w-xs">
         Build an ATS-validated resume tailored to your target roles and track which version gets you the most interviews.
       </p>
-      <Button onClick={onCreateClick}>Create first resume</Button>
+      <Link href={NEW_RESUME_HREF} className={buttonVariants()}>Create first resume</Link>
     </div>
   )
 }
