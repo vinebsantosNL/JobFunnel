@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft,
@@ -10,11 +11,11 @@ import {
   Plus,
   Trash2,
   Save,
-  FileText,
+  Download,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useUpdateCVVersion, useDuplicateCVVersion } from '@/hooks/useCVVersions'
-import type { CVVersion } from '@/types/database.types'
+import type { CVVersion, TemplateId } from '@/types/database.types'
 import type {
   ResumeData,
   ResumeExperience,
@@ -24,6 +25,16 @@ import type {
 } from '@/types/resume'
 import { EMPTY_RESUME_DATA } from '@/types/resume'
 import { cn } from '@/lib/utils'
+import { scoreResume } from '@/lib/ats-engine'
+import type { AtsScoreResult, AtsRuleResult } from '@/lib/ats-engine'
+import { useQuery } from '@tanstack/react-query'
+import type { JobApplication } from '@/types/database.types'
+
+// PDFViewer uses browser-only APIs — must be loaded dynamically
+const ResumePreview = dynamic(
+  () => import('./pdf/ResumePreview').then((m) => m.ResumePreview),
+  { ssr: false, loading: () => <PreviewLoading /> }
+)
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -687,16 +698,245 @@ function EducationSection({
   )
 }
 
-// ─── Preview placeholder ──────────────────────────────────────────────────────
+// ─── Preview loading skeleton ─────────────────────────────────────────────────
 
-function PreviewPane() {
+function PreviewLoading() {
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[500px] bg-gray-50 rounded-xl border border-dashed border-gray-200 gap-3">
-      <FileText className="w-10 h-10 text-gray-300" strokeWidth={1.2} />
-      <p className="text-sm font-medium text-gray-400">Live preview</p>
-      <p className="text-xs text-gray-400 text-center max-w-[180px]">
-        PDF preview will be available in the next update.
-      </p>
+    <div className="w-full h-full flex items-center justify-center bg-gray-50">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+        <p className="text-xs text-gray-400">Rendering preview…</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── ATS Score tab ────────────────────────────────────────────────────────────
+
+function AtsScoreGauge({ score }: { score: number }) {
+  const color = score >= 80 ? 'text-green-600' : score >= 60 ? 'text-amber-500' : 'text-red-500'
+  const bg    = score >= 80 ? 'bg-green-50 border-green-200' : score >= 60 ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'
+  const label = score >= 80 ? 'Strong' : score >= 60 ? 'Needs work' : 'Critical issues'
+
+  return (
+    <div className={cn('rounded-xl border p-5 flex items-center gap-5', bg)}>
+      <div className={cn('text-5xl font-black tabular-nums', color)}>{score}</div>
+      <div>
+        <p className={cn('text-sm font-bold', color)}>{label}</p>
+        <p className="text-xs text-gray-500 mt-0.5">out of 100 · deterministic ATS rule engine</p>
+      </div>
+    </div>
+  )
+}
+
+function AtsRuleRow({ rule }: { rule: AtsRuleResult }) {
+  const icon = rule.severity === 'pass'
+    ? <span className="w-4 h-4 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">✓</span>
+    : rule.severity === 'error'
+    ? <span className="w-4 h-4 rounded-full bg-red-500 flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">✕</span>
+    : <span className="w-4 h-4 rounded-full bg-amber-400 flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">!</span>
+
+  return (
+    <div className="flex gap-3 py-3 border-b border-gray-100 last:border-0">
+      <div className="mt-0.5">{icon}</div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-800">{rule.title}</p>
+        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{rule.detail}</p>
+        {rule.penalty > 0 && (
+          <span className="text-xs text-red-500 font-medium">−{rule.penalty} pts</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function AtsScoreTab({ data, templateId }: { data: ResumeData; templateId: TemplateId }) {
+  const result: AtsScoreResult = scoreResume(data, templateId)
+
+  return (
+    <div className="space-y-5">
+      <AtsScoreGauge score={result.score} />
+
+      <div className="flex gap-4 text-center">
+        <div className="flex-1 rounded-lg bg-red-50 border border-red-100 py-3">
+          <p className="text-xl font-bold text-red-600">{result.errors.length}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Errors</p>
+        </div>
+        <div className="flex-1 rounded-lg bg-amber-50 border border-amber-100 py-3">
+          <p className="text-xl font-bold text-amber-500">{result.warnings.length}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Warnings</p>
+        </div>
+        <div className="flex-1 rounded-lg bg-green-50 border border-green-100 py-3">
+          <p className="text-xl font-bold text-green-600">{result.passes.length}</p>
+          <p className="text-xs text-gray-500 mt-0.5">Passing</p>
+        </div>
+      </div>
+
+      {result.errors.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">Errors — fix these first</p>
+          <div className="rounded-xl border border-red-100 px-4 divide-y divide-gray-100">
+            {result.errors.map((r) => <AtsRuleRow key={r.id} rule={r} />)}
+          </div>
+        </div>
+      )}
+
+      {result.warnings.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-1">Warnings — recommended fixes</p>
+          <div className="rounded-xl border border-amber-100 px-4 divide-y divide-gray-100">
+            {result.warnings.map((r) => <AtsRuleRow key={r.id} rule={r} />)}
+          </div>
+        </div>
+      )}
+
+      {result.passes.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Passing checks</p>
+          <div className="rounded-xl border border-green-100 px-4 divide-y divide-gray-100">
+            {result.passes.map((r) => <AtsRuleRow key={r.id} rule={r} />)}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Pipeline Keywords tab ────────────────────────────────────────────────────
+
+const STOP_WORDS = new Set([
+  'a','an','the','and','or','but','in','on','at','to','for','of','with','by',
+  'from','up','about','into','through','during','is','are','was','were','be',
+  'been','being','have','has','had','do','does','did','will','would','could',
+  'should','may','might','this','that','these','those','i','we','you','they',
+  'he','she','it','as','if','then','than','so','not','no','nor','yet','both',
+  'either','each','few','more','most','other','some','such','own','same',
+])
+
+function extractKeywords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s\-+#.]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length >= 3 && !STOP_WORDS.has(w))
+}
+
+function buildCvKeywordSet(data: ResumeData): Set<string> {
+  const text = [
+    data.summary ?? '',
+    ...data.experience.flatMap((e) => [e.title, e.company, ...e.bullets.map((b) => b.text)]),
+    ...data.skills,
+    ...data.education.flatMap((e) => [e.degree, e.field ?? '']),
+  ].join(' ')
+  return new Set(extractKeywords(text))
+}
+
+function PipelineKeywordsTab({ data }: { data: ResumeData }) {
+  const { data: jobs, isLoading } = useQuery<JobApplication[]>({
+    queryKey: ['jobs-keywords'],
+    queryFn: async () => {
+      const res = await fetch('/api/jobs')
+      if (!res.ok) return []
+      return res.json()
+    },
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  const activeJobs = (jobs ?? []).filter(
+    (j) => !['rejected', 'withdrawn'].includes(j.stage)
+  )
+
+  if (activeJobs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+        <p className="text-sm font-medium text-gray-500">No active pipeline jobs</p>
+        <p className="text-xs text-gray-400 max-w-xs">
+          Add jobs to your pipeline first. Keyword gaps will appear here once you have active applications.
+        </p>
+        <a href="/pipeline" className="text-xs text-blue-600 underline">Go to Pipeline →</a>
+      </div>
+    )
+  }
+
+  // Build keyword frequency map from pipeline job titles + notes
+  const pipelineText = activeJobs
+    .flatMap((j) => [j.job_title, j.company_name, j.notes ?? ''])
+    .join(' ')
+  const pipelineKeywords = extractKeywords(pipelineText)
+
+  const freqMap = new Map<string, number>()
+  for (const kw of pipelineKeywords) {
+    freqMap.set(kw, (freqMap.get(kw) ?? 0) + 1)
+  }
+
+  const cvKeywords = buildCvKeywordSet(data)
+
+  // Missing = in pipeline ≥2 times but not in CV
+  const missing = Array.from(freqMap.entries())
+    .filter(([kw, count]) => count >= 2 && !cvKeywords.has(kw))
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 30)
+
+  // Present = in pipeline AND in CV
+  const present = Array.from(freqMap.entries())
+    .filter(([kw]) => cvKeywords.has(kw))
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 20)
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+        <p className="text-sm font-semibold text-blue-800">Based on {activeJobs.length} active pipeline jobs</p>
+        <p className="text-xs text-blue-600 mt-0.5">Keywords ranked by frequency across your saved job titles and notes.</p>
+      </div>
+
+      {missing.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Missing from your CV</p>
+          <div className="flex flex-wrap gap-2">
+            {missing.map(([kw, count]) => (
+              <span
+                key={kw}
+                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 font-medium"
+              >
+                {kw}
+                <span className="text-red-400 text-[10px]">×{count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {present.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-2">Already in your CV</p>
+          <div className="flex flex-wrap gap-2">
+            {present.map(([kw, count]) => (
+              <span
+                key={kw}
+                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 font-medium"
+              >
+                {kw}
+                <span className="text-green-400 text-[10px]">×{count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {missing.length === 0 && (
+        <div className="rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-center">
+          <p className="text-sm font-semibold text-green-700">Great keyword coverage!</p>
+          <p className="text-xs text-green-600 mt-0.5">Your CV already contains the most frequent keywords from your pipeline.</p>
+        </div>
+      )}
     </div>
   )
 }
@@ -725,6 +965,19 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
     ...parsed,
     contact: { ...EMPTY_RESUME_DATA.contact, ...(parsed.contact ?? {}) },
   })
+
+  // Debounced preview data — updated 300ms after every change to avoid re-rendering on every keystroke
+  const [previewData, setPreviewData] = useState<ResumeData>({
+    ...EMPTY_RESUME_DATA,
+    ...parsed,
+    contact: { ...EMPTY_RESUME_DATA.contact, ...(parsed.contact ?? {}) },
+  })
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function schedulePreviewUpdate(next: ResumeData) {
+    if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
+    previewTimerRef.current = setTimeout(() => setPreviewData(next), 300)
+  }
 
   // Section open/close state — contact open by default for new CVs
   const hasContent = !!(parsed.contact?.firstName || parsed.contact?.email)
@@ -761,12 +1014,14 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
     }
   }, [])
 
   function handleDataChange(next: ResumeData) {
     setData(next)
     scheduleAutosave(next, cvName)
+    schedulePreviewUpdate(next)
   }
 
   function handleNameChange(name: string) {
@@ -795,6 +1050,28 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
     { id: 'ats', label: 'ATS Score' },
     { id: 'keywords', label: 'Pipeline Keywords' },
   ]
+
+  // ── Download handlers ──────────────────────────────────────────────────────
+  const [downloading, setDownloading] = useState<'pdf' | 'docx' | null>(null)
+
+  async function handleDownload(format: 'pdf' | 'docx') {
+    setDownloading(format)
+    try {
+      const res = await fetch(`/api/cv-versions/${version.id}/export/${format}`, { method: 'POST' })
+      if (!res.ok) throw new Error(`Export failed: ${res.status}`)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${cvName.replace(/[^a-z0-9\-_]/gi, '_')}.${format}`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      // silent — user sees button re-enable
+    } finally {
+      setDownloading(null)
+    }
+  }
 
   // ── Save indicator text ────────────────────────────────────────────────────
   const saveIndicator = updateMutation.isPending
@@ -847,6 +1124,30 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
             Save
           </Button>
         )}
+
+        {/* Download buttons */}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => handleDownload('pdf')}
+          disabled={downloading !== null}
+          className="flex-shrink-0 hidden sm:flex items-center gap-1.5"
+          title="Download as PDF"
+        >
+          <Download className="w-3.5 h-3.5" />
+          {downloading === 'pdf' ? 'Generating…' : 'PDF'}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => handleDownload('docx')}
+          disabled={downloading !== null}
+          className="flex-shrink-0 hidden sm:flex items-center gap-1.5"
+          title="Download as DOCX (recommended for Taleo/SAP)"
+        >
+          <Download className="w-3.5 h-3.5" />
+          {downloading === 'docx' ? 'Generating…' : 'DOCX'}
+        </Button>
       </div>
 
       {/* ── Lock banner ─────────────────────────────────────────────────────── */}
@@ -1013,33 +1314,23 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
             )}
 
             {activeTab === 'ats' && (
-              <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-                <p className="text-sm font-medium text-gray-500">ATS Score</p>
-                <p className="text-xs text-gray-400 max-w-xs">
-                  The ATS rule engine is coming in the next sprint. Fill in your content and come back to check your score.
-                </p>
-              </div>
+              <AtsScoreTab data={data} templateId={version.template_id as TemplateId} />
             )}
 
             {activeTab === 'keywords' && (
-              <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-                <p className="text-sm font-medium text-gray-500">Pipeline Keywords</p>
-                <p className="text-xs text-gray-400 max-w-xs">
-                  Add jobs to your pipeline first. Keyword gaps will appear here once your saved applications have job descriptions.
-                </p>
-              </div>
+              <PipelineKeywordsTab data={data} />
             )}
           </div>
         </div>
 
-        {/* Preview side — desktop */}
+        {/* Preview side — desktop + mobile preview tab */}
         <div
           className={cn(
-            'hidden sm:flex flex-1 flex-col p-4 overflow-y-auto bg-gray-100 border-l border-gray-200',
+            'hidden sm:flex flex-1 flex-col bg-gray-200 border-l border-gray-200 overflow-hidden',
             mobileTab === 'preview' && '!flex w-full sm:w-auto'
           )}
         >
-          <PreviewPane />
+          <ResumePreview data={previewData} templateId={version.template_id as TemplateId} />
         </div>
       </div>
     </div>
