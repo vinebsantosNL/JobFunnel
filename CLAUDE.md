@@ -316,15 +316,45 @@ Growth: Learning Agility, Feedback Reception, Self-improvement
 
 ---
 
+## Branch & Deployment Strategy
+
+JobFunnel uses a two-branch pipeline to protect customers from regressions.
+
+```
+feature/your-change  →  staging  →  main (production)
+```
+
+| Branch | Purpose | Vercel URL |
+|---|---|---|
+| `staging` | Validate design and behaviour before release | `{project}-git-staging-{user}.vercel.app` (auto-assigned by Vercel) |
+| `main` | Production — live customers | Custom domain |
+
+**Rules:**
+- All work is done on short-lived feature branches, then merged into `staging` first.
+- Only after validating on staging should code be merged into `main` for production.
+- Never push directly to `main` without going through `staging`.
+- Cron jobs and email notifications only run on production (`main`). Staging is safe to test freely.
+
+**CI (GitHub Actions)** runs automatically on every push to `staging` and every PR to `main`:
+- Type check (`tsc --noEmit`)
+- Lint (`eslint`)
+- Build (requires `STAGING_*` secrets set in GitHub → Settings → Secrets)
+
+**GitHub branch protection to configure (once):**
+- `main`: Require PR from `staging`, require CI to pass, no direct pushes.
+- `staging`: Require CI to pass before merging feature branches.
+
+---
+
 ## Pre-Push Quality Gate — MANDATORY
 
-Before running `git push` on ANY commit going to production (main branch), you MUST complete both of the following steps in order. Do not skip either step, even if the change looks small or trivial.
+Before merging `staging` → `main` (i.e. before any code reaches production), you MUST complete both steps below in order. Do not skip either, even if the change looks small.
 
 **Step 1 — Code Review:** Run the @code-reviewer skill against all changed files. Address any critical issues it flags before proceeding.
 
 **Step 2 — QA Pass:** Run the @qa-engineer skill to validate the feature or fix end-to-end. Address any bugs or regressions it identifies before proceeding.
 
-Only after both steps pass cleanly should you run `git push`. This gate applies to all code changes: new features, bug fixes, refactors, and UI polish alike.
+Only after both steps pass cleanly should you merge to `main`. Pushing to `staging` is encouraged freely — that is the validation step. The gate applies at the `staging → main` promotion only.
 
 ## Automated Hooks
 
