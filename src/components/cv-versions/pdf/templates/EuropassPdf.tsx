@@ -28,11 +28,14 @@ const s = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     color: COLORS.white,
     letterSpacing: 0.5,
+    lineHeight: 1,
+    marginBottom: 6,
   },
   targetTitle: {
     fontSize: 10,
     color: '#BFDBFE',
-    marginTop: 3,
+    lineHeight: 1,
+    marginBottom: 4,
   },
   contactRow: {
     flexDirection: 'row',

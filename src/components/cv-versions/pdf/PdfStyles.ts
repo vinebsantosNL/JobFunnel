@@ -42,12 +42,14 @@ export const base = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     color: COLORS.black,
     letterSpacing: 0.5,
-    marginBottom: 4,
+    lineHeight: 1,
+    marginBottom: 6,
   },
   targetTitle: {
     fontSize: 11,
     color: '#444444',
-    marginBottom: 2,
+    lineHeight: 1,
+    marginBottom: 4,
   },
   contactLine: {
     fontSize: 8.5,
