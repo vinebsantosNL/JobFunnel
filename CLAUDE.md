@@ -316,6 +316,16 @@ Growth: Learning Agility, Feedback Reception, Self-improvement
 
 ---
 
+## Pre-Push Quality Gate — MANDATORY
+
+Before running `git push` on ANY commit going to production (main branch), you MUST complete both of the following steps in order. Do not skip either step, even if the change looks small or trivial.
+
+**Step 1 — Code Review:** Run the @code-reviewer skill against all changed files. Address any critical issues it flags before proceeding.
+
+**Step 2 — QA Pass:** Run the @qa-engineer skill to validate the feature or fix end-to-end. Address any bugs or regressions it identifies before proceeding.
+
+Only after both steps pass cleanly should you run `git push`. This gate applies to all code changes: new features, bug fixes, refactors, and UI polish alike.
+
 ## Automated Hooks
 
 After every successful `vercel deploy` or `vercel --prod`, always use the @qa-engineer skill to run a QA pass before marking the task done. Do not skip this even if the deploy looks clean.
