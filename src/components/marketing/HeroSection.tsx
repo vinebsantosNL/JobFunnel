@@ -120,10 +120,7 @@ export function HeroSection() {
 
       {/* Scroll hint */}
       <div
-        className="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 cursor-pointer"
-        onClick={() => {
-          // handled client-side — graceful no-op on SSR
-        }}
+        className="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
       >
         <span
           style={{
