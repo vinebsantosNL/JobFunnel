@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { CVVersion } from '@/types/database.types'
 import type { CreateCVVersionInput, UpdateCVVersionInput } from '@/lib/validations/cv-version'
-import { AppError, NotFoundError, FreeTierLimitError, ConflictError } from '@/lib/utils/errors'
+import { AppError, NotFoundError, FreeTierLimitError, ConflictError, CVLockedError } from '@/lib/utils/errors'
 import { getProfileTier } from '@/lib/services/profileService'
 
 export async function getCVVersions(
@@ -134,12 +134,33 @@ export async function duplicateCVVersion(
   return version as CVVersion
 }
 
+// Fields that are immutable once a CV version is locked (application reached screening+)
+const LOCKED_CONTENT_FIELDS = ['resume_data', 'template_id', 'target_country'] as const
+type LockedContentField = typeof LOCKED_CONTENT_FIELDS[number]
+
 export async function updateCVVersion(
   supabase: SupabaseClient,
   id: string,
   userId: string,
   data: UpdateCVVersionInput
 ): Promise<CVVersion> {
+  // Business rule: if any content fields are being updated, verify the version is not locked
+  const hasContentFields = LOCKED_CONTENT_FIELDS.some(
+    (field) => (data as Record<LockedContentField, unknown>)[field] !== undefined
+  )
+
+  if (hasContentFields) {
+    const { data: current, error: fetchError } = await supabase
+      .from('cv_versions')
+      .select('is_locked')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single()
+
+    if (fetchError || !current) throw new NotFoundError('CV version not found')
+    if (current.is_locked) throw new CVLockedError()
+  }
+
   // Business rule: clear existing default before setting a new one
   if (data.is_default === true) {
     await supabase

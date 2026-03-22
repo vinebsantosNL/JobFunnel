@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, Copy, Archive, ArchiveRestore, Lock, Star, MoreHorizontal } from 'lucide-react'
+import Link from 'next/link'
+import { Pencil, Copy, Archive, ArchiveRestore, Lock, Star, MoreHorizontal, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
@@ -270,10 +271,21 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
           version.is_archived && 'opacity-60'
         )}
       >
-        {/* Thumbnail */}
-        <div className="p-3 pb-0">
-          <TemplateThumbnail templateId={version.template_id} />
-        </div>
+        {/* Thumbnail — click to open full editor */}
+        <Link
+          href={`/app/cv-versions/${version.id}/edit`}
+          className="p-3 pb-0 block group/thumb"
+        >
+          <div className="relative">
+            <TemplateThumbnail templateId={version.template_id} />
+            <div className="absolute inset-0 rounded-lg bg-black/0 group-hover/thumb:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover/thumb:opacity-100">
+              <span className="text-xs font-medium text-gray-700 bg-white/90 px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
+                <ExternalLink className="w-3 h-3" />
+                {version.is_locked ? 'View' : 'Open editor'}
+              </span>
+            </div>
+          </div>
+        </Link>
 
         {/* Body */}
         <div className="p-4 flex flex-col gap-3 flex-1">
@@ -371,9 +383,10 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             )}
           >
             {version.is_locked ? (
-              // Locked: View (edit opens read-only), Duplicate, Archive
+              // Locked: view editor (read-only), Rename, Duplicate, Archive
               <>
-                <ActionButton icon={<Pencil className="w-3.5 h-3.5" />} label="View" onClick={openEdit} />
+                <ActionLinkButton href={`/app/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-3.5 h-3.5" />} label="View" />
+                <ActionButton icon={<Pencil className="w-3.5 h-3.5" />} label="Rename" onClick={openEdit} />
                 <ActionButton icon={<Copy className="w-3.5 h-3.5" />} label="Duplicate" onClick={openDuplicate} />
                 <ActionButton
                   icon={version.is_archived ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
@@ -383,9 +396,10 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
                 />
               </>
             ) : (
-              // Unlocked: Edit, Duplicate, Archive
+              // Unlocked: open editor, Rename, Duplicate, Set default, Archive
               <>
-                <ActionButton icon={<Pencil className="w-3.5 h-3.5" />} label="Edit" onClick={openEdit} />
+                <ActionLinkButton href={`/app/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-3.5 h-3.5" />} label="Edit" />
+                <ActionButton icon={<Pencil className="w-3.5 h-3.5" />} label="Rename" onClick={openEdit} />
                 <ActionButton icon={<Copy className="w-3.5 h-3.5" />} label="Duplicate" onClick={openDuplicate} />
                 {!version.is_default && (
                   <ActionButton
@@ -418,7 +432,8 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
             <SheetTitle className="text-left truncate">{version.name}</SheetTitle>
           </SheetHeader>
           <div className="flex flex-col gap-1">
-            <SheetAction icon={<Pencil className="w-4 h-4" />} label={version.is_locked ? 'View' : 'Edit'} onClick={openEdit} />
+            <SheetActionLink href={`/app/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-4 h-4" />} label={version.is_locked ? 'View resume' : 'Open editor'} onClick={() => setMobileSheetOpen(false)} />
+            <SheetAction icon={<Pencil className="w-4 h-4" />} label="Rename" onClick={openEdit} />
             <SheetAction icon={<Copy className="w-4 h-4" />} label="Duplicate" onClick={openDuplicate} />
             {!version.is_default && !version.is_locked && (
               <SheetAction icon={<Star className="w-4 h-4" />} label="Set as default" onClick={handleSetDefault} />
@@ -436,7 +451,7 @@ export function CVVersionCard({ version, stats }: CVVersionCardProps) {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent size="md">
           <DialogHeader>
-            <DialogTitle>{version.is_locked ? 'View Resume Version' : 'Edit Resume Version'}</DialogTitle>
+            <DialogTitle>Rename resume version</DialogTitle>
           </DialogHeader>
           <CVVersionForm
             version={version}
@@ -503,6 +518,25 @@ function ActionButton({
   )
 }
 
+function ActionLinkButton({
+  href, icon, label,
+}: {
+  href: string
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <Link
+      href={href}
+      title={label}
+      className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 rounded-md transition-colors min-h-[44px] sm:min-h-0"
+    >
+      {icon}
+      <span className="hidden lg:inline">{label}</span>
+    </Link>
+  )
+}
+
 function SheetAction({
   icon, label, onClick,
 }: {
@@ -518,5 +552,25 @@ function SheetAction({
       <span className="text-gray-500">{icon}</span>
       {label}
     </button>
+  )
+}
+
+function SheetActionLink({
+  href, icon, label, onClick,
+}: {
+  href: string
+  icon: React.ReactNode
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className="flex items-center gap-3 w-full px-3 py-3.5 rounded-xl text-sm text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors min-h-[44px]"
+    >
+      <span className="text-gray-500">{icon}</span>
+      {label}
+    </Link>
   )
 }
