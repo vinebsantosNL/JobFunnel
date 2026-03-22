@@ -286,32 +286,168 @@ export function ProblemBlock() {
         </div>
       </section>
 
-      {/* ── Act 03 ── */}
-      <section style={{ background: act03.bg }} className="relative overflow-hidden">
+      {/* ── Act 03 — two-column with funnel visual ── */}
+      <section style={{ background: '#0C1A17' }} className="relative overflow-hidden marketing-grid-bg">
+        {/* Large decorative number — top right */}
+        <div
+          className="absolute top-6 right-6 hidden sm:block select-none pointer-events-none"
+          style={{
+            fontFamily: 'var(--font-dm-mono)',
+            fontSize: 'clamp(80px, 12vw, 160px)',
+            fontWeight: 900,
+            lineHeight: 1,
+            color: 'rgba(255,255,255,0.04)',
+            letterSpacing: '-0.04em',
+          }}
+        >
+          03
+        </div>
+
         <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
-          <div className="max-w-2xl">
-            <ActLabel number={act03.number} dark />
-            <h2
-              className="text-3xl sm:text-4xl font-bold leading-tight mb-8 text-white"
-              style={{ letterSpacing: '-0.02em' }}
-            >
-              {act03.headline}
-            </h2>
-            <p className="text-base leading-relaxed mb-4" style={{ color: act03.mutedColor }}>
-              {act03.intro}
-            </p>
-            <blockquote
-              className="border-l-2 border-[#10B981] pl-5 my-6 text-base italic leading-relaxed"
-              style={{ color: 'rgba(255,255,255,0.75)' }}
-            >
-              {act03.quote}
-            </blockquote>
-            <div className="space-y-4">
-              {act03.body.map((para, i) => (
-                <p key={i} className="text-base leading-relaxed" style={{ color: act03.mutedColor }}>{para}</p>
-              ))}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+
+            {/* Left — text + mini analytics card */}
+            <div>
+              <ActLabel number="03" dark />
+              <h2
+                className="text-3xl sm:text-4xl font-bold leading-tight mb-6 text-white"
+                style={{ letterSpacing: '-0.02em' }}
+              >
+                {act03.headline}
+              </h2>
+              <p className="text-base leading-relaxed mb-5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                {act03.intro}
+              </p>
+
+              {/* Mini funnel card */}
+              <div
+                className="rounded-xl p-5 mb-6"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                <p
+                  className="text-xs mb-4 text-white/30 uppercase tracking-widest"
+                  style={{ fontFamily: 'var(--font-dm-mono)', letterSpacing: '0.1em' }}
+                >
+                  Your Funnel — This Week
+                </p>
+                {[
+                  { label: 'Applied → Screening',    rate: '9%',  bench: '18%', color: '#EF4444' },
+                  { label: 'Screening → Interviewing',rate: '55%', bench: '50%', color: '#10B981' },
+                  { label: 'Interviewing → Offer',   rate: '22%', bench: '28%', color: '#F59E0B' },
+                ].map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between py-3 border-t"
+                    style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+                  >
+                    <span className="text-sm text-white/60">{row.label}</span>
+                    <span className="text-sm" style={{ fontFamily: 'var(--font-dm-mono)', color: row.color }}>
+                      {row.rate}{' '}
+                      <span className="text-white/25 text-xs">bench {row.bench}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  The gap is most likely at the CV or targeting layer — not your interview performance.
+                </p>
+                {act03.body.map((para, i) => (
+                  <p key={i} className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>{para}</p>
+                ))}
+              </div>
+              <p className="mt-8 text-xl font-bold italic text-white">{act03.coda}</p>
             </div>
-            <p className="mt-6 text-xl font-bold text-[#10B981]">{act03.coda}</p>
+
+            {/* Right — funnel bars + CV comparison */}
+            <div className="hidden lg:flex flex-col gap-5 pt-4">
+              {/* Funnel bars */}
+              {[
+                { label: 'Applied',      count: 42, pct: 100, color: '#2563EB', rate: '100%' },
+                { label: 'Screening',    count: 8,  pct: 19,  color: '#8B5CF6', rate: '19%' },
+                { label: 'Interviewing', count: 4,  pct: 10,  color: '#F59E0B', rate: '50%' },
+                { label: 'Offer',        count: 1,  pct: 3,   color: '#10B981', rate: '25%' },
+              ].map((bar) => (
+                <div key={bar.label}>
+                  <p
+                    className="text-xs text-white/30 mb-1.5 uppercase tracking-widest"
+                    style={{ fontFamily: 'var(--font-dm-mono)', letterSpacing: '0.1em' }}
+                  >
+                    {bar.label}
+                  </p>
+                  <div className="flex items-center gap-3">
+                    {/* Bar */}
+                    <div className="flex-1 h-9 rounded-lg overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                      <div
+                        className="h-full rounded-lg flex items-center px-3"
+                        style={{ width: `${bar.pct}%`, background: bar.color, minWidth: '2.5rem' }}
+                      >
+                        <span
+                          className="text-sm font-bold text-white"
+                          style={{ fontFamily: 'var(--font-dm-mono)' }}
+                        >
+                          {bar.count}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Rate */}
+                    {bar.label !== 'Applied' && (
+                      <span
+                        className="text-xs text-white/40 w-14 flex-shrink-0"
+                        style={{ fontFamily: 'var(--font-dm-mono)' }}
+                      >
+                        → {bar.rate}
+                      </span>
+                    )}
+                    {bar.label === 'Applied' && (
+                      <span
+                        className="text-xs text-white/25 w-14 flex-shrink-0"
+                        style={{ fontFamily: 'var(--font-dm-mono)' }}
+                      >
+                        {bar.rate}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* CV comparison mini card */}
+              <div
+                className="rounded-lg p-4 mt-2"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+              >
+                {[
+                  { label: 'CV v2 Skills-first', pct: 11, color: '#EF4444' },
+                  { label: 'CV v3 Impact-first', pct: 19, color: '#10B981' },
+                ].map((cv) => (
+                  <div key={cv.label} className="flex items-center gap-3 py-1.5">
+                    <span
+                      className="text-xs text-white/40 w-36 flex-shrink-0"
+                      style={{ fontFamily: 'var(--font-dm-mono)' }}
+                    >
+                      {cv.label}
+                    </span>
+                    <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${cv.pct * 5}%`, background: cv.color }}
+                      />
+                    </div>
+                    <span
+                      className="text-xs w-8 text-right flex-shrink-0"
+                      style={{ fontFamily: 'var(--font-dm-mono)', color: cv.color }}
+                    >
+                      {cv.pct}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
