@@ -45,13 +45,14 @@ export async function createCVVersion(
   userId: string,
   data: CreateCVVersionInput
 ): Promise<CVVersion> {
-  // Business rule: free tier capped at 2 CV versions
+  // Business rule: free tier capped at 2 active (non-archived) CV versions
   const profile = await getProfileTier(supabase, userId)
   if (profile.subscription_tier === 'free') {
     const { count, error: countError } = await supabase
       .from('cv_versions')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
+      .eq('is_archived', false)
 
     if (countError) throw new AppError(countError.message)
     if ((count ?? 0) >= 2) throw new FreeTierLimitError('CV versions')
@@ -81,11 +82,55 @@ export async function createCVVersion(
       description: data.description ?? null,
       tags: data.tags ?? [],
       is_default: shouldBeDefault,
+      template_id: data.template_id ?? 'precision',
+      target_country: data.target_country ?? null,
     })
     .select()
     .single()
 
   if (error || !version) throw new AppError(error?.message ?? 'Failed to create CV version')
+  return version as CVVersion
+}
+
+export async function duplicateCVVersion(
+  supabase: SupabaseClient,
+  id: string,
+  userId: string,
+  newName: string
+): Promise<CVVersion> {
+  // Business rule: free tier capped at 2 active (non-archived) CV versions
+  const profile = await getProfileTier(supabase, userId)
+  if (profile.subscription_tier === 'free') {
+    const { count, error: countError } = await supabase
+      .from('cv_versions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_archived', false)
+
+    if (countError) throw new AppError(countError.message)
+    if ((count ?? 0) >= 2) throw new FreeTierLimitError('CV versions')
+  }
+
+  const source = await getCVVersion(supabase, id, userId)
+
+  const { data: version, error } = await supabase
+    .from('cv_versions')
+    .insert({
+      user_id: userId,
+      name: newName,
+      description: source.description,
+      tags: source.tags,
+      template_id: source.template_id,
+      resume_data: source.resume_data,
+      target_country: source.target_country,
+      is_default: false,
+      is_archived: false,
+      // is_locked starts as false — duplicate is never locked on creation
+    })
+    .select()
+    .single()
+
+  if (error || !version) throw new AppError(error?.message ?? 'Failed to duplicate CV version')
   return version as CVVersion
 }
 
