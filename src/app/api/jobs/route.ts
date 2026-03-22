@@ -1,112 +1,39 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { createJobSchema } from '@/lib/validations/job'
+import { getJobApplications, createJobApplication } from '@/lib/services/jobService'
+import { handleApiError } from '@/lib/utils/errors'
 
 export async function GET(request: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { searchParams } = new URL(request.url)
-  const priority = searchParams.get('priority')
-  const search = searchParams.get('search')
+    const { searchParams } = new URL(request.url)
+    const jobs = await getJobApplications(supabase, user.id, {
+      priority: searchParams.get('priority'),
+      search: searchParams.get('search'),
+    })
 
-  let query = supabase
-    .from('job_applications')
-    .select('*, cv_versions(name)')
-    .eq('user_id', user.id)
-    .order('stage_updated_at', { ascending: false })
-
-  if (priority && priority !== 'all') {
-    query = query.eq('priority', priority)
+    return NextResponse.json(jobs)
+  } catch (error) {
+    return handleApiError(error)
   }
-  if (search) {
-    query = query.or(`company_name.ilike.%${search}%,job_title.ilike.%${search}%`)
-  }
-
-  const { data, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Free tier limit check: max 5 active applications
-  const { count } = await supabase
-    .from('job_applications')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .not('stage', 'in', '("rejected","withdrawn")')
+    const parsed = createJobSchema.safeParse(await request.json())
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('subscription_tier')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.subscription_tier === 'free' && (count ?? 0) >= 5) {
-    return NextResponse.json(
-      { error: 'Free tier limit reached. Upgrade to Pro for unlimited applications.' },
-      { status: 403 }
-    )
+    const job = await createJobApplication(supabase, user.id, parsed.data)
+    return NextResponse.json(job, { status: 201 })
+  } catch (error) {
+    return handleApiError(error)
   }
-
-  const body = await request.json()
-  const parsed = createJobSchema.safeParse(body)
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
-  }
-
-  let resolvedCVVersionId: string | null = parsed.data.cv_version_id ?? null
-
-  if (resolvedCVVersionId) {
-    // Verify the cv_version belongs to this user
-    const { data: versionCheck } = await supabase
-      .from('cv_versions')
-      .select('id')
-      .eq('id', resolvedCVVersionId)
-      .eq('user_id', user.id)
-      .single()
-    if (!versionCheck) {
-      return NextResponse.json({ error: 'CV version not found' }, { status: 400 })
-    }
-  } else {
-    // Use the user's default CV version if none provided
-    const { data: defaultVersion } = await supabase
-      .from('cv_versions')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('is_default', true)
-      .eq('is_archived', false)
-      .single()
-    resolvedCVVersionId = defaultVersion?.id ?? null
-  }
-
-  const jobData = {
-    ...parsed.data,
-    user_id: user.id,
-    job_url: parsed.data.job_url || null,
-    stage_updated_at: new Date().toISOString(),
-    cv_version_id: resolvedCVVersionId,
-  }
-
-  const { data, error } = await supabase
-    .from('job_applications')
-    .insert(jobData)
-    .select()
-    .single()
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  // Log initial stage to history
-  await supabase.from('stage_history').insert({
-    job_id: data.id,
-    from_stage: null,
-    to_stage: data.stage,
-  })
-
-  return NextResponse.json(data, { status: 201 })
 }

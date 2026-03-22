@@ -1,72 +1,34 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { z } from 'zod'
-
-const updateProfileSchema = z.object({
-  full_name: z.string().min(1).max(200).optional(),
-  role: z.enum(['software_engineer', 'product_manager', 'data_scientist', 'other']).optional(),
-  years_experience: z.number().int().min(0).max(60).optional().nullable(),
-  location_country: z.string().max(100).optional().nullable(),
-  target_countries: z.array(z.string().max(100)).optional(),
-  notification_prefs: z
-    .object({
-      weekly_summary: z.boolean(),
-      stale_applications: z.boolean(),
-    })
-    .optional(),
-  target_role: z.string().max(100).optional().nullable(),
-  target_date: z.string().optional().nullable(),
-  target_salary_min: z.number().int().min(0).optional().nullable(),
-  target_salary_max: z.number().int().min(0).optional().nullable(),
-  target_salary_currency: z.string().max(10).optional().nullable(),
-})
+import { updateProfileSchema } from '@/lib/validations/profile'
+import { getProfile, updateProfile } from '@/lib/services/profileService'
+import { handleApiError } from '@/lib/utils/errors'
 
 export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const profile = await getProfile(supabase, user.id)
+    return NextResponse.json(profile)
+  } catch (error) {
+    return handleApiError(error)
   }
-
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (error || !profile) {
-    return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-  }
-
-  return NextResponse.json(profile)
 }
 
 export async function PATCH(request: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const parsed = updateProfileSchema.safeParse(await request.json())
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+
+    const profile = await updateProfile(supabase, user.id, parsed.data)
+    return NextResponse.json(profile)
+  } catch (error) {
+    return handleApiError(error)
   }
-
-  const body = await request.json()
-  const parsed = updateProfileSchema.safeParse(body)
-
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
-  }
-
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .update({ ...parsed.data, updated_at: new Date().toISOString() })
-    .eq('id', user.id)
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json(profile)
 }

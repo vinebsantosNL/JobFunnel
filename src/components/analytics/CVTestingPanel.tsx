@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CVComparisonChart } from '@/components/analytics/CVComparisonChart'
 import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
-import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
+import type { CVComparisonRow } from '@/lib/services/analyticsService'
 import type { CVVersion, Profile } from '@/types/database.types'
 
 const EU_AVG_SCREENING_LABEL = '2–4%'

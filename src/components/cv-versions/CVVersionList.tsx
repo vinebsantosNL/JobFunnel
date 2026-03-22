@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
+import type { CVComparisonRow } from '@/lib/services/analyticsService'
 
 const FREE_TIER_LIMIT = 2
 

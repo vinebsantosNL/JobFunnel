@@ -10,7 +10,7 @@ import {
   LabelList,
   Cell,
 } from 'recharts'
-import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
+import type { CVComparisonRow } from '@/lib/services/analyticsService'
 
 const BAR_PALETTE = ['#2563EB', '#7C3AED', '#10B981', '#94A3B8', '#F59E0B', '#06B6D4', '#EC4899']
 const LOW_DATA_THRESHOLD = 10

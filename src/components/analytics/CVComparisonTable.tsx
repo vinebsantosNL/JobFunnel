@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
-import type { CVComparisonRow } from '@/app/api/analytics/cv-comparison/route'
+import type { CVComparisonRow } from '@/lib/services/analyticsService'
 
 type SortKey = keyof Pick<
   CVComparisonRow,
