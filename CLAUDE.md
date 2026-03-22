@@ -263,6 +263,23 @@ All endpoints require authentication via Supabase session. RLS handles user scop
 
 ---
 
+## Mobile Experience — Non-Negotiable
+
+JobFunnel is used heavily on mobile. Every feature must be reviewed for mobile before it is considered done. Treat mobile as a first-class target, not an afterthought.
+
+**Rules to follow on every feature:**
+- **Panels and drawers**: Desktop slide-over panels (`<Sheet>`) must NOT render on mobile. At `<640px`, replace with a full-screen push or bottom sheet.
+- **Modals and dialogs**: Use a responsive pattern — centered modal on `md:` and above, bottom sheet sliding up from the bottom on mobile. Never render a floating centered dialog on a small screen.
+- **Tap targets**: All interactive elements (buttons, links, icon actions) must have a minimum touch area of 44×44px. Small text-only links in card footers are not acceptable on mobile.
+- **Error states**: Never display raw error text alone. Always include a `Retry` button or a recovery CTA. Error cards must be readable on a 375px screen.
+- **Empty states**: Must include a one-line explanation and a next-step CTA. No blank white space on mobile.
+- **Grid layouts**: Default to single-column (`grid-cols-1`) on mobile. Multi-column layouts only at `sm:` breakpoint and above.
+- **Horizontal overflow**: No component may cause horizontal scroll on screens <640px.
+
+Before shipping any UI change, mentally walk through the feature on a 390px wide screen (iPhone 14 viewport). If it breaks, fix it first.
+
+---
+
 ## Coding Standards
 
 - TypeScript strict mode, zero `any`
