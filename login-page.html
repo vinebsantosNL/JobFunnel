@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log in — Job Funnel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink-900:   #0C1A17;
+      --ink-800:   #112219;
+      --ink-700:   #1A3329;
+      --emerald:   #10B981;
+      --blue:      #2563EB;
+      --blue-hover:#1D4ED8;
+      --slate-900: #0F172A;
+      --slate-700: #334155;
+      --slate-500: #64748B;
+      --slate-300: #CBD5E1;
+      --slate-200: #E2E8F0;
+      --slate-100: #F1F5F9;
+      --slate-50:  #F8FAFC;
+      --red:       #EF4444;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --font-mono:    'DM Mono', 'Courier New', monospace;
+    }
+
+    html { height: 100%; }
+
+    body {
+      font-family: var(--font-body);
+      background: #fff;
+      color: var(--slate-900);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+
+    .layout {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* ── Left panel ─────────────────────────────────────────── */
+
+    .left {
+      flex: 0 0 42%;
+      max-width: 42%;
+      background: var(--ink-900);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 48px;
+      overflow: hidden;
+    }
+
+    /* Grid texture */
+    .left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(rgba(16,185,129,0.06) 0px, rgba(16,185,129,0.06) 1px, transparent 1px, transparent 40px),
+        repeating-linear-gradient(90deg, rgba(16,185,129,0.06) 0px, rgba(16,185,129,0.06) 1px, transparent 1px, transparent 40px);
+      pointer-events: none;
+    }
+
+    /* Radial glow */
+    .left::after {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -80px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(16,185,129,0.13) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .left-content { position: relative; z-index: 1; }
+
+    /* Logo */
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      margin-bottom: 64px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--emerald);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-text {
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    /* Hook */
+    .left-headline {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 3.5vw, 52px);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .left-headline em {
+      font-style: italic;
+      font-weight: 300;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .left-sub {
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.5);
+      max-width: 300px;
+      margin-bottom: 48px;
+    }
+
+    /* Funnel mini visual */
+    .funnel-preview {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 48px;
+    }
+
+    .funnel-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.25);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .funnel-row {
+      margin-bottom: 10px;
+    }
+
+    .funnel-row:last-child { margin-bottom: 0; }
+
+    .funnel-row-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .funnel-stage-name {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .funnel-rate {
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .funnel-bar-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .funnel-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+
+    /* Trust badges */
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .trust-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.04em;
+    }
+
+    .trust-badge .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--emerald);
+      opacity: 0.7;
+    }
+
+    /* Bottom tagline */
+    .left-footer {
+      position: relative;
+      z-index: 1;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Right panel ─────────────────────────────────────────── */
+
+    .right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+      background: #fff;
+    }
+
+    .form-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    /* Mobile logo (shown only below 768px) */
+    .mobile-logo {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      margin-bottom: 32px;
+    }
+
+    .form-headline {
+      font-family: var(--font-display);
+      font-size: clamp(30px, 3vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--slate-900);
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+
+    .form-sub {
+      font-size: 14px;
+      color: var(--slate-500);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    /* Form */
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--slate-700);
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .field input {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      border: 1.5px solid var(--slate-200);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--slate-900);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    .field input.error {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+    }
+
+    .field input::placeholder { color: var(--slate-300); }
+
+    .field-error {
+      display: none;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--red);
+    }
+
+    .field-error.visible { display: block; }
+
+    /* Submit button */
+    .btn-primary {
+      width: 100%;
+      height: 50px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.28);
+      letter-spacing: -0.01em;
+    }
+
+    .btn-primary:hover { background: var(--blue-hover); box-shadow: 0 6px 18px rgba(37,99,235,0.35); }
+    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+    /* Spinner */
+    .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .btn-primary.loading .btn-label { display: none; }
+    .btn-primary.loading .spinner { display: block; }
+
+    /* Divider + signup link */
+    .form-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .form-divider span {
+      font-size: 12px;
+      color: var(--slate-300);
+      white-space: nowrap;
+    }
+
+    .form-divider::before,
+    .form-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--slate-200);
+    }
+
+    .signup-link {
+      display: block;
+      text-align: center;
+      font-size: 14px;
+      color: var(--slate-500);
+      text-decoration: none;
+    }
+
+    .signup-link a {
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .signup-link a:hover { text-decoration: underline; }
+
+    /* Trust micro-copy */
+    .form-trust {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 24px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--slate-300);
+      letter-spacing: 0.06em;
+      text-align: center;
+    }
+
+    .form-trust .sep {
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--slate-300);
+    }
+
+    /* ── Confirmation state ──────────────────────────────────── */
+
+    #confirm-state {
+      display: none;
+      text-align: center;
+    }
+
+    .confirm-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .confirm-headline {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--slate-900);
+      margin-bottom: 12px;
+      line-height: 1.1;
+    }
+
+    .confirm-sub {
+      font-size: 14px;
+      color: var(--slate-500);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .confirm-email {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--slate-700);
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: inline-block;
+      margin: 4px 0 24px;
+    }
+
+    .confirm-hint {
+      font-size: 12px;
+      color: var(--slate-300);
+      margin-bottom: 28px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.02em;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      padding: 0 24px;
+      border: 1.5px solid var(--slate-200);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--slate-700);
+      background: #fff;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .btn-secondary:hover { border-color: var(--slate-300); background: var(--slate-50); }
+
+    .back-link {
+      display: block;
+      font-size: 13px;
+      color: var(--slate-400);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .back-link:hover { color: var(--slate-700); }
+
+    /* ── Fade transition ─────────────────────────────────────── */
+
+    .fade-transition {
+      animation: fadeIn 0.35s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+
+    @media (max-width: 768px) {
+      .layout {
+        flex-direction: column;
+      }
+
+      .left {
+        display: none;
+      }
+
+      .right {
+        padding: 48px 24px;
+        align-items: flex-start;
+        padding-top: 52px;
+      }
+
+      .form-box {
+        max-width: 100%;
+      }
+
+      .mobile-logo {
+        display: flex;
+      }
+
+      .form-headline {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Left panel ──────────────────────────────────────── -->
+  <div class="left">
+    <div class="left-content">
+
+      <!-- Logo -->
+      <a href="/" class="logo">
+        <div class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M3 4h12M5 8h8M7 12h4M9 16h0" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="logo-text">Job Funnel</span>
+      </a>
+
+      <!-- Hook headline -->
+      <h1 class="left-headline">
+        Your funnel<br />
+        waits.<br />
+        <em>Right where<br />you left it.</em>
+      </h1>
+
+      <p class="left-sub">
+        Every application, every conversion rate, every story you wrote — exactly as you left them.
+      </p>
+
+      <!-- Funnel mini visual -->
+      <div class="funnel-preview">
+        <p class="funnel-label">Your pipeline · last session</p>
+
+        <div class="funnel-row">
+          <div class="funnel-row-top">
+            <span class="funnel-stage-name">Applied</span>
+            <span class="funnel-rate" style="color:rgba(255,255,255,0.25);font-size:10px">42</span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:100%;background:#2563EB"></div>
+          </div>
+        </div>
+
+        <div class="funnel-row">
+          <div class="funnel-row-top">
+            <span class="funnel-stage-name">Screening</span>
+            <span class="funnel-rate" style="color:#10B981">19%</span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:19%;background:#8B5CF6"></div>
+          </div>
+        </div>
+
+        <div class="funnel-row">
+          <div class="funnel-row-top">
+            <span class="funnel-stage-name">Interviewing</span>
+            <span class="funnel-rate" style="color:#F59E0B">50%</span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:10%;background:#F59E0B"></div>
+          </div>
+        </div>
+
+        <div class="funnel-row">
+          <div class="funnel-row-top">
+            <span class="funnel-stage-name">Offer</span>
+            <span class="funnel-rate" style="color:#10B981">25%</span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:2%;min-width:6px;background:#10B981"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust badges -->
+      <div class="trust-row">
+        <span class="trust-badge"><span class="dot"></span> GDPR-compliant</span>
+        <span class="trust-badge"><span class="dot"></span> Built in Europe</span>
+        <span class="trust-badge"><span class="dot"></span> No password, ever</span>
+      </div>
+
+    </div>
+
+    <p class="left-footer">© 2025 Job Funnel · Built for Europe</p>
+  </div>
+
+  <!-- ── Right panel ─────────────────────────────────────── -->
+  <div class="right">
+    <div class="form-box">
+
+      <!-- Mobile logo -->
+      <a href="/" class="mobile-logo">
+        <div class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M3 4h12M5 8h8M7 12h4M9 16h0" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="logo-text" style="color:var(--slate-900)">Job Funnel</span>
+      </a>
+
+      <!-- ── Form state ──────────────────────────────────── -->
+      <div id="form-state">
+
+        <h1 class="form-headline">Welcome back.</h1>
+        <p class="form-sub">
+          Enter your email — we'll send you a secure link.<br />
+          No password needed.
+        </p>
+
+        <form id="login-form" novalidate onsubmit="handleSubmit(event)">
+
+          <div class="field">
+            <label for="email">Work or personal email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@company.com"
+              autocomplete="email"
+              autofocus
+            />
+            <p class="field-error" id="email-error">Please enter a valid email address.</p>
+          </div>
+
+          <button type="submit" class="btn-primary" id="submit-btn">
+            <span class="btn-label">Send magic link →</span>
+            <div class="spinner"></div>
+          </button>
+
+        </form>
+
+        <div class="form-divider"><span>or</span></div>
+
+        <p class="signup-link">
+          New to Job Funnel? <a href="/signup">Create a free account →</a>
+        </p>
+
+        <div class="form-trust">
+          <span>GDPR-compliant</span>
+          <span class="sep"></span>
+          <span>No password, ever</span>
+          <span class="sep"></span>
+          <span>Data stays in the EU</span>
+        </div>
+
+      </div>
+
+      <!-- ── Confirmation state ──────────────────────────── -->
+      <div id="confirm-state">
+
+        <div class="confirm-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+
+        <h2 class="confirm-headline">Check your inbox.</h2>
+
+        <p class="confirm-sub">We sent a magic link to</p>
+        <span class="confirm-email" id="confirm-email-display">you@company.com</span>
+
+        <p class="confirm-hint">Link expires in 15 minutes · Check your spam folder if needed</p>
+
+        <button class="btn-secondary" onclick="handleResend()">
+          Resend link
+        </button>
+
+        <a class="back-link" onclick="showForm()">← Use a different email</a>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const input    = document.getElementById('email');
+    const errorEl  = document.getElementById('email-error');
+    const btn      = document.getElementById('submit-btn');
+    const email    = input.value.trim();
+
+    // Validate
+    if (!isValidEmail(email)) {
+      input.classList.add('error');
+      errorEl.classList.add('visible');
+      input.focus();
+      return;
+    }
+
+    input.classList.remove('error');
+    errorEl.classList.remove('visible');
+
+    // Loading state
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    // Simulate API call — replace with real Supabase magic link call
+    setTimeout(() => {
+      showConfirm(email);
+    }, 1400);
+  }
+
+  document.getElementById('email').addEventListener('input', function() {
+    this.classList.remove('error');
+    document.getElementById('email-error').classList.remove('visible');
+  });
+
+  function showConfirm(email) {
+    document.getElementById('confirm-email-display').textContent = email;
+    document.getElementById('form-state').style.display = 'none';
+    const confirmEl = document.getElementById('confirm-state');
+    confirmEl.style.display = 'block';
+    confirmEl.classList.add('fade-transition');
+  }
+
+  function showForm() {
+    document.getElementById('confirm-state').style.display = 'none';
+    const formEl = document.getElementById('form-state');
+    formEl.style.display = 'block';
+    formEl.classList.add('fade-transition');
+
+    const btn = document.getElementById('submit-btn');
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+
+  function handleResend() {
+    const btn = document.querySelector('#confirm-state .btn-secondary');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = 'Link resent ✓';
+      setTimeout(() => {
+        btn.textContent = 'Resend link';
+        btn.disabled = false;
+      }, 3000);
+    }, 1000);
+  }
+</script>
+
+</body>
+</html>
