@@ -1,111 +1,137 @@
-'use client'
+import { AuthShell } from '@/components/auth/AuthShell'
+import { MagicLinkForm } from '@/components/auth/MagicLinkForm'
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import Link from 'next/link'
+const funnelRows = [
+  { label: 'Applied',      pct: 100, color: '#2563EB', rate: '42',  rateColor: 'rgba(255,255,255,0.25)' },
+  { label: 'Screening',    pct: 19,  color: '#8B5CF6', rate: '19%', rateColor: '#10B981' },
+  { label: 'Interviewing', pct: 10,  color: '#F59E0B', rate: '50%', rateColor: '#F59E0B' },
+  { label: 'Offer',        pct: 2,   color: '#10B981', rate: '25%', rateColor: '#10B981' },
+]
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  async function handleMagicLink(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-    } else {
-      setSent(true)
-    }
-    setLoading(false)
-  }
-
-  async function handleOAuth(provider: 'google' | 'github') {
-    const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    })
-  }
-
+function LoginLeftContent() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Sign in to your JobFunnel OS account</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {sent ? (
-            <div className="text-center py-4">
-              <p className="text-sm text-green-600 font-medium">Check your email!</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                We sent a magic link to <strong>{email}</strong>
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleMagicLink} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+    <>
+      {/* Headline */}
+      <h2
+        className="text-white font-black mb-4"
+        style={{ fontSize: 'clamp(32px, 3vw, 46px)', letterSpacing: '-0.03em', lineHeight: 1.05 }}
+      >
+        Your funnel waits.<br />
+        <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 300 }}>
+          Right where you left it.
+        </span>
+      </h2>
+
+      <p className="text-sm mb-10" style={{ color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, maxWidth: '300px' }}>
+        Every application, every rate, every story — exactly as you left them.
+      </p>
+
+      {/* Mini funnel card */}
+      <div
+        className="rounded-xl p-5 mb-8"
+        style={{
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        <p
+          className="text-xs mb-4 uppercase"
+          style={{
+            fontFamily: 'var(--font-dm-mono)',
+            letterSpacing: '0.1em',
+            color: 'rgba(255,255,255,0.2)',
+          }}
+        >
+          Your pipeline · last session
+        </p>
+
+        <div className="space-y-3">
+          {funnelRows.map((row) => (
+            <div key={row.label}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span
+                  className="text-xs uppercase"
+                  style={{
+                    fontFamily: 'var(--font-dm-mono)',
+                    letterSpacing: '0.06em',
+                    color: 'rgba(255,255,255,0.3)',
+                  }}
+                >
+                  {row.label}
+                </span>
+                <span
+                  className="text-xs"
+                  style={{ fontFamily: 'var(--font-dm-mono)', color: row.rateColor }}
+                >
+                  {row.rate}
+                </span>
+              </div>
+              <div
+                className="w-full h-1.5 rounded-full overflow-hidden"
+                style={{ background: 'rgba(255,255,255,0.06)' }}
+              >
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${row.pct}%`,
+                    background: row.color,
+                    minWidth: row.pct < 5 ? '8px' : undefined,
+                  }}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Sending...' : 'Send magic link'}
-              </Button>
-            </form>
-          )}
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" onClick={() => handleOAuth('google')} type="button">
-              Google
-            </Button>
-            <Button variant="outline" onClick={() => handleOAuth('github')} type="button">
-              GitHub
-            </Button>
-          </div>
+      {/* Trust badges */}
+      <div className="flex flex-wrap gap-2">
+        {['GDPR-compliant', 'Built in Europe', 'No password, ever'].map((badge) => (
+          <span
+            key={badge}
+            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs"
+            style={{
+              fontFamily: 'var(--font-dm-mono)',
+              color: 'rgba(255,255,255,0.35)',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              letterSpacing: '0.02em',
+            }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ background: '#10B981', opacity: 0.7 }}
+            />
+            {badge}
+          </span>
+        ))}
+      </div>
+    </>
+  )
+}
 
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-600 hover:underline">
-              Sign up
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+interface LoginPageProps {
+  searchParams: Promise<{ error?: string }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams
+  const authError = params.error === 'auth_error'
+    ? 'The magic link has expired or is invalid. Please request a new one.'
+    : null
+
+  return (
+    <AuthShell leftContent={<LoginLeftContent />}>
+      <MagicLinkForm
+        mode="login"
+        headline="Welcome back."
+        sub="Enter your email — we'll send you a secure link. No password needed."
+        ctaText="Send magic link"
+        bottomText="New to Job Funnel?"
+        bottomLinkText="Create a free account →"
+        bottomHref="/signup"
+        initialError={authError}
+      />
+    </AuthShell>
   )
 }
