@@ -1,112 +1,95 @@
-'use client'
+import { AuthShell } from '@/components/auth/AuthShell'
+import { MagicLinkForm } from '@/components/auth/MagicLinkForm'
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import Link from 'next/link'
+function SignupLeftContent() {
+  return (
+    <>
+      {/* Eyebrow */}
+      <div
+        className="flex items-center gap-2 mb-6"
+        style={{
+          fontFamily: 'var(--font-dm-mono)',
+          fontSize: '11px',
+          letterSpacing: '0.12em',
+          color: '#10B981',
+          textTransform: 'uppercase',
+        }}
+      >
+        <span className="w-5 h-px bg-[#10B981]" />
+        Job search analytics · Built for Europe
+      </div>
+
+      {/* Headline mirrors hero */}
+      <h2
+        className="text-white font-black mb-8"
+        style={{ fontSize: 'clamp(30px, 2.8vw, 44px)', letterSpacing: '-0.03em', lineHeight: 1.0 }}
+      >
+        47 applications.<br />
+        <span style={{ color: '#FC4D4D' }}>3</span> screening calls.<br />
+        <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 300, fontSize: '0.78em' }}>
+          You still don&apos;t know why.
+        </span>
+      </h2>
+
+      {/* Value prop bullets */}
+      <div className="space-y-3 mb-10">
+        {[
+          { icon: '▸', text: 'Stage-by-stage conversion rates vs EU benchmarks' },
+          { icon: '▸', text: 'Interview story vault in STAR format' },
+          { icon: '▸', text: 'A/B test CV versions · see what gets responses' },
+        ].map((item) => (
+          <div key={item.text} className="flex items-start gap-3">
+            <span
+              className="flex-shrink-0 mt-0.5"
+              style={{ color: '#10B981', fontFamily: 'var(--font-dm-mono)', fontSize: '11px' }}
+            >
+              {item.icon}
+            </span>
+            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
+              {item.text}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Pricing nudge */}
+      <div
+        className="rounded-xl p-4"
+        style={{
+          background: 'rgba(16,185,129,0.06)',
+          border: '1px solid rgba(16,185,129,0.15)',
+        }}
+      >
+        <p
+          className="text-xs mb-1"
+          style={{
+            fontFamily: 'var(--font-dm-mono)',
+            color: '#10B981',
+            letterSpacing: '0.06em',
+          }}
+        >
+          Free to start
+        </p>
+        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
+          5 applications free. Pro unlocks unlimited pipeline, full analytics, and CV testing — €15/month.
+        </p>
+      </div>
+    </>
+  )
+}
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  async function handleSignup(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-        shouldCreateUser: true,
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-    } else {
-      setSent(true)
-    }
-    setLoading(false)
-  }
-
-  async function handleOAuth(provider: 'google' | 'github') {
-    const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    })
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-          <CardDescription>Start managing your job search like a product funnel</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {sent ? (
-            <div className="text-center py-4">
-              <p className="text-sm text-green-600 font-medium">Check your email!</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                We sent a magic link to <strong>{email}</strong>
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Sending...' : 'Create account'}
-              </Button>
-            </form>
-          )}
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" onClick={() => handleOAuth('google')} type="button">
-              Google
-            </Button>
-            <Button variant="outline" onClick={() => handleOAuth('github')} type="button">
-              GitHub
-            </Button>
-          </div>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Sign in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthShell leftContent={<SignupLeftContent />}>
+      <MagicLinkForm
+        mode="signup"
+        headline="Start your funnel."
+        sub="Enter your email — we'll send you a secure link to create your account. No password needed."
+        ctaText="Create free account"
+        bottomText="Already have an account?"
+        bottomLinkText="Log in →"
+        bottomHref="/login"
+      />
+    </AuthShell>
   )
 }
