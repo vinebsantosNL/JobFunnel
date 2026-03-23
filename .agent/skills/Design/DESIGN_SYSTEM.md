@@ -478,6 +478,12 @@ Applies `reveal-init` / `reveal-show` classes (opacity 0 → 1, translateY 28px 
 | `MarketingFooter` | Dark | Links + legal |
 | `RevealWrapper` | Any | Scroll-triggered reveal HOC |
 
+### App Shell (`/src/components/layout/`)
+
+| Component | File(s) | Description | Spec |
+|---|---|---|---|
+| `Sidebar` | `sidebar.tsx` · `mobile-nav.tsx` | Desktop left sidebar + mobile bottom bar. Shared nav items via `/lib/nav-items.ts`. Sprint 2: token migration + dark mode pending. | [Sidebar.md](./components/Sidebar.md) |
+
 ### App UI (`/src/components/ui/` — shadcn/ui)
 
 `Button`, `Badge`, `Avatar`, `Card`, `Checkbox`, `Dialog`, `Input`, `Label`, `Select`, `Separator`, `Sheet`, `Textarea`, `Tooltip`, `Switch`, `Sonner`

@@ -6,29 +6,13 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
-import {
-  LayoutDashboard,
-  Kanban,
-  BarChart3,
-  BookOpen,
-  FileText,
-  Settings,
-  HelpCircle,
-  LogOut,
-  User,
-} from 'lucide-react'
+import { PRIMARY_NAV_ITEMS, BOTTOM_NAV_ITEMS } from '@/lib/nav-items'
+import { HelpCircle, LogOut, User } from 'lucide-react'
 
-const navItems = [
-  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
-  { href: '/pipeline', label: 'Pipeline', icon: Kanban },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/stories', label: 'STAR Stories', icon: BookOpen },
-  { href: '/cv-versions', label: 'Resume Builder', icon: FileText },
-]
-
-const bottomItems = [
-  { href: '/settings', label: 'Settings', icon: Settings },
-]
+/** Shared class for all nav link items — desktop sidebar */
+const navLinkBase =
+  'relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -62,20 +46,21 @@ export function Sidebar() {
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="flex items-center h-16 px-5 cursor-pointer hover:opacity-80 transition-opacity"
+        className="flex items-center h-16 px-5 cursor-pointer hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
       >
         <span className="text-lg font-bold text-blue-600">Job</span>
         <span className="text-lg font-bold text-gray-900">&nbsp;Funnel</span>
       </Link>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon }) => (
+      {/* Primary Navigation */}
+      <nav aria-label="Primary navigation" className="flex-1 px-3 py-2 space-y-0.5">
+        {PRIMARY_NAV_ITEMS.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}
+            aria-current={isActive(href) ? 'page' : undefined}
             className={cn(
-              'relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              navLinkBase,
               isActive(href)
                 ? 'text-blue-700'
                 : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
@@ -93,6 +78,7 @@ export function Sidebar() {
                 'relative z-10 w-4 h-4 flex-shrink-0',
                 isActive(href) ? 'text-blue-600' : 'text-gray-400'
               )}
+              aria-hidden="true"
             />
             <span className="relative z-10">{label}</span>
           </Link>
@@ -104,7 +90,7 @@ export function Sidebar() {
         {/* User profile card */}
         {profile && (
           <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg bg-white/60">
-            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0" aria-hidden="true">
               <User className="w-4 h-4 text-orange-400" />
             </div>
             <div className="min-w-0">
@@ -118,49 +104,61 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* Settings */}
-        {bottomItems.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              'relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-              isActive(href)
-                ? 'text-blue-700'
-                : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
-            )}
-          >
-            {isActive(href) && (
-              <motion.div
-                layoutId="nav-indicator"
-                className="absolute inset-0 bg-white rounded-lg shadow-sm"
-                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              />
-            )}
-            <Icon
+        {/* Secondary nav (Settings) */}
+        <nav aria-label="Secondary navigation">
+          {BOTTOM_NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={isActive(href) ? 'page' : undefined}
               className={cn(
-                'relative z-10 w-4 h-4 flex-shrink-0',
-                isActive(href) ? 'text-blue-600' : 'text-gray-400'
+                navLinkBase,
+                isActive(href)
+                  ? 'text-blue-700'
+                  : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
               )}
-            />
-            <span className="relative z-10">{label}</span>
-          </Link>
-        ))}
+            >
+              {isActive(href) && (
+                <motion.div
+                  layoutId="nav-indicator"
+                  className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                />
+              )}
+              <Icon
+                className={cn(
+                  'relative z-10 w-4 h-4 flex-shrink-0',
+                  isActive(href) ? 'text-blue-600' : 'text-gray-400'
+                )}
+                aria-hidden="true"
+              />
+              <span className="relative z-10">{label}</span>
+            </Link>
+          ))}
+        </nav>
 
         {/* Support */}
         <button
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-white/60 hover:text-gray-800 transition-colors"
+          className={cn(
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500',
+            'hover:bg-white/60 hover:text-gray-800 transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
+          )}
         >
-          <HelpCircle className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <HelpCircle className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
           Support
         </button>
 
         {/* Sign out */}
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-white/60 hover:text-gray-800 transition-colors"
+          className={cn(
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500',
+            'hover:bg-white/60 hover:text-gray-800 transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
+          )}
         >
-          <LogOut className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <LogOut className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
           Sign out
         </button>
       </div>
