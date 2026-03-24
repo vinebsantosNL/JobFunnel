@@ -42,23 +42,31 @@ export function DateFilterPills({
 
   return (
     <div className="flex flex-col gap-1 w-fit">
-      <div className="border border-border rounded-lg overflow-hidden flex">
+      <div className="rounded-xl border border-[--jf-border] overflow-hidden flex">
         {presets.map((p, i) => (
           <button
             key={i}
             onClick={() => onSelect(i)}
-            className={`px-4 py-1.5 text-sm transition-colors ${
+            className="px-4 py-1.5 font-mono text-xs transition-colors"
+            style={
               selectedIndex === i
-                ? 'bg-foreground text-background'
-                : 'bg-card text-muted-foreground hover:bg-muted'
-            }`}
+                ? {
+                    background: 'var(--jf-interactive-subtle)',
+                    color: 'var(--jf-interactive)',
+                    fontWeight: 600,
+                  }
+                : {
+                    background: 'transparent',
+                    color: 'var(--jf-text-secondary)',
+                  }
+            }
           >
             {p.label}
           </button>
         ))}
       </div>
       {selectedPreset && (
-        <p className="text-xs text-muted-foreground pl-1">
+        <p className="font-mono text-xs text-[--jf-text-muted] pl-1">
           {formatDateRangeLabel(selectedPreset.days)}
         </p>
       )}

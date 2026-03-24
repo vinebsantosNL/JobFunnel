@@ -16,6 +16,12 @@ const STAGE_LABELS: Partial<Record<Stage, string>> = {
   offer:        'Offer',
 }
 
+const BENCHMARKS: Partial<Record<Stage, number>> = {
+  screening: 20,
+  interviewing: 10,
+  offer: 5,
+}
+
 interface FunnelChartProps {
   data: FunnelData
 }
@@ -57,6 +63,26 @@ export function FunnelChart({ data }: FunnelChartProps) {
         const targetWidth = Math.max(width, width > 0 ? 4 : 0)
         const staggerDelay = `${index * 120}ms`
 
+        // Benchmark chip logic
+        const benchmark = BENCHMARKS[stage]
+        let benchmarkChip: React.ReactNode = null
+        if (benchmark !== undefined && convRate !== undefined && convRate !== benchmark) {
+          const isAbove = convRate > benchmark
+          benchmarkChip = (
+            <span
+              className="font-mono text-[10px] px-1.5 py-0.5 rounded-md ml-2 whitespace-nowrap"
+              style={{
+                background: isAbove
+                  ? 'rgba(16,185,129,0.1)'
+                  : 'rgba(239,68,68,0.08)',
+                color: isAbove ? '#10B981' : '#EF4444',
+              }}
+            >
+              {isAbove ? '↑' : '↓'} vs {benchmark}% avg
+            </span>
+          )
+        }
+
         return (
           <div key={stage} className="flex items-center gap-3">
             {/* Left label: Stage · X jobs */}
@@ -96,6 +122,9 @@ export function FunnelChart({ data }: FunnelChartProps) {
                 )}
               </div>
             </div>
+
+            {/* Benchmark chip */}
+            {benchmarkChip}
           </div>
         )
       })}

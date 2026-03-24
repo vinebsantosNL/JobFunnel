@@ -1,30 +1,68 @@
 import React from 'react'
 
 interface MetricCardProps {
-  title: string
-  value?: string
-  subtitle?: string
-  /** Tailwind left-border color class, e.g. 'border-l-blue-500' */
-  accentColor?: string
+  /** Display value (number or formatted string) */
+  value: number | string
+  /** Label shown below value */
+  label: string
+  /** Icon element rendered in the tinted container */
+  icon: React.ReactNode
+  /** Hex color string used for icon container tint and icon color */
+  accentColor: string
+  /** Optional delta string, e.g. "+12%" or "-5%" */
+  delta?: string
   children?: React.ReactNode
 }
 
 export function MetricCard({
-  title,
   value,
-  subtitle,
-  accentColor = 'border-l-blue-500',
+  label,
+  icon,
+  accentColor,
+  delta,
   children,
 }: MetricCardProps) {
+  const isPositiveDelta = delta && delta.startsWith('+')
+  const isNegativeDelta = delta && delta.startsWith('-')
+
   return (
-    <div className={`bg-card rounded-xl border border-border border-l-4 ${accentColor} p-5`}>
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{title}</p>
+    <div className="rounded-2xl bg-[--jf-bg-card] border border-[--jf-border] shadow-[--jf-shadow-sm] p-5">
       {children ?? (
         <>
-          {value !== undefined && (
-            <p className="text-2xl font-bold text-foreground">{value}</p>
+          {/* Icon container */}
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+            style={{
+              background: `${accentColor}1F`,
+              color: accentColor,
+            }}
+          >
+            {icon}
+          </div>
+
+          {/* Value */}
+          <p className="font-mono text-3xl font-bold text-[--jf-text-primary]">
+            {value}
+          </p>
+
+          {/* Label */}
+          <p className="text-sm text-[--jf-text-secondary] mt-1">{label}</p>
+
+          {/* Delta */}
+          {delta && (
+            <p
+              className="font-mono text-xs mt-1"
+              style={{
+                color: isPositiveDelta
+                  ? 'var(--jf-success)'
+                  : isNegativeDelta
+                    ? 'var(--jf-error)'
+                    : 'var(--jf-text-muted)',
+              }}
+            >
+              {delta}
+            </p>
           )}
-          {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
         </>
       )}
     </div>
