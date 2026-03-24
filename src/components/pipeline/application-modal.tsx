@@ -162,7 +162,10 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
               <button
                 type="button"
                 onClick={() => handleStageChange(nextStage)}
-                className="flex items-center gap-1.5 text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors px-3 py-2 rounded-lg min-h-[36px]"
+                className="flex items-center gap-1.5 text-xs font-medium text-white transition-colors px-3 py-2 rounded-lg min-h-[36px]"
+                style={{ background: 'var(--jf-interactive)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--jf-interactive-hover)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--jf-interactive)' }}
               >
                 Move to {STAGE_CONFIG[nextStage].label}
                 <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
@@ -204,10 +207,12 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 4 }}
                   transition={{ duration: 0.15 }}
-                  className={cn(
-                    'px-3 py-1 rounded-full text-xs font-semibold border flex-shrink-0',
-                    stageConfig.bgColor, stageConfig.color, stageConfig.borderColor
-                  )}
+                  style={{
+                    background: `${stageConfig.hex}15`,
+                    color: stageConfig.hex,
+                    border: `1px solid ${stageConfig.hex}40`,
+                  }}
+                  className="px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0"
                 >
                   {stageConfig.label.toUpperCase()}
                 </motion.span>
@@ -309,7 +314,13 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Priority</p>
                     <div className="flex items-center gap-2">
-                      <div aria-hidden="true" className={cn('w-2 h-2 rounded-full', PRIORITY_CONFIG[job.priority].color)} />
+                      <div
+                        aria-hidden="true"
+                        className="w-2 h-2 rounded-full"
+                        style={{
+                          background: job.priority === 'high' ? '#EF4444' : job.priority === 'medium' ? '#F59E0B' : '#94A3B8',
+                        }}
+                      />
                       <span className="text-sm text-foreground">{PRIORITY_CONFIG[job.priority].label}</span>
                     </div>
                   </div>
@@ -447,7 +458,11 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                     className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border hover:border-border hover:bg-accent transition-colors text-left"
                   >
                     {/* aria-hidden — color dot is decorative; label text conveys stage */}
-                    <span aria-hidden="true" className={cn('w-2 h-2 rounded-full flex-shrink-0', STAGE_CONFIG[stage].dotColor)} />
+                    <span
+                      aria-hidden="true"
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ background: STAGE_CONFIG[stage].hex }}
+                    />
                     <span className="text-sm font-medium text-foreground">{STAGE_CONFIG[stage].label}</span>
                   </button>
                 ))}

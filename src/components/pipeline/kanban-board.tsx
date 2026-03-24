@@ -10,21 +10,228 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import type { JobApplication, Stage } from '@/types/database.types'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { JobApplication, Stage, Priority } from '@/types/database.types'
 import { STAGES, STAGE_CONFIG, SEQUENTIAL_STAGES, STAGE_ORDER, ACTIVE_STAGES } from '@/lib/stages'
 import { KanbanColumn } from './kanban-column'
 import { ApplicationCard } from './application-card'
 import { ApplicationModal } from './application-modal'
 import { FilterBar } from './filter-bar'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/use-jobs'
-import type { CreateJobInput, UpdateJobInput } from '@/lib/validations/job'
+import { createJobSchema, type CreateJobInput, type UpdateJobInput } from '@/lib/validations/job'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+
+/* ------------------------------------------------------------------ */
+/*  AddJobForm — local component for the "Add Application" dialog     */
+/* ------------------------------------------------------------------ */
+
+interface AddJobFormProps {
+  defaultStage: Stage
+  onSubmit: (input: CreateJobInput) => Promise<void>
+  onCancel: () => void
+}
+
+function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } = useForm<CreateJobInput>({
+    resolver: zodResolver(createJobSchema) as never,
+    defaultValues: {
+      stage: defaultStage,
+      priority: 'medium',
+      company_name: '',
+      job_title: '',
+      job_url: '',
+      location: '',
+      notes: '',
+    },
+  })
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor="add-company" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Company Name *
+          </Label>
+          <Input
+            id="add-company"
+            className="mt-1"
+            aria-invalid={!!errors.company_name}
+            {...register('company_name')}
+          />
+          {errors.company_name && <p className="text-xs text-red-500 mt-0.5">{errors.company_name.message}</p>}
+        </div>
+        <div>
+          <Label htmlFor="add-title" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Job Title *
+          </Label>
+          <Input
+            id="add-title"
+            className="mt-1"
+            aria-invalid={!!errors.job_title}
+            {...register('job_title')}
+          />
+          {errors.job_title && <p className="text-xs text-red-500 mt-0.5">{errors.job_title.message}</p>}
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="add-location" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          Location
+        </Label>
+        <Input id="add-location" placeholder="Amsterdam, NL" className="mt-1" {...register('location')} />
+      </div>
+
+      <div>
+        <Label htmlFor="add-url" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          Job URL
+        </Label>
+        <Input id="add-url" type="url" placeholder="https://..." className="mt-1" {...register('job_url')} />
+        {errors.job_url && <p className="text-xs text-red-500 mt-0.5">{errors.job_url.message}</p>}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor="add-smin" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Salary Min
+          </Label>
+          <Input id="add-smin" type="number" className="mt-1" {...register('salary_min', { valueAsNumber: true })} />
+        </div>
+        <div>
+          <Label htmlFor="add-smax" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Salary Max
+          </Label>
+          <Input id="add-smax" type="number" className="mt-1" {...register('salary_max', { valueAsNumber: true })} />
+        </div>
+      </div>
+
+      {/* Stage pills */}
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Stage</Label>
+        <Controller
+          name="stage"
+          control={control}
+          render={({ field }) => (
+            <div className="flex flex-wrap gap-2 mt-1.5">
+              {STAGES.filter(s => s !== 'hired').map((stage) => {
+                const cfg = STAGE_CONFIG[stage]
+                const selected = field.value === stage
+                return (
+                  <button
+                    key={stage}
+                    type="button"
+                    onClick={() => field.onChange(stage)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                    style={{
+                      border: selected ? `2px solid ${cfg.hex}` : '1px solid var(--jf-border)',
+                      background: selected ? `${cfg.hex}15` : 'transparent',
+                      color: selected ? cfg.hex : 'var(--jf-text-secondary)',
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: cfg.hex,
+                      }}
+                    />
+                    {cfg.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        />
+      </div>
+
+      {/* Priority pills */}
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Priority</Label>
+        <Controller
+          name="priority"
+          control={control}
+          render={({ field }) => {
+            const priorities: { value: Priority; label: string; color: string }[] = [
+              { value: 'high', label: 'High', color: '#EF4444' },
+              { value: 'medium', label: 'Medium', color: '#F59E0B' },
+              { value: 'low', label: 'Low', color: '#94A3B8' },
+            ]
+            return (
+              <div className="flex gap-2 mt-1.5">
+                {priorities.map((p) => {
+                  const selected = field.value === p.value
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => field.onChange(p.value)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                      style={{
+                        border: selected ? `2px solid ${p.color}` : '1px solid var(--jf-border)',
+                        background: selected ? `${p.color}15` : 'transparent',
+                        color: selected ? p.color : 'var(--jf-text-secondary)',
+                      }}
+                    >
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          background: p.color,
+                        }}
+                      />
+                      {p.label}
+                    </button>
+                  )
+                })}
+              </div>
+            )
+          }}
+        />
+      </div>
+
+      {/* Notes */}
+      <div>
+        <Label htmlFor="add-notes" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          Notes
+        </Label>
+        <Textarea id="add-notes" rows={3} className="mt-1" {...register('notes')} />
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-col gap-2 pt-1">
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Adding...' : 'Add Application'}
+        </Button>
+        <Button type="button" variant="ghost" className="w-full" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  KanbanBoard                                                        */
+/* ------------------------------------------------------------------ */
 
 export function KanbanBoard() {
   const [search, setSearch] = useState('')
@@ -33,6 +240,8 @@ export function KanbanBoard() {
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null)
   const [activeJob, setActiveJob] = useState<JobApplication | null>(null)
   const [pendingMove, setPendingMove] = useState<{ job: JobApplication; newStage: Stage } | null>(null)
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [addModalStage, setAddModalStage] = useState<Stage>('saved')
 
   const { data: rawJobs = [], isLoading, error, refetch } = useJobs({ search, priority })
 
@@ -108,7 +317,7 @@ export function KanbanBoard() {
   if (isLoading) {
     return (
       <div role="status" aria-label="Loading pipeline" className="flex gap-3 p-4 overflow-x-auto">
-        <span className="sr-only">Loading your pipeline…</span>
+        <span className="sr-only">Loading your pipeline...</span>
         {[1, 2, 3, 4, 5].map((col) => (
           <div key={col} className="w-64 min-w-[220px] flex-shrink-0 space-y-2">
             <div className="h-9 bg-muted rounded-lg animate-pulse" />
@@ -142,6 +351,7 @@ export function KanbanBoard() {
         onPriorityChange={setPriority}
         onCVVersionChange={setCVVersionIds}
         activeCount={activeCount}
+        onOpenAddModal={() => { setAddModalStage('saved'); setAddModalOpen(true) }}
       />
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -153,6 +363,7 @@ export function KanbanBoard() {
               jobs={jobsByStage[stage]}
               onCardClick={setSelectedJob}
               onAddJob={handleAddJob}
+              onAddClick={(s) => { setAddModalStage(s); setAddModalOpen(true) }}
             />
           ))}
         </div>
@@ -171,6 +382,25 @@ export function KanbanBoard() {
         onUpdate={handleUpdate}
         onDelete={handleDelete}
       />
+
+      {/* Add Application Modal */}
+      {addModalOpen && (
+        <Dialog open={addModalOpen} onOpenChange={(o) => { if (!o) setAddModalOpen(false) }}>
+          <DialogContent size="lg">
+            <DialogHeader>
+              <DialogTitle>Add Application</DialogTitle>
+            </DialogHeader>
+            <AddJobForm
+              defaultStage={addModalStage}
+              onSubmit={async (input) => {
+                await handleAddJob(input)
+                setAddModalOpen(false)
+              }}
+              onCancel={() => setAddModalOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Skip Stage Confirmation Modal */}
       {pendingMove && (

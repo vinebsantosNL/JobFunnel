@@ -6,6 +6,7 @@ export interface StageConfig {
   bgColor: string
   borderColor: string
   dotColor: string
+  hex: string
 }
 
 export const STAGE_CONFIG: Record<Stage, StageConfig> = {
@@ -15,6 +16,7 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     bgColor: 'bg-gray-50',
     borderColor: 'border-gray-200',
     dotColor: 'bg-gray-400',
+    hex: '#64748B',
   },
   applied: {
     label: 'Applied',
@@ -22,6 +24,7 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
     dotColor: 'bg-blue-500',
+    hex: '#2563EB',
   },
   screening: {
     label: 'Screening',
@@ -29,6 +32,7 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-200',
     dotColor: 'bg-purple-500',
+    hex: '#8B5CF6',
   },
   interviewing: {
     label: 'Interviewing',
@@ -36,6 +40,7 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     bgColor: 'bg-amber-50',
     borderColor: 'border-amber-200',
     dotColor: 'bg-amber-500',
+    hex: '#F59E0B',
   },
   offer: {
     label: 'Offer',
@@ -43,6 +48,7 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     bgColor: 'bg-green-50',
     borderColor: 'border-green-200',
     dotColor: 'bg-green-500',
+    hex: '#10B981',
   },
   hired: {
     label: 'Hired',
@@ -50,6 +56,7 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     bgColor: 'bg-emerald-50',
     borderColor: 'border-emerald-300',
     dotColor: 'bg-emerald-500',
+    hex: '#059669',
   },
   rejected: {
     label: 'Rejected',
@@ -57,6 +64,7 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     bgColor: 'bg-red-50',
     borderColor: 'border-red-200',
     dotColor: 'bg-red-400',
+    hex: '#EF4444',
   },
   withdrawn: {
     label: 'Withdrawn',
@@ -64,6 +72,7 @@ export const STAGE_CONFIG: Record<Stage, StageConfig> = {
     bgColor: 'bg-gray-50',
     borderColor: 'border-gray-200',
     dotColor: 'bg-gray-400',
+    hex: '#94A3B8',
   },
 }
 

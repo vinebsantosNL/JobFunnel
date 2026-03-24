@@ -4,10 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'framer-motion'
-import { Clock } from 'lucide-react'
-import type { JobApplication, Stage } from '@/types/database.types'
+import type { JobApplication } from '@/types/database.types'
 import { PRIORITY_CONFIG } from '@/lib/stages'
-import { Badge } from '@/components/ui/badge'
 
 interface ApplicationCardProps {
   job: JobApplication
@@ -22,10 +20,16 @@ function getDaysInStage(stageUpdatedAt: string): number {
   return Math.floor(diff / (1000 * 60 * 60 * 24))
 }
 
-const STALE_THRESHOLDS: Partial<Record<Stage, number>> = {
-  screening: 5,
-  interviewing: 7,
-  offer: 5,
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return name.slice(0, 2).toUpperCase()
+}
+
+const PRIORITY_HEX: Record<string, string | undefined> = {
+  high: '#EF4444',
+  medium: '#F59E0B',
+  low: undefined,
 }
 
 export function ApplicationCard({ job, onClick, isOverlay = false }: ApplicationCardProps) {
@@ -46,93 +50,168 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
     prevIsDragging.current = isDragging
   }, [isDragging])
 
-  // Outer div: dnd-kit positional transform only — no Framer Motion interference
   const dndStyle = {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? undefined : 'transform 120ms cubic-bezier(0.16, 1, 0.3, 1)',
-    // isOverlay = the card rendered inside DragOverlay — always full opacity
-    // isDragging = the source placeholder left behind in the column — faded
     opacity: !isOverlay && isDragging ? 0.3 : 1,
   }
 
   const days = getDaysInStage(job.stage_updated_at)
   const priority = PRIORITY_CONFIG[job.priority]
 
-  const staleThreshold = STALE_THRESHOLDS[job.stage]
-  const isStale = staleThreshold !== undefined && days >= staleThreshold
-
   const colorIdx = job.company_name.charCodeAt(0) % AVATAR_COLORS.length
   const avatarColor = AVATAR_COLORS[colorIdx]
-  const firstLetter = job.company_name.charAt(0).toUpperCase()
+  const initials = getInitials(job.company_name)
+
+  const priorityDotColor = PRIORITY_HEX[job.priority]
+
+  // Days color coding
+  let daysColor = 'var(--jf-text-muted)'
+  if (days >= 30) daysColor = 'var(--jf-error)'
+  else if (days >= 14) daysColor = 'var(--jf-warning)'
+
+  const daysLabel = days === 0 ? 'Today' : `${days}d`
 
   return (
-    // Outer: dnd-kit handles position — plain div, no animation library
     <div
       ref={setNodeRef}
       style={dndStyle}
       {...attributes}
       {...listeners}
-      className="cursor-grab active:cursor-grabbing rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+      className="cursor-grab active:cursor-grabbing rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
     >
-    {/* Inner: Framer Motion handles visual micro-interactions only */}
-    <motion.div
-      onClick={() => onClick(job)}
-      animate={justDropped ? { scale: [1, 1.02, 1] } : { scale: 1 }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className={`bg-card rounded-lg border border-border p-3 shadow-sm select-none transition-[box-shadow,border-color,translate] duration-150${isOverlay ? ' shadow-xl ring-1 ring-primary/30 rotate-1 cursor-grabbing' : ' hover:shadow-md hover:-translate-y-0.5 hover:border-border cursor-grab active:cursor-grabbing'}${isStale && !isDragging ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
-    >
-      {/* Top row: avatar + company + priority dot + days */}
-      <div className="flex items-center gap-2">
-        {/* aria-hidden — avatar is decorative; company name provides the label */}
-        <div
-          aria-hidden="true"
-          className="w-7 h-7 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-          style={{ backgroundColor: avatarColor }}
+      <motion.div
+        onClick={() => onClick(job)}
+        animate={justDropped ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className={`select-none transition-[box-shadow,border-color] duration-150${
+          isOverlay ? ' rotate-1 cursor-grabbing' : ' cursor-grab active:cursor-grabbing'
+        }`}
+        style={{
+          background: 'var(--jf-bg-card)',
+          border: '1px solid var(--jf-border)',
+          borderRadius: 12,
+          padding: '12px 14px',
+          boxShadow: isOverlay
+            ? '0 10px 25px rgba(0,0,0,.15), 0 0 0 1px rgba(37,99,235,.3)'
+            : 'var(--jf-shadow-sm)',
+        }}
+        onMouseEnter={(e) => {
+          if (!isOverlay) {
+            e.currentTarget.style.boxShadow = 'var(--jf-shadow-md)'
+            e.currentTarget.style.borderColor = '#CBD5E1'
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isOverlay) {
+            e.currentTarget.style.boxShadow = 'var(--jf-shadow-sm)'
+            e.currentTarget.style.borderColor = 'var(--jf-border)'
+          }
+        }}
+      >
+        {/* Row 1: Company identity */}
+        <div className="flex items-center gap-2">
+          <div
+            aria-hidden="true"
+            className="flex items-center justify-center text-white flex-shrink-0"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              backgroundColor: avatarColor,
+              fontSize: 11,
+              fontWeight: 700,
+            }}
+          >
+            {initials}
+          </div>
+          <span
+            className="truncate flex-1"
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--jf-text-primary)',
+            }}
+          >
+            {job.company_name}
+          </span>
+          {priorityDotColor && (
+            <span
+              role="img"
+              aria-label={`${priority.label} priority`}
+              className="flex-shrink-0"
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: priorityDotColor,
+              }}
+            />
+          )}
+        </div>
+
+        {/* Row 2: Job title */}
+        <p
+          className="truncate mt-1.5"
+          style={{
+            fontSize: 13,
+            fontWeight: 500,
+            color: 'var(--jf-text-secondary)',
+          }}
         >
-          {firstLetter}
+          {job.job_title}
+        </p>
+
+        {/* Row 3: Meta row */}
+        <div className="flex items-center flex-wrap mt-2" style={{ gap: 6 }}>
+          {job.location && (
+            <span
+              className="flex items-center"
+              style={{
+                fontSize: 11,
+                color: 'var(--jf-text-muted)',
+                gap: 3,
+              }}
+            >
+              <span aria-hidden="true" style={{ fontSize: 10 }}>&#x1F4CD;</span>
+              {job.location}
+            </span>
+          )}
+          <span
+            style={{
+              fontFamily: 'var(--font-dm-mono, monospace)',
+              fontSize: 11,
+              color: daysColor,
+            }}
+          >
+            {daysLabel}
+          </span>
         </div>
-        <span className="text-xs text-muted-foreground truncate flex-1">{job.company_name}</span>
-        {/* role="img" makes priority accessible to touch + keyboard users (title alone is not) */}
-        <span
-          role="img"
-          aria-label={`${priority.label} priority`}
-          className={`w-2 h-2 rounded-full flex-shrink-0 ${priority.color}`}
-        />
-        {isStale && (
-          <span aria-label="Follow-up recommended">
-            <Clock aria-hidden="true" className="w-3 h-3 text-amber-500 flex-shrink-0" />
-          </span>
-        )}
-        <Badge variant="secondary" className="text-xs flex-shrink-0">
-          {days === 0 ? 'Today' : `${days}d`}
-        </Badge>
-      </div>
 
-      {/* Job title */}
-      <p className="font-bold text-sm text-foreground truncate mt-1.5">{job.job_title}</p>
-
-      {/* Tags row */}
-      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-        {job.location && (
-          <span className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full">
-            {job.location}
-          </span>
+        {/* Row 4: CV version badge */}
+        {job.cv_versions?.name && (
+          <div
+            className="mt-2"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '2px 8px',
+              borderRadius: 6,
+              background: 'rgba(37,99,235,0.08)',
+              border: '1px solid rgba(37,99,235,0.2)',
+              fontFamily: 'var(--font-dm-mono, monospace)',
+              fontSize: 11,
+              color: 'var(--jf-interactive)',
+              maxWidth: 140,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {job.cv_versions.name}
+          </div>
         )}
-        {job.salary_min && (
-          <span className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full">
-            {job.salary_currency ?? '€'}{job.salary_min.toLocaleString()}
-            {job.salary_max ? `–${job.salary_max.toLocaleString()}` : '+'}
-          </span>
-        )}
-      </div>
-
-      {/* Thin progress bar for applied stage */}
-      {job.stage === 'applied' && (
-        <div className="w-full h-1 bg-muted rounded-full mt-2">
-          <div className="bg-primary h-full rounded-full" style={{ width: '66%' }} />
-        </div>
-      )}
-    </motion.div>
+      </motion.div>
     </div>
   )
 }
