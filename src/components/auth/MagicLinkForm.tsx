@@ -53,7 +53,12 @@ export function MagicLinkForm({
 
     const err = await sendLink(trimmed)
     if (err) {
-      setError(err.message)
+      const isNoAccount = err.message.toLowerCase().includes('signups not allowed')
+      setError(
+        isNoAccount
+          ? "No account found with this email. Please sign up first."
+          : err.message
+      )
     } else {
       setSent(true)
     }
