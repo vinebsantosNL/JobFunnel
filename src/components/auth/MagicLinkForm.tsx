@@ -62,9 +62,15 @@ export function MagicLinkForm({
 
   async function handleResend() {
     setResendStatus('sending')
-    await sendLink(email.trim())
-    setResendStatus('sent')
-    setTimeout(() => setResendStatus('idle'), 3000)
+    const err = await sendLink(email.trim())
+    if (err) {
+      setResendStatus('idle')
+      setError(err.message)
+      setSent(false)
+    } else {
+      setResendStatus('sent')
+      setTimeout(() => setResendStatus('idle'), 3000)
+    }
   }
 
   /* ── Confirmation state ─────────────────────────────────── */
