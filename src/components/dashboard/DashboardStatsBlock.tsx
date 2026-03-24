@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Briefcase, Activity, Users, BookOpen } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -34,53 +36,109 @@ function useCountUp(target: number, loading: boolean): number {
   return count
 }
 
+function StatTileLoading() {
+  return (
+    <div
+      className="rounded-2xl p-[18px_20px] flex flex-col gap-3"
+      style={{
+        background: 'var(--jf-bg-card)',
+        border: '1px solid var(--jf-border)',
+        boxShadow: 'var(--jf-shadow-sm)',
+      }}
+    >
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="h-7 w-10 rounded animate-pulse" style={{ background: 'var(--jf-border)' }} />
+          <div className="h-3 w-[60px] rounded animate-pulse mt-1" style={{ background: 'var(--jf-border)' }} />
+        </div>
+        <div className="w-9 h-9 rounded-[10px] animate-pulse" style={{ background: 'var(--jf-border)' }} />
+      </div>
+    </div>
+  )
+}
+
 function StatTile({
   label,
   value,
   loading,
-  borderColor,
-  descriptor,
-  descriptorClass,
+  icon: Icon,
+  tintBg,
+  iconColor,
   href,
   tooltip,
 }: {
   label: string
   value: number
   loading: boolean
-  borderColor: string
-  descriptor: string
-  descriptorClass: string
+  icon: LucideIcon
+  tintBg: string
+  iconColor: string
   href: string
   tooltip?: React.ReactNode
 }) {
   const displayValue = useCountUp(value, loading)
 
+  if (loading) return <StatTileLoading />
+
   const inner = (
     <Link
       href={href}
-      className={`bg-card rounded-xl border border-border border-l-4 ${borderColor} p-5 hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98] transition-[colors,box-shadow,transform] duration-150 group block`}
+      className="rounded-2xl flex flex-col gap-3 cursor-pointer transition-shadow duration-150"
+      style={{
+        background: 'var(--jf-bg-card)',
+        border: '1px solid var(--jf-border)',
+        boxShadow: 'var(--jf-shadow-sm)',
+        padding: '18px 20px',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = 'var(--jf-shadow-md)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = 'var(--jf-shadow-sm)'
+      }}
     >
-      {loading ? (
-        <div className="space-y-2">
-          <div className="h-8 w-16 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-24 bg-muted rounded animate-pulse" />
-        </div>
-      ) : (
-        <>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-            {label}
-          </p>
-          {/* aria-live polite — announces only the final settled value to screen readers */}
+      <div className="flex justify-between items-start">
+        {/* Value block */}
+        <div>
           <p
-            className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors"
+            className="leading-none"
+            style={{
+              fontFamily: 'var(--font-dm-mono, monospace)',
+              fontSize: 28,
+              fontWeight: 500,
+              color: 'var(--jf-text-primary)',
+            }}
             aria-live="polite"
             aria-atomic="true"
           >
             {displayValue}
           </p>
-          <p className={`text-xs mt-1 ${descriptorClass}`}>{descriptor}</p>
-        </>
-      )}
+          <p
+            className="uppercase mt-1"
+            style={{
+              fontSize: 12,
+              fontWeight: 500,
+              color: 'var(--jf-text-muted)',
+              letterSpacing: '0.04em',
+            }}
+          >
+            {label}
+          </p>
+        </div>
+
+        {/* Icon container */}
+        <div
+          className="flex items-center justify-center flex-shrink-0"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            background: tintBg,
+          }}
+        >
+          <Icon size={18} style={{ color: iconColor }} />
+        </div>
+      </div>
     </Link>
   )
 
@@ -108,23 +166,23 @@ export function DashboardStatsBlock() {
 
   return (
     <TooltipProvider delay={200}>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         <StatTile
-          label="TOTAL APPLICATIONS"
+          label="TOTAL APPS"
           value={data?.totalApplications ?? 0}
           loading={isLoading}
-          borderColor="border-l-blue-500"
-          descriptor="Last 30 days"
-          descriptorClass="text-muted-foreground"
+          icon={Briefcase}
+          tintBg="rgba(37,99,235,0.08)"
+          iconColor="var(--jf-interactive)"
           href="/pipeline"
         />
         <StatTile
           label="ACTIVE PIPELINE"
           value={data?.activeApplications ?? 0}
           loading={isLoading}
-          borderColor="border-l-blue-400"
-          descriptor="Screening · Interviewing · Offer"
-          descriptorClass="text-muted-foreground"
+          icon={Activity}
+          tintBg="rgba(16,185,129,0.08)"
+          iconColor="var(--jf-success)"
           href="/pipeline"
           tooltip={breakdownTooltip}
         />
@@ -132,18 +190,18 @@ export function DashboardStatsBlock() {
           label="INTERVIEWS"
           value={data?.interviews ?? 0}
           loading={isLoading}
-          borderColor="border-l-purple-500"
-          descriptor="Active now"
-          descriptorClass="text-muted-foreground"
+          icon={Users}
+          tintBg="rgba(245,158,11,0.08)"
+          iconColor="var(--jf-warning)"
           href="/pipeline"
         />
         <StatTile
           label="STAR STORIES"
           value={data?.storiesCreated ?? 0}
           loading={isLoading}
-          borderColor="border-l-amber-500"
-          descriptor="All time"
-          descriptorClass="text-muted-foreground"
+          icon={BookOpen}
+          tintBg="rgba(139,92,246,0.08)"
+          iconColor="var(--jf-purple)"
           href="/stories"
         />
       </div>

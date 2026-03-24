@@ -4,16 +4,16 @@ import {
   BarChart3,
   BookOpen,
   FileText,
-  Settings,
+  User,
 } from 'lucide-react'
 
 export type NavItem = {
   href: string
   label: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>
 }
 
-/** Primary navigation items — rendered in sidebar main nav and mobile bottom bar */
+/** Primary navigation — desktop sidebar main nav */
 export const PRIMARY_NAV_ITEMS: NavItem[] = [
   { href: '/dashboard',   label: 'Home',           icon: LayoutDashboard },
   { href: '/pipeline',    label: 'Pipeline',        icon: Kanban },
@@ -22,10 +22,17 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
   { href: '/cv-versions', label: 'Resume Builder',  icon: FileText },
 ]
 
-/** Bottom/secondary navigation items — rendered at the foot of the desktop sidebar and appended to mobile bottom bar */
-export const BOTTOM_NAV_ITEMS: NavItem[] = [
-  { href: '/settings', label: 'Settings', icon: Settings },
+/**
+ * Mobile bottom nav — 5 items only.
+ * Resume Builder is dropped; Settings surfaces as "Profile" (5th slot).
+ */
+export const MOBILE_NAV_ITEMS: NavItem[] = [
+  { href: '/dashboard',  label: 'Home',      icon: LayoutDashboard },
+  { href: '/pipeline',   label: 'Pipeline',  icon: Kanban },
+  { href: '/analytics',  label: 'Analytics', icon: BarChart3 },
+  { href: '/stories',    label: 'Stories',   icon: BookOpen },
+  { href: '/settings',   label: 'Profile',   icon: User },
 ]
 
-/** All nav items combined — used by MobileNav bottom bar */
-export const ALL_NAV_ITEMS: NavItem[] = [...PRIMARY_NAV_ITEMS, ...BOTTOM_NAV_ITEMS]
+/** @deprecated Use PRIMARY_NAV_ITEMS + MOBILE_NAV_ITEMS separately */
+export const ALL_NAV_ITEMS = PRIMARY_NAV_ITEMS

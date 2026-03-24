@@ -50,6 +50,28 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* JobFunnel stage colors → Tailwind utilities */
+  --color-jf-stage-saved:        var(--jf-stage-saved);
+  --color-jf-stage-applied:      var(--jf-stage-applied);
+  --color-jf-stage-screening:    var(--jf-stage-screening);
+  --color-jf-stage-interviewing: var(--jf-stage-interviewing);
+  --color-jf-stage-offer:        var(--jf-stage-offer);
+  --color-jf-stage-rejected:     var(--jf-stage-rejected);
+  --color-jf-stage-withdrawn:    var(--jf-stage-withdrawn);
+  --color-jf-success:            var(--jf-success);
+  --color-jf-warning:            var(--jf-warning);
+  --color-jf-error:              var(--jf-error);
+  --color-jf-purple:             var(--jf-purple);
+  --color-jf-interactive:        var(--jf-interactive);
+  --color-jf-interactive-hover:  var(--jf-interactive-hover);
+  --color-jf-interactive-subtle: var(--jf-interactive-subtle);
+  --color-jf-text-primary:       var(--jf-text-primary);
+  --color-jf-text-secondary:     var(--jf-text-secondary);
+  --color-jf-text-muted:         var(--jf-text-muted);
+  --color-jf-bg-page:            var(--jf-bg-page);
+  --color-jf-bg-card:            var(--jf-bg-card);
+  --color-jf-bg-subtle:          var(--jf-bg-subtle);
+  --color-jf-border:             var(--jf-border);
 }
 
 :root {
@@ -91,6 +113,40 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* ── JobFunnel Design System ───────────────────────────────── */
+  /* Stage colors */
+  --jf-stage-saved:        #64748B;
+  --jf-stage-applied:      #2563EB;
+  --jf-stage-screening:    #8B5CF6;
+  --jf-stage-interviewing: #F59E0B;
+  --jf-stage-offer:        #10B981;
+  --jf-stage-rejected:     #EF4444;
+  --jf-stage-withdrawn:    #94A3B8;
+  /* Semantic */
+  --jf-success:            #10B981;
+  --jf-warning:            #F59E0B;
+  --jf-error:              #EF4444;
+  --jf-purple:             #8B5CF6;
+  /* Interactive */
+  --jf-interactive:        #2563EB;
+  --jf-interactive-hover:  #1D4ED8;
+  --jf-interactive-subtle: #EFF6FF;
+  /* Text */
+  --jf-text-primary:   #0F172A;
+  --jf-text-secondary: #475569;
+  --jf-text-muted:     #94A3B8;
+  /* Surfaces */
+  --jf-bg-page:   #FAFAFA;
+  --jf-bg-card:   #FFFFFF;
+  --jf-bg-subtle: #F8FAFC;
+  --jf-border:    #E2E8F0;
+  /* Elevation */
+  --jf-shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --jf-shadow-md: 0 4px 12px rgba(0,0,0,.07);
+  --jf-shadow-lg: 0 8px 28px rgba(0,0,0,.12);
+  /* Layout */
+  --jf-sidebar-w: 240px;
+  --jf-header-h:  64px;
 }
 
 .dark {
@@ -125,6 +181,15 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  /* ── JobFunnel dark overrides ──────────────────────────────── */
+  --jf-bg-page:            #0F172A;
+  --jf-bg-card:            #1E293B;
+  --jf-bg-subtle:          #1E293B;
+  --jf-border:             #334155;
+  --jf-text-primary:       #F8FAFC;
+  --jf-text-secondary:     #94A3B8;
+  --jf-text-muted:         #64748B;
+  --jf-interactive-subtle: rgba(37,99,235,0.12);
 }
 
 @layer base {
