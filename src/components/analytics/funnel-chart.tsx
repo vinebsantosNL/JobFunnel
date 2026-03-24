@@ -62,18 +62,18 @@ export function FunnelChart({ data }: FunnelChartProps) {
             {/* Left label: Stage · X jobs */}
             <div className="w-36 text-right flex-shrink-0">
               {isApplied ? (
-                <span className="text-sm font-bold text-gray-900">
-                  Applied · <span className="font-normal text-gray-500">{count} jobs</span>
+                <span className="text-sm font-bold text-foreground">
+                  Applied · <span className="font-normal text-muted-foreground">{count} jobs</span>
                 </span>
               ) : (
-                <span className="text-sm text-gray-600">
-                  {STAGE_LABELS[stage]} · <span className="text-gray-400">{count}</span>
+                <span className="text-sm text-muted-foreground">
+                  {STAGE_LABELS[stage]} · <span className="text-muted-foreground/70">{count}</span>
                 </span>
               )}
             </div>
 
             {/* Bar — staggered entrance, width = step-over-step conversion rate */}
-            <div className="flex-1 bg-gray-100 rounded-full h-7 relative overflow-hidden">
+            <div className="flex-1 bg-muted rounded-full h-7 relative overflow-hidden">
               <div
                 className="h-full rounded-full flex items-center justify-end pr-3"
                 style={{

@@ -31,15 +31,15 @@ export function StoryInlinePanel() {
           exit={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-6">
+          <div className="bg-card rounded-2xl border border-border shadow-sm mb-6">
             {/* Panel header — only shown for form modes */}
             {isFormMode && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h2 className="font-semibold text-sm text-gray-900">{panelTitle}</h2>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <h2 className="font-semibold text-sm text-foreground">{panelTitle}</h2>
                 <button
                   type="button"
                   onClick={closeExpanded}
-                  className="text-gray-400 hover:text-gray-600 transition-colors rounded-md p-0.5 hover:bg-gray-100"
+                  className="text-muted-foreground hover:text-foreground transition-colors rounded-md p-0.5 hover:bg-muted"
                   aria-label="Close panel"
                 >
                   <X className="h-4 w-4" />
@@ -55,7 +55,7 @@ export function StoryInlinePanel() {
                   <button
                     type="button"
                     onClick={closeExpanded}
-                    className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 transition-colors rounded-md p-0.5 hover:bg-gray-100"
+                    className="absolute top-0 right-0 text-muted-foreground hover:text-foreground transition-colors rounded-md p-0.5 hover:bg-muted"
                     aria-label="Close panel"
                   >
                     <X className="h-4 w-4" />
@@ -64,11 +64,11 @@ export function StoryInlinePanel() {
                     ? <StoryDetail story={activeStory} />
                     : (
                       <div className="space-y-4 animate-pulse">
-                        <div className="h-6 bg-gray-100 rounded w-3/4" />
+                        <div className="h-6 bg-muted rounded w-3/4" />
                         <div className="space-y-2">
-                          <div className="h-3 bg-gray-100 rounded w-full" />
-                          <div className="h-3 bg-gray-100 rounded w-5/6" />
-                          <div className="h-3 bg-gray-100 rounded w-4/6" />
+                          <div className="h-3 bg-muted rounded w-full" />
+                          <div className="h-3 bg-muted rounded w-5/6" />
+                          <div className="h-3 bg-muted rounded w-4/6" />
                         </div>
                       </div>
                     )
@@ -83,10 +83,10 @@ export function StoryInlinePanel() {
               )}
               {expandedView.type === 'edit' && !activeStory && (
                 <div className="space-y-4 animate-pulse">
-                  <div className="h-6 bg-gray-100 rounded w-3/4" />
+                  <div className="h-6 bg-muted rounded w-3/4" />
                   <div className="space-y-2">
-                    <div className="h-3 bg-gray-100 rounded w-full" />
-                    <div className="h-3 bg-gray-100 rounded w-5/6" />
+                    <div className="h-3 bg-muted rounded w-full" />
+                    <div className="h-3 bg-muted rounded w-5/6" />
                   </div>
                 </div>
               )}

@@ -109,7 +109,7 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Title */}
       <div>
-        <Label htmlFor="story-title-inline" className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <Label htmlFor="story-title-inline" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           Title
         </Label>
         <Input
@@ -125,7 +125,7 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
       </div>
 
       {/* Mode toggle */}
-      <div className="flex gap-2 border border-gray-200 rounded-lg overflow-hidden w-fit">
+      <div className="flex gap-2 border border-border rounded-lg overflow-hidden w-fit">
         {(['star', 'freeform'] as const).map(m => (
           <button
             key={m}
@@ -134,8 +134,8 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
             className={cn(
               'px-4 py-1.5 text-sm font-medium transition-colors',
               formMode === m
-                ? 'bg-gray-900 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                ? 'bg-foreground text-background'
+                : 'bg-card text-muted-foreground hover:bg-muted'
             )}
           >
             {m === 'star' ? 'STAR Format' : 'Free Form'}
@@ -153,7 +153,7 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
                   <div className={cn('w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs', field.colors)}>
                     {field.letter}
                   </div>
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{field.label}</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{field.label}</span>
                 </div>
                 <WordCount value={watch(field.id) ?? ''} />
               </div>
@@ -170,7 +170,7 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
       ) : (
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <Label htmlFor="inline-full-content" className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <Label htmlFor="inline-full-content" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Story
             </Label>
             <WordCount value={watch('full_content') ?? ''} />
@@ -187,7 +187,7 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
 
       {/* Competencies */}
       <div>
-        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
           Competencies
         </Label>
         <Controller

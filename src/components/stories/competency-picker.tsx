@@ -20,7 +20,7 @@ export function CompetencyPicker({ selected, onChange }: CompetencyPickerProps) 
     <div className="space-y-3">
       {Object.entries(COMPETENCY_CATEGORIES).map(([category, competencies]) => (
         <div key={category}>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">{category}</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{category}</p>
           <div className="flex flex-wrap gap-1.5">
             {competencies.map(competency => (
               <button
@@ -30,7 +30,7 @@ export function CompetencyPicker({ selected, onChange }: CompetencyPickerProps) 
                 className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
                   selected.includes(competency)
                     ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                    : 'bg-card text-muted-foreground border-border hover:border-primary/50'
                 }`}
               >
                 {competency}

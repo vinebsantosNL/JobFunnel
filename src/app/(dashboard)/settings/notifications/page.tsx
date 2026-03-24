@@ -57,7 +57,7 @@ export default function NotificationsSettingsPage() {
   }
 
   return (
-    <main className="flex-1 p-6 overflow-auto">
+    <div className="flex-1 p-6 overflow-auto">
       <div className="max-w-xl mx-auto">
         <Card>
           <CardHeader>
@@ -66,15 +66,15 @@ export default function NotificationsSettingsPage() {
           <CardContent className="space-y-6">
             {isLoading ? (
               <div className="space-y-4 animate-pulse">
-                <div className="h-12 bg-gray-100 rounded-lg" />
-                <div className="h-12 bg-gray-100 rounded-lg" />
+                <div className="h-12 bg-muted rounded-lg" />
+                <div className="h-12 bg-muted rounded-lg" />
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Weekly Summary</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-sm font-medium text-foreground">Weekly Summary</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Receive a weekly digest of your job search activity.
                     </p>
                   </div>
@@ -87,8 +87,8 @@ export default function NotificationsSettingsPage() {
 
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Stale Application Alerts</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-sm font-medium text-foreground">Stale Application Alerts</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Get notified when applications haven&apos;t had activity in 14+ days.
                     </p>
                   </div>
@@ -103,6 +103,6 @@ export default function NotificationsSettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </div>
   )
 }

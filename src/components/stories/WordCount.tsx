@@ -10,6 +10,6 @@ function countWords(text: string): number {
 
 export function WordCount({ value }: WordCountProps) {
   return (
-    <span className="text-xs text-gray-400">{countWords(value)} words</span>
+    <span className="text-xs text-muted-foreground">{countWords(value)} words</span>
   )
 }

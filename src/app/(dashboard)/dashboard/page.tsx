@@ -23,7 +23,8 @@ export default async function DashboardPage() {
 
       <UpgradeBanner isPro={isPro} />
 
-      <main className="flex-1 p-6 overflow-auto">
+      {/* Single <main> is in layout.tsx — use div here to avoid duplicate landmark */}
+      <div className="flex-1 p-6 overflow-auto">
         <div className="space-y-6">
           <DashboardStatsBlock />
 
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
 
           <GettingStartedBlock />
         </div>
-      </main>
+      </div>
 
     </div>
   )

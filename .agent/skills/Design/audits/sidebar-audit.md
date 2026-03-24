@@ -78,9 +78,11 @@ Partial (3/7 dimensions fully passing)
 - [x] Skip-to-content link in dashboard layout (m1)
 - [x] Extract shared `navItems` to `/lib/nav-items.ts` (m2)
 
-### Sprint 2 — Token alignment (requires designer spec)
-- [ ] Migrate sidebar colors → CSS variable tokens (M2)
-- [ ] Dark mode variants (E1)
+### Sprint 2 — ✅ Complete
+- [x] Migrate sidebar colors → CSS variable tokens (M2) — `bg-sidebar`, `text-sidebar-foreground`, etc.
+- [x] Dark mode variants (E1) — automatic via `next-themes` + `globals.css` `.dark` overrides
+- [x] Layout `bg-gray-50` → `bg-background` (dashboard layout.tsx)
+- [x] Focus ring → `ring-sidebar-ring` (design token, not hardcoded blue)
 
 ### Sprint 3+ — Enhancements
 - [ ] Collapsible sidebar (E2, post-MVP)

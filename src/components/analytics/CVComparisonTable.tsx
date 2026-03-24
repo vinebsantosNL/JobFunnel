@@ -75,7 +75,7 @@ export function CVComparisonTable({
   })
 
   function SortIndicator({ col }: { col: SortKey }) {
-    if (sortKey !== col) return <span className="text-gray-300 ml-1">↕</span>
+    if (sortKey !== col) return <span className="text-muted-foreground/40 ml-1">↕</span>
     return <span className="text-blue-600 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
   }
 
@@ -88,14 +88,14 @@ export function CVComparisonTable({
   ]
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
+    <div className="overflow-x-auto rounded-lg border border-border">
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 border-b border-gray-200">
+        <thead className="bg-muted/50 border-b border-border">
           <tr>
             {columns.map(({ key, label }) => (
               <th
                 key={key}
-                className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap"
+                className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide cursor-pointer select-none hover:bg-muted transition-colors whitespace-nowrap"
                 onClick={() => handleSort(key)}
               >
                 {label}
@@ -107,7 +107,7 @@ export function CVComparisonTable({
         <tbody className="divide-y divide-gray-100">
           {sorted.length === 0 ? (
             <tr>
-              <td colSpan={5} className="px-4 py-8 text-center text-gray-400 text-sm">
+              <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground text-sm">
                 No data available
               </td>
             </tr>
@@ -124,7 +124,7 @@ export function CVComparisonTable({
               return (
                 <tr
                   key={row.version_id ?? 'untagged'}
-                  className={`transition-colors ${isUntagged ? 'bg-gray-50/50' : 'hover:bg-gray-50'}`}
+                  className={`transition-colors ${isUntagged ? 'bg-muted/30' : 'hover:bg-muted/50'}`}
                 >
                   {/* Version name with colored left border */}
                   <td className="px-4 py-3">
@@ -134,9 +134,9 @@ export function CVComparisonTable({
                         style={{ backgroundColor: borderColor }}
                       />
                       {isUntagged ? (
-                        <span className="text-gray-400 italic text-sm">Untagged</span>
+                        <span className="text-muted-foreground italic text-sm">Untagged</span>
                       ) : (
-                        <span className="font-semibold text-gray-900">{row.version_name}</span>
+                        <span className="font-semibold text-foreground">{row.version_name}</span>
                       )}
                       {isDefault && (
                         <Badge variant="secondary" className="text-xs px-1.5 py-0">
@@ -147,20 +147,20 @@ export function CVComparisonTable({
                   </td>
 
                   {/* Applications */}
-                  <td className="px-4 py-3 text-gray-700">{row.total_applied}</td>
+                  <td className="px-4 py-3 text-foreground">{row.total_applied}</td>
 
                   {/* Applied → Screen */}
-                  <td className={`px-4 py-3 font-medium ${isBestScreening ? 'text-green-600' : 'text-gray-700'}`}>
+                  <td className={`px-4 py-3 font-medium ${isBestScreening ? 'text-green-600' : 'text-foreground'}`}>
                     {fmt(row.screening_rate)}
                   </td>
 
                   {/* Screen → Interview */}
-                  <td className={`px-4 py-3 font-medium ${isBestScreening && row.interview_rate ? 'text-green-600' : 'text-gray-700'}`}>
+                  <td className={`px-4 py-3 font-medium ${isBestScreening && row.interview_rate ? 'text-green-600' : 'text-foreground'}`}>
                     {fmt(row.interview_rate)}
                   </td>
 
                   {/* Overall conversion */}
-                  <td className="px-4 py-3 text-gray-700">{fmt(row.overall_conversion)}</td>
+                  <td className="px-4 py-3 text-foreground">{fmt(row.overall_conversion)}</td>
                 </tr>
               )
             })

@@ -71,7 +71,7 @@ export function FilterBar({
 
       <Select value={priority} onValueChange={(v) => onPriorityChange(v ?? 'all')}>
         <SelectTrigger className="w-40 h-8 text-sm">
-          <span className={priority !== 'all' ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+          <span className={priority !== 'all' ? 'text-primary font-medium' : 'text-muted-foreground'}>
             {priorityLabel}
           </span>
         </SelectTrigger>
@@ -86,7 +86,7 @@ export function FilterBar({
       {activeVersions.length > 0 && (
         <Select value={cvSelectValue} onValueChange={handleCVVersionSelect}>
           <SelectTrigger className="w-44 h-8 text-sm">
-            <span className={cvSelectValue !== '__all__' ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+            <span className={cvSelectValue !== '__all__' ? 'text-primary font-medium' : 'text-muted-foreground'}>
               {resumeLabel}
             </span>
           </SelectTrigger>
@@ -106,7 +106,7 @@ export function FilterBar({
         <Tooltip>
           <TooltipTrigger
             render={
-              <span className="text-xs text-gray-400 ml-auto cursor-default" />
+              <span className="text-xs text-muted-foreground ml-auto cursor-default" />
             }
           >
             {activeCount} active application{activeCount !== 1 ? 's' : ''}

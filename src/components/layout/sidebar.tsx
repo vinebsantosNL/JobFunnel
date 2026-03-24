@@ -12,7 +12,7 @@ import { HelpCircle, LogOut, User } from 'lucide-react'
 /** Shared class for all nav link items — desktop sidebar */
 const navLinkBase =
   'relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1'
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -42,14 +42,14 @@ export function Sidebar() {
     pathname === href || pathname.startsWith(href + '/')
 
   return (
-    <aside className="flex flex-col w-60 h-full bg-slate-100 border-r border-gray-200">
+    <aside className="flex flex-col w-60 h-full bg-sidebar border-r border-sidebar-border">
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="flex items-center h-16 px-5 cursor-pointer hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+        className="flex items-center h-16 px-5 cursor-pointer hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1"
       >
-        <span className="text-lg font-bold text-blue-600">Job</span>
-        <span className="text-lg font-bold text-gray-900">&nbsp;Funnel</span>
+        <span className="text-lg font-bold text-sidebar-primary">Job</span>
+        <span className="text-lg font-bold text-sidebar-foreground">&nbsp;Funnel</span>
       </Link>
 
       {/* Primary Navigation */}
@@ -62,21 +62,21 @@ export function Sidebar() {
             className={cn(
               navLinkBase,
               isActive(href)
-                ? 'text-blue-700'
-                : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
+                ? 'text-sidebar-primary'
+                : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
           >
             {isActive(href) && (
               <motion.div
                 layoutId="nav-indicator"
-                className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                className="absolute inset-0 bg-sidebar-accent rounded-lg shadow-sm"
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               />
             )}
             <Icon
               className={cn(
                 'relative z-10 w-4 h-4 flex-shrink-0',
-                isActive(href) ? 'text-blue-600' : 'text-gray-400'
+                isActive(href) ? 'text-sidebar-primary' : 'text-sidebar-foreground/60'
               )}
               aria-hidden="true"
             />
@@ -89,15 +89,15 @@ export function Sidebar() {
       <div className="px-3 pb-4 space-y-1">
         {/* User profile card */}
         {profile && (
-          <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg bg-white/60">
+          <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg bg-sidebar-accent">
             <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0" aria-hidden="true">
               <User className="w-4 h-4 text-orange-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-800 truncate">
+              <p className="text-sm font-semibold text-sidebar-accent-foreground truncate">
                 {profile.full_name ?? 'User'}
               </p>
-              <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
+              <p className="text-[10px] font-medium text-sidebar-foreground/50 uppercase tracking-wide">
                 {profile.subscription_tier === 'pro' ? 'Premium Tier' : 'Free Tier'}
               </p>
             </div>
@@ -114,21 +114,21 @@ export function Sidebar() {
               className={cn(
                 navLinkBase,
                 isActive(href)
-                  ? 'text-blue-700'
-                  : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
+                  ? 'text-sidebar-primary'
+                  : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               )}
             >
               {isActive(href) && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                  className="absolute inset-0 bg-sidebar-accent rounded-lg shadow-sm"
                   transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 />
               )}
               <Icon
                 className={cn(
                   'relative z-10 w-4 h-4 flex-shrink-0',
-                  isActive(href) ? 'text-blue-600' : 'text-gray-400'
+                  isActive(href) ? 'text-sidebar-primary' : 'text-sidebar-foreground/60'
                 )}
                 aria-hidden="true"
               />
@@ -140,12 +140,12 @@ export function Sidebar() {
         {/* Support */}
         <button
           className={cn(
-            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500',
-            'hover:bg-white/60 hover:text-gray-800 transition-colors',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+            'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1'
           )}
         >
-          <HelpCircle className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
+          <HelpCircle className="w-4 h-4 text-sidebar-foreground/60 flex-shrink-0" aria-hidden="true" />
           Support
         </button>
 
@@ -153,12 +153,12 @@ export function Sidebar() {
         <button
           onClick={handleSignOut}
           className={cn(
-            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500',
-            'hover:bg-white/60 hover:text-gray-800 transition-colors',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+            'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1'
           )}
         >
-          <LogOut className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
+          <LogOut className="w-4 h-4 text-sidebar-foreground/60 flex-shrink-0" aria-hidden="true" />
           Sign out
         </button>
       </div>

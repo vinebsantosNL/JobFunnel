@@ -15,19 +15,22 @@ interface ChecklistItem {
 
 function CheckItem({ item }: { item: ChecklistItem }) {
   const content = (
-    <div className="flex items-center gap-3 py-3.5 border-b border-gray-100 last:border-0">
-      {/* Square checkbox */}
+    <div className="flex items-center gap-3 py-3.5 border-b border-border last:border-0">
+      {/* Visual checkbox — role + aria-checked for screen readers */}
       <div
+        role="checkbox"
+        aria-checked={item.done}
+        aria-label={item.label}
         className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
           item.done
-            ? 'bg-blue-600 border-blue-600'
+            ? 'bg-primary border-primary'
             : item.soon
-            ? 'border-gray-200'
-            : 'border-gray-400'
+            ? 'border-border'
+            : 'border-muted-foreground'
         }`}
       >
         {item.done && (
-          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
+          <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 12 12" aria-hidden="true">
             <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
@@ -37,31 +40,31 @@ function CheckItem({ item }: { item: ChecklistItem }) {
       <div className="flex-1 min-w-0">
         <p
           className={`text-sm font-medium ${
-            item.done ? 'text-gray-400 line-through' : item.soon ? 'text-gray-400' : 'text-gray-900'
+            item.done ? 'text-muted-foreground line-through' : item.soon ? 'text-muted-foreground' : 'text-foreground'
           }`}
         >
           {item.label}
-          {item.soon && <span className="ml-2 text-xs text-gray-400 font-normal">(Soon)</span>}
+          {item.soon && <span className="ml-2 text-xs text-muted-foreground font-normal">(Soon)</span>}
         </p>
         {item.subtitle && !item.done && (
-          <p className={`text-xs mt-0.5 ${item.priority === 'high' ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
+          <p className={`text-xs mt-0.5 ${item.priority === 'high' ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
             {item.subtitle}
           </p>
         )}
         {item.subtitle && item.done && (
-          <p className="text-xs text-gray-400 mt-0.5">{item.subtitle}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
         )}
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {item.priority === 'high' && !item.done && (
-          <span className="text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full uppercase tracking-wide">
+          <span className="text-xs font-medium text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full uppercase tracking-wide">
             High Priority
           </span>
         )}
         {!item.done && !item.soon && item.href && (
-          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         )}
@@ -70,7 +73,11 @@ function CheckItem({ item }: { item: ChecklistItem }) {
   )
 
   if (!item.done && !item.soon && item.href) {
-    return <Link href={item.href}>{content}</Link>
+    return (
+      <Link href={item.href} aria-label={item.label}>
+        {content}
+      </Link>
+    )
   }
 
   return (
@@ -116,22 +123,30 @@ export function GettingStartedBlock() {
   ]
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className="bg-card rounded-xl border border-border p-5">
       {/* Header row */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-base font-semibold text-gray-900">Getting Started</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Complete these tasks to kickstart your job search.</p>
+          <h2 className="text-base font-semibold text-foreground">Getting Started</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Complete these tasks to kickstart your job search.</p>
         </div>
         <div className="text-right flex-shrink-0 ml-4">
           {isLoading ? (
-            <div className="h-4 w-20 bg-gray-100 rounded animate-pulse mb-1" />
+            <div className="h-4 w-20 bg-muted rounded animate-pulse mb-1" />
           ) : (
-            <span className="text-sm font-semibold text-gray-700">{pct}% Complete</span>
+            <span className="text-sm font-semibold text-foreground">{pct}% Complete</span>
           )}
-          <div className="w-32 h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden">
+          {/* Progress bar — progressbar role + aria values */}
+          <div
+            role="progressbar"
+            aria-valuenow={isLoading ? 0 : pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Getting started progress"
+            className="w-32 h-1.5 bg-muted rounded-full mt-1.5 overflow-hidden"
+          >
             <div
-              className="h-full bg-blue-600 rounded-full transition-all duration-500"
+              className="h-full bg-primary rounded-full transition-all duration-500"
               style={{ width: isLoading ? '0%' : `${pct}%` }}
             />
           </div>
@@ -142,11 +157,11 @@ export function GettingStartedBlock() {
       {isLoading ? (
         <div className="space-y-1">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center gap-3 py-3 border-b border-gray-100">
-              <div className="w-5 h-5 rounded bg-gray-100 animate-pulse flex-shrink-0" />
+            <div key={i} className="flex items-center gap-3 py-3 border-b border-border">
+              <div className="w-5 h-5 rounded bg-muted animate-pulse flex-shrink-0" />
               <div className="flex-1 space-y-1">
-                <div className="h-3.5 bg-gray-100 rounded animate-pulse w-3/4" />
-                <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2" />
+                <div className="h-3.5 bg-muted rounded animate-pulse w-3/4" />
+                <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
               </div>
             </div>
           ))}

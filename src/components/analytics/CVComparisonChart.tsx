@@ -35,11 +35,11 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs space-y-1">
-      <p className="font-semibold text-gray-800 mb-2">{label}</p>
+    <div className="bg-card border border-border rounded-lg shadow-lg p-3 text-xs space-y-1">
+      <p className="font-semibold text-foreground mb-2">{label}</p>
       {payload.map((item) => (
-        <p key={item.name} className="text-gray-600">
-          {item.name}: <span className="font-medium text-gray-900">{item.value}%</span>
+        <p key={item.name} className="text-muted-foreground">
+          {item.name}: <span className="font-medium text-foreground">{item.value}%</span>
         </p>
       ))}
     </div>

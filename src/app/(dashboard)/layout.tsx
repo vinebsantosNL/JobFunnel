@@ -4,11 +4,11 @@ import { UserStoreHydrator } from '@/components/providers/UserStoreHydrator'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Skip-to-content link — visually hidden until focused by keyboard */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-blue-700 focus:font-medium focus:rounded-lg focus:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-card focus:text-primary focus:font-medium focus:rounded-lg focus:shadow-md focus:outline-none focus:ring-2 focus:ring-ring"
       >
         Skip to main content
       </a>

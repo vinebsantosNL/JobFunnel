@@ -1,12 +1,12 @@
 # Sidebar — Component Spec
 
-**Version:** 1.0.0 · **Created:** 2026-03-23
+**Version:** 1.1.0 · **Created:** 2026-03-23 · **Updated:** 2026-03-23
 **Files:**
 - `src/components/layout/sidebar.tsx` — desktop sidebar
 - `src/components/layout/mobile-nav.tsx` — mobile bottom bar
 - `src/lib/nav-items.ts` — shared nav item constants
 **Context:** App shell — renders on every logged-in page
-**Status:** Sprint 2 pending — token migration (M2), dark mode (E1)
+**Status:** ✅ Sprint 1 + Sprint 2 complete — token-aligned, dark mode ready
 
 ---
 
@@ -56,9 +56,8 @@ This is the highest-impact component in the app: it wraps every page, sets the v
 
 | Variant | Description | Status |
 |---|---|---|
-| Default (light) | Current state — raw Tailwind gray/slate/blue | ✅ Shipped |
-| Token-aligned | Colors via CSS custom properties (`--sidebar`, `--sidebar-foreground`, etc.) | 🟡 Sprint 2 |
-| Dark mode | `dark:` variants once token migration is complete | 🟡 Blocked on Sprint 2 |
+| Token-aligned (light) | All colors via `bg-sidebar`, `text-sidebar-foreground`, etc. | ✅ Sprint 2 |
+| Dark mode | `next-themes` toggles `.dark` class → CSS vars flip automatically | ✅ Sprint 2 |
 | Collapsed (icon-only) | Fixed `w-16`, no labels, tooltip on hover | 🔵 Phase 2+ |
 
 ---
@@ -93,10 +92,10 @@ type NavItem = {
 
 | Element | State | Visual |
 |---|---|---|
-| NavLink | Default | `text-gray-500`, no background |
-| NavLink | Hover | `bg-white/60`, `text-gray-800` |
-| NavLink | Active (current page) | `text-blue-700`, white card bg via `motion.div layoutId="nav-indicator"` |
-| NavLink | Focus (keyboard) | `ring-2 ring-blue-500 ring-offset-1`, outline removed |
+| NavLink | Default | `text-sidebar-foreground`, no background |
+| NavLink | Hover | `bg-sidebar-accent`, `text-sidebar-accent-foreground` |
+| NavLink | Active (current page) | `text-sidebar-primary`, `bg-sidebar-accent` pill via `motion.div layoutId="nav-indicator"` |
+| NavLink | Focus (keyboard) | `ring-2 ring-sidebar-ring ring-offset-1`, outline removed |
 | Support / Sign out buttons | Default | Same as NavLink default |
 | Support / Sign out buttons | Hover | Same as NavLink hover |
 | Support / Sign out buttons | Focus | Same as NavLink focus |
@@ -136,22 +135,22 @@ The dashboard `layout.tsx` renders a `<a href="#main-content">` link that is vis
 | `<nav aria-label="Secondary navigation">` | ✅ Sprint 1 |
 | `<nav aria-label="Mobile navigation">` | ✅ Sprint 1 |
 | `aria-current="page"` on active links | ✅ Sprint 1 |
-| `focus-visible:ring-2 ring-blue-500` on all interactive elements | ✅ Sprint 1 |
+| `focus-visible:ring-2 ring-sidebar-ring` on all interactive elements | ✅ Sprint 1+2 |
 | All icons `aria-hidden="true"` | ✅ Sprint 1 |
 | Skip-to-content link in layout | ✅ Sprint 1 |
 | Minimum touch target `min-h-[44px]` on desktop nav | ✅ (`py-2.5` + `text-sm` = ~44px) |
 | Minimum touch target `min-h-[56px]` on mobile bar | ✅ Explicit `min-h-[56px]` |
-| Dark mode support | 🟡 Sprint 2 (blocked on token migration) |
+| Dark mode support | ✅ Sprint 2 — automatic via CSS vars + `next-themes` |
 
 ---
 
-## Token Mapping (Sprint 2 target)
+## Token Mapping (✅ Sprint 2 — shipped)
 
-These CSS custom properties are already defined in `globals.css` but not yet consumed by the sidebar. Token migration should replace the raw Tailwind values below:
+All sidebar and mobile-nav colors now use CSS custom properties from `globals.css`. Dark mode flips automatically when `next-themes` adds the `.dark` class to `<html>`.
 
-| Element | Current (raw) | Target (token) |
-|---|---|---|
-| Sidebar background | `bg-slate-100` | `bg-[var(--sidebar)]` |
+| Element | Token class | Light value | Dark value |
+|---|---|---|---|
+| Sidebar background | `bg-sidebar` | `oklch(0.985 0 0)` ≈ white | `oklch(0.205 0 0)` dark surface |
 | Sidebar border | `border-gray-200` | `border-[var(--sidebar-border)]` |
 | Nav link default text | `text-gray-500` | `text-[var(--sidebar-foreground)]` |
 | Nav link active text | `text-blue-700` | `text-[var(--sidebar-primary)]` |
@@ -198,3 +197,4 @@ These CSS custom properties are already defined in `globals.css` but not yet con
 | Version | Date | Changes |
 |---|---|---|
 | 1.0.0 | 2026-03-23 | Initial spec — extracted from audit. Sprint 1 accessibility fixes applied to code. |
+| 1.1.0 | 2026-03-23 | Sprint 2 — full token migration to `--sidebar-*` CSS variables. Dark mode automatic via `next-themes`. Layout `bg-gray-50` → `bg-background`. Focus ring → `ring-sidebar-ring`. |

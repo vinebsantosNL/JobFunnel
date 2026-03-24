@@ -5,11 +5,11 @@ export default function PipelinePage() {
   return (
     <>
       <Header title="Pipeline" />
-      <main className="flex-1 p-6 overflow-hidden">
+      <div className="flex-1 p-6 overflow-hidden">
         <div className="h-full">
           <KanbanBoard />
         </div>
-      </main>
+      </div>
     </>
   )
 }

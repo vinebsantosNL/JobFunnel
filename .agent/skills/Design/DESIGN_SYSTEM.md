@@ -1,6 +1,6 @@
 # JobFunnel OS — Design System
 
-**Version**: 1.1.0 · **Last updated**: 2026-03-23
+**Version**: 1.3.0 · **Last updated**: 2026-03-24
 **Baseline**: [job-funnel-lime.vercel.app](https://job-funnel-lime.vercel.app) + [/login](https://job-funnel-lime.vercel.app/login)
 
 > **Rule #1 — Read this before building anything.**
@@ -482,7 +482,29 @@ Applies `reveal-init` / `reveal-show` classes (opacity 0 → 1, translateY 28px 
 
 | Component | File(s) | Description | Spec |
 |---|---|---|---|
-| `Sidebar` | `sidebar.tsx` · `mobile-nav.tsx` | Desktop left sidebar + mobile bottom bar. Shared nav items via `/lib/nav-items.ts`. Sprint 2: token migration + dark mode pending. | [Sidebar.md](./components/Sidebar.md) |
+| `Sidebar` | `sidebar.tsx` · `mobile-nav.tsx` | Desktop left sidebar + mobile bottom bar. Shared nav items via `/lib/nav-items.ts`. Full token migration + dark mode via `--sidebar-*` tokens. | [Sidebar.md](./components/Sidebar.md) |
+| `Header` | `header.tsx` | Page-level header bar with title and optional back link. `role="banner"` explicit (nested header loses implicit role). Full token migration. | [Header.md](./components/Header.md) |
+
+### App Dashboard (`/src/components/dashboard/`)
+
+| Component | File(s) | Description | Spec |
+|---|---|---|---|
+| `DashboardStatsBlock` | `DashboardStatsBlock.tsx` | 4-tile stats grid (Total Applications, Active Pipeline, Interviews, Stories). `useCountUp` animation with `aria-live="polite"`. Left-border accent colors are intentional semantic indicators. | [StatTile.md](./components/StatTile.md) |
+| `NextCareerGoal` | `NextCareerGoal.tsx` · `CareerGoalModal.tsx` | Personalised greeting card + career goal summary (target title, date, salary). Opens `CareerGoalModal` for editing. TanStack Query with server `initialData`. | [NextCareerGoal.md](./components/NextCareerGoal.md) |
+| `GettingStartedBlock` | `GettingStartedBlock.tsx` | Onboarding checklist with progress bar. 4 check items (3 completable, 1 "soon"). Framer Motion stagger animation. Full ARIA roles on checkboxes and progress bar. | [GettingStartedBlock.md](./components/GettingStartedBlock.md) |
+| `UpgradeBanner` | `UpgradeBanner.tsx` | Full-width promotional strip for free users. Returns `null` for Pro users. Intentionally uses non-semantic blue brand colors to signal "upgrade" context. | [UpgradeBanner.md](./components/UpgradeBanner.md) |
+
+### App Pipeline (`/src/components/pipeline/`)
+
+| Component | File(s) | Description | Spec |
+|---|---|---|---|
+| `KanbanBoard` | `kanban-board.tsx` | Root Pipeline orchestrator. DnD context, filter state, job CRUD, skip-stage confirmation dialog. Loading `role="status"`, error `role="alert"`. Skip-stage buttons migrated to shadcn `Button`. | — |
+| `KanbanColumn` | `kanban-column.tsx` | Single Kanban stage column. `role="region"` + `aria-label` for AT navigation. Drop zone with `bg-muted/50`; drag-over `bg-blue-50` (intentional interaction color). Stage colors from `/lib/stages` (intentional semantic tokens). | — |
+| `ApplicationCard` | `application-card.tsx` | Draggable job card. Dual-layer architecture: outer `div` for dnd-kit positional transform, inner `motion.div` for micro-interactions. `focus-visible:ring-primary` on drag handle. `role="img"` on priority dot. Stale `ring-amber-300 animate-pulse` indicator. | — |
+| `ApplicationModal` | `application-modal.tsx` | Full job detail slide-over. `role="tablist"` / `role="tab"` / `role="tabpanel"` / `aria-selected` on tab interface. `aria-live` on animated stage badge. All decorative icons `aria-hidden`. Share button `disabled` until feature ships. | — |
+| `FilterBar` | `filter-bar.tsx` | Search + priority + CV version filters. Active filters highlighted in `text-primary`. Tooltip shows active application count. | — |
+| `QuickAddForm` | `quick-add-form.tsx` | Inline "Add job" form within each column. Collapses to a ghost button; expands to a 2-field form. Zod validation + loading state. | — |
+| `PipelineUpgradeBanner` | `pipeline/upgrade-banner.tsx` | Inline limit warning (amber = approaching, red = blocked). Distinct from dashboard `UpgradeBanner` — contextual, not decorative. Emoji icons `aria-hidden`. | — |
 
 ### App UI (`/src/components/ui/` — shadcn/ui)
 
