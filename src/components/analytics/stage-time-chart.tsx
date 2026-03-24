@@ -32,7 +32,7 @@ export function StageTimeChart({ data }: StageTimeChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="h-56 flex items-center justify-center text-gray-400 text-sm">
+      <div className="h-56 flex items-center justify-center text-muted-foreground text-sm">
         No stage data yet
       </div>
     )

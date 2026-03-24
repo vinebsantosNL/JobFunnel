@@ -6,38 +6,23 @@ import { FunnelChart } from '@/components/analytics/funnel-chart'
 import { TimelineChart } from '@/components/analytics/timeline-chart'
 import { StageTimeChart } from '@/components/analytics/stage-time-chart'
 import { CVTestingPanel } from '@/components/analytics/CVTestingPanel'
+import {
+  DateFilterPills,
+  DEFAULT_DATE_PRESETS,
+  getDateRange,
+} from '@/components/analytics/date-filter-pills'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useFunnelData, useTimelineData, useStageTimeData } from '@/hooks/use-analytics'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 
-const DATE_PRESETS = [
-  { label: 'Last 30 days', days: 30 },
-  { label: 'Last 45 days', days: 45 },
-  { label: 'Last 90 days', days: 90 },
-] as const
-
 type Tab = 'funnel' | 'timeline' | 'cv-testing'
-
-function getDateRange(days: number): { from: string; to: string } {
-  const to = new Date()
-  const from = new Date()
-  from.setDate(from.getDate() - days)
-  return { from: from.toISOString(), to: to.toISOString() }
-}
-
-function formatDateRangeLabel(days: number): string {
-  const to = new Date()
-  const from = new Date()
-  from.setDate(from.getDate() - days)
-  const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-  return `${fmt(from)} – ${fmt(to)}`
-}
 
 export function AnalyticsDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('funnel')
   const [presetIndex, setPresetIndex] = useState(0)
 
-  const preset = DATE_PRESETS[presetIndex]
+  const preset = DEFAULT_DATE_PRESETS[presetIndex]
   // useMemo prevents new Date() from running on every render (which changes milliseconds
   // → different query key → infinite refetch loop stuck on Loading...)
   const dateRange = useMemo(() => getDateRange(preset.days), [preset.days])
@@ -51,18 +36,22 @@ export function AnalyticsDashboard() {
 
   // Active = currently in Screening, Interviewing, or Offer (current stage distribution)
   const activeApps = funnel
-    ? (funnel.stage_counts.screening ?? 0) + (funnel.stage_counts.interviewing ?? 0) + (funnel.stage_counts.offer ?? 0)
+    ? (funnel.stage_counts.screening ?? 0) +
+      (funnel.stage_counts.interviewing ?? 0) +
+      (funnel.stage_counts.offer ?? 0)
     : 0
 
   // Offers = currently in Offer or Hired (received an offer)
-  const offers = funnel ? (funnel.stage_counts.offer ?? 0) + (funnel.stage_counts.hired ?? 0) : 0
+  const offers = funnel
+    ? (funnel.stage_counts.offer ?? 0) + (funnel.stage_counts.hired ?? 0)
+    : 0
   const conversion = funnel?.overall_conversion ?? 0
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
+    <div className="p-6">
       <div className="space-y-6">
         {/* Tab navigation */}
-        <div className="flex gap-1 border-b border-gray-200">
+        <div className="flex gap-1 border-b border-border">
           {(
             [
               { key: 'funnel', label: 'Funnel Overview' },
@@ -75,37 +64,23 @@ export function AnalyticsDashboard() {
               onClick={() => setActiveTab(key)}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px flex items-center gap-1.5 ${
                 activeTab === key
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               }`}
             >
               {label}
-              {dot && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />}
+              {dot && (
+                <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+              )}
             </button>
           ))}
         </div>
 
         {(activeTab === 'funnel' || activeTab === 'timeline') && (
-          <div className="flex flex-col gap-1 w-fit">
-            {/* Date filter pills */}
-            <div className="border border-gray-200 rounded-lg overflow-hidden flex">
-              {DATE_PRESETS.map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPresetIndex(i)}
-                  className={`px-4 py-1.5 text-sm transition-colors ${
-                    presetIndex === i
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-            {/* Active range subtitle */}
-            <p className="text-xs text-gray-400 pl-1">{formatDateRangeLabel(preset.days)}</p>
-          </div>
+          <DateFilterPills
+            selectedIndex={presetIndex}
+            onSelect={setPresetIndex}
+          />
         )}
 
         {activeTab === 'funnel' && (
@@ -150,8 +125,11 @@ export function AnalyticsDashboard() {
                     <div className="space-y-3 py-2">
                       {[100, 75, 50, 30].map((w, i) => (
                         <div key={i} className="flex items-center gap-3">
-                          <div className="w-36 h-4 bg-gray-100 rounded animate-pulse" />
-                          <div className="flex-1 bg-gray-100 rounded-full h-7 animate-pulse" style={{ maxWidth: `${w}%` }} />
+                          <Skeleton className="w-36 h-4" />
+                          <Skeleton
+                            className="flex-1 h-7 rounded-full"
+                            style={{ maxWidth: `${w}%` }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -159,9 +137,16 @@ export function AnalyticsDashboard() {
                     <FunnelChart data={funnel} />
                   ) : (
                     <div className="h-64 flex flex-col items-center justify-center gap-2 text-center px-4">
-                      <p className="text-sm font-medium text-gray-600">No funnel data yet</p>
-                      <p className="text-xs text-gray-400">Start tracking applications to see your conversion funnel.</p>
-                      <Link href="/pipeline" className="text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors mt-1">
+                      <p className="text-sm font-medium text-foreground">
+                        No funnel data yet
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Start tracking applications to see your conversion funnel.
+                      </p>
+                      <Link
+                        href="/pipeline"
+                        className="text-xs text-primary font-medium hover:opacity-80 transition-opacity mt-1"
+                      >
                         Add your first application →
                       </Link>
                     </div>
@@ -169,12 +154,16 @@ export function AnalyticsDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Stage Efficiency — anchored to funnel */}
+              {/* Stage Efficiency — anchored to funnel, desktop only */}
               <div className="w-60 flex-shrink-0 hidden lg:flex flex-col">
                 <Card className="flex-1">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-semibold text-gray-900">Stage Efficiency</CardTitle>
-                    <p className="text-xs text-gray-400">Average days spent per stage</p>
+                    <CardTitle className="text-sm font-semibold">
+                      Stage Efficiency
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      Average days spent per stage
+                    </p>
                   </CardHeader>
                   <CardContent className="space-y-0 pt-0">
                     {[
@@ -182,27 +171,31 @@ export function AnalyticsDashboard() {
                         label: 'Applied → Screened',
                         stage: 'applied' as const,
                         color: 'bg-blue-500',
-                        link: '#funnel',
                       },
                       {
                         label: 'Screening → Interview',
                         stage: 'screening' as const,
                         color: 'bg-purple-500',
-                        link: '#funnel',
                       },
                       {
                         label: 'Interview → Offer',
                         stage: 'interviewing' as const,
                         color: 'bg-amber-500',
-                        link: '#funnel',
                       },
                     ].map(({ label, stage, color }) => {
                       const days = stageTime?.find(s => s.stage === stage)?.avg_days
                       return (
-                        <div key={stage} className="flex items-center gap-2 py-2.5 border-b border-gray-50 last:border-0">
-                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${color}`} />
-                          <span className="text-xs text-gray-500 flex-1 leading-tight">{label}</span>
-                          <span className="text-xs font-semibold text-gray-900 tabular-nums">
+                        <div
+                          key={stage}
+                          className="flex items-center gap-2 py-2.5 border-b border-border/50 last:border-0"
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full flex-shrink-0 ${color}`}
+                          />
+                          <span className="text-xs text-muted-foreground flex-1 leading-tight">
+                            {label}
+                          </span>
+                          <span className="text-xs font-semibold text-foreground tabular-nums">
                             {days != null ? `${days}d` : '—'}
                           </span>
                         </div>
@@ -210,22 +203,29 @@ export function AnalyticsDashboard() {
                     })}
 
                     {/* Avg total process time */}
-                    {stageTime && stageTime.length > 0 && (() => {
-                      const total = stageTime
-                        .filter(s => ['applied', 'screening', 'interviewing'].includes(s.stage))
-                        .reduce((sum, s) => sum + s.avg_days, 0)
-                      return (
-                        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full flex-shrink-0 bg-gray-300" />
-                          <span className="text-xs text-gray-500 flex-1">Avg total process</span>
-                          <span className="text-xs font-semibold text-gray-900">{Math.round(total)}d</span>
-                        </div>
-                      )
-                    })()}
+                    {stageTime && stageTime.length > 0 &&
+                      (() => {
+                        const total = stageTime
+                          .filter(s =>
+                            ['applied', 'screening', 'interviewing'].includes(s.stage)
+                          )
+                          .reduce((sum, s) => sum + s.avg_days, 0)
+                        return (
+                          <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full flex-shrink-0 bg-muted-foreground/40" />
+                            <span className="text-xs text-muted-foreground flex-1">
+                              Avg total process
+                            </span>
+                            <span className="text-xs font-semibold text-foreground">
+                              {Math.round(total)}d
+                            </span>
+                          </div>
+                        )
+                      })()}
 
                     <Link
                       href="/pipeline"
-                      className="block mt-4 text-center text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                      className="block mt-4 text-center text-xs text-primary hover:opacity-80 font-medium transition-opacity"
                     >
                       View Pipeline →
                     </Link>
@@ -241,9 +241,13 @@ export function AnalyticsDashboard() {
               </CardHeader>
               <CardContent>
                 {stageTimeLoading ? (
-                  <div className="h-56 flex items-end gap-3 px-4 pb-6 animate-pulse">
+                  <div className="h-56 flex items-end gap-3 px-4 pb-6">
                     {[60, 40, 80, 50, 70].map((h, i) => (
-                      <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+                      <Skeleton
+                        key={i}
+                        className="flex-1 rounded-t rounded-b-none"
+                        style={{ height: `${h}%` }}
+                      />
                     ))}
                   </div>
                 ) : (
@@ -261,18 +265,29 @@ export function AnalyticsDashboard() {
             </CardHeader>
             <CardContent>
               {timelineLoading ? (
-                <div className="h-56 flex items-end gap-2 px-4 pb-4 animate-pulse">
+                <div className="h-56 flex items-end gap-2 px-4 pb-4">
                   {[30, 50, 40, 70, 55, 80, 60, 75, 45, 90, 65, 50].map((h, i) => (
-                    <div key={i} className="flex-1 bg-gray-100 rounded-t" style={{ height: `${h}%` }} />
+                    <Skeleton
+                      key={i}
+                      className="flex-1 rounded-t rounded-b-none"
+                      style={{ height: `${h}%` }}
+                    />
                   ))}
                 </div>
               ) : timeline && timeline.length > 0 ? (
                 <TimelineChart data={timeline} />
               ) : (
                 <div className="h-56 flex flex-col items-center justify-center gap-2 text-center px-4">
-                  <p className="text-sm font-medium text-gray-600">No timeline data yet</p>
-                  <p className="text-xs text-gray-400">Applications will appear here as you add them over time.</p>
-                  <Link href="/pipeline" className="text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors mt-1">
+                  <p className="text-sm font-medium text-foreground">
+                    No timeline data yet
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Applications will appear here as you add them over time.
+                  </p>
+                  <Link
+                    href="/pipeline"
+                    className="text-xs text-primary font-medium hover:opacity-80 transition-opacity mt-1"
+                  >
                     Go to Pipeline →
                   </Link>
                 </div>

@@ -114,7 +114,7 @@ export default function ProfileSettingsPage() {
   }
 
   return (
-    <main className="flex-1 p-6 overflow-auto">
+    <div className="flex-1 p-6 overflow-auto">
       <div className="max-w-xl mx-auto">
         <Card>
           <CardHeader>
@@ -124,7 +124,7 @@ export default function ProfileSettingsPage() {
             {isLoading ? (
               <div className="space-y-4 animate-pulse">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-9 bg-gray-100 rounded-lg" />
+                  <div key={i} className="h-9 bg-muted rounded-lg" />
                 ))}
               </div>
             ) : (
@@ -198,7 +198,7 @@ export default function ProfileSettingsPage() {
                     aria-invalid={!!errors.target_countries}
                     {...register('target_countries')}
                   />
-                  <p className="text-xs text-gray-500">Separate multiple countries with commas</p>
+                  <p className="text-xs text-muted-foreground">Separate multiple countries with commas</p>
                 </div>
 
                 <div className="flex justify-end pt-2">
@@ -211,6 +211,6 @@ export default function ProfileSettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </div>
   )
 }

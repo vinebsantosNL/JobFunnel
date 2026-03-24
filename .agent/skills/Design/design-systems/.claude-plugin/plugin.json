@@ -1,0 +1,69 @@
+{
+  "name": "design-systems",
+  "version": "1.0.0",
+  "description": "Build, document, and maintain scalable design systems — from tokens and components to accessibility and theming.",
+  "author": "JobFunnel OS",
+  "keywords": ["design-systems", "tokens", "components", "accessibility", "theming", "jobfunnel"],
+  "skills": [
+    {
+      "name": "design-token",
+      "description": "Define, organize, and document design tokens — the atomic values that drive visual consistency. Use for color systems, spacing, typography, elevation, and motion tokens.",
+      "path": "skills/design-token/SKILL.md"
+    },
+    {
+      "name": "component-spec",
+      "description": "Create comprehensive component specifications covering anatomy, variants, props, states, behavior, and accessibility.",
+      "path": "skills/component-spec/SKILL.md"
+    },
+    {
+      "name": "accessibility-audit",
+      "description": "Conduct WCAG 2.2 AA accessibility audits using the POUR framework. Identify issues by severity and produce prioritized remediation roadmaps.",
+      "path": "skills/accessibility-audit/SKILL.md"
+    },
+    {
+      "name": "naming-convention",
+      "description": "Establish consistent naming systems for tokens, components, files, and code across design and engineering.",
+      "path": "skills/naming-convention/SKILL.md"
+    },
+    {
+      "name": "theming-system",
+      "description": "Design token-driven theming architectures supporting light mode, dark mode, high contrast, and brand variants.",
+      "path": "skills/theming-system/SKILL.md"
+    },
+    {
+      "name": "pattern-library",
+      "description": "Create and maintain reusable UX pattern entries — problem-first documentation of recurring design solutions.",
+      "path": "skills/pattern-library/SKILL.md"
+    },
+    {
+      "name": "icon-system",
+      "description": "Define and maintain icon system specifications including grid, scale rules, naming, categorization, and accessibility.",
+      "path": "skills/icon-system/SKILL.md"
+    },
+    {
+      "name": "documentation-template",
+      "description": "Standardized templates for component docs, token docs, and pattern entries that keep design system knowledge consistent and current.",
+      "path": "skills/documentation-template/SKILL.md"
+    }
+  ],
+  "commands": [
+    {
+      "name": "audit-system",
+      "trigger": "/audit-system",
+      "description": "Evaluate a design system for consistency, completeness, and accessibility. Produces a prioritized report with a remediation roadmap.",
+      "path": "commands/audit-system.md"
+    },
+    {
+      "name": "create-component",
+      "trigger": "/create-component",
+      "description": "Generate a complete component specification from a name or description — anatomy, variants, props, states, tokens, and accessibility.",
+      "path": "commands/create-component.md"
+    },
+    {
+      "name": "tokenize",
+      "trigger": "/tokenize",
+      "description": "Extract and organize design tokens from an existing codebase or stylesheet into a structured global → alias → component hierarchy.",
+      "path": "commands/tokenize.md"
+    }
+  ]
+}

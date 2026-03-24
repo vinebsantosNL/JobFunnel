@@ -107,12 +107,13 @@ export function KanbanBoard() {
 
   if (isLoading) {
     return (
-      <div className="flex gap-3 p-4 overflow-x-auto">
+      <div role="status" aria-label="Loading pipeline" className="flex gap-3 p-4 overflow-x-auto">
+        <span className="sr-only">Loading your pipeline…</span>
         {[1, 2, 3, 4, 5].map((col) => (
           <div key={col} className="w-64 min-w-[220px] flex-shrink-0 space-y-2">
-            <div className="h-9 bg-gray-100 rounded-lg animate-pulse" />
+            <div className="h-9 bg-muted rounded-lg animate-pulse" />
             {[1, 2, 3].map((card) => (
-              <div key={card} className="h-24 bg-gray-100 rounded-xl animate-pulse" />
+              <div key={card} className="h-24 bg-muted rounded-xl animate-pulse" />
             ))}
           </div>
         ))}
@@ -122,8 +123,8 @@ export function KanbanBoard() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3">
-        <p className="text-red-500 text-sm">Failed to load jobs.</p>
+      <div role="alert" className="flex flex-col items-center justify-center h-64 gap-3">
+        <p className="text-destructive text-sm">Failed to load jobs.</p>
         <Button variant="outline" size="sm" onClick={() => refetch()}>
           Retry
         </Button>
@@ -178,7 +179,7 @@ export function KanbanBoard() {
             <DialogHeader>
               <DialogTitle>Confirm Stage Jump</DialogTitle>
             </DialogHeader>
-            <div className="text-sm text-gray-600 space-y-1 mt-1">
+            <div className="text-sm text-muted-foreground space-y-1 mt-1">
               {(() => {
                 const fromLabel = STAGE_CONFIG[pendingMove.job.stage].label
                 const toLabel = STAGE_CONFIG[pendingMove.newStage].label
@@ -195,37 +196,39 @@ export function KanbanBoard() {
                       <strong>{fromLabel}</strong> directly to <strong>{toLabel}</strong>
                       {skipped.length > 0 && `, skipping ${skipped.join(', ')}`}.
                     </p>
-                    <p className="text-gray-400 mt-2">
+                    <p className="text-muted-foreground/70 mt-2">
                       Was this intentional? If you confirm, intermediate stages will be logged
                       automatically to preserve your funnel metrics.
                     </p>
                     <div className="flex flex-col gap-2 mt-4">
-                      <button
-                        className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                      <Button
+                        className="w-full"
                         onClick={() => {
                           updateJob.mutate({ id: pendingMove.job.id, input: { stage: pendingMove.newStage } })
                           setPendingMove(null)
                         }}
                       >
                         Yes, move to {toLabel}
-                      </button>
+                      </Button>
                       {nextStage && nextStage !== pendingMove.newStage && (
-                        <button
-                          className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                        <Button
+                          variant="secondary"
+                          className="w-full"
                           onClick={() => {
                             updateJob.mutate({ id: pendingMove.job.id, input: { stage: nextStage } })
                             setPendingMove(null)
                           }}
                         >
                           No, move to {STAGE_CONFIG[nextStage].label} instead
-                        </button>
+                        </Button>
                       )}
-                      <button
-                        className="w-full px-4 py-2 text-gray-400 hover:text-gray-600 text-sm transition-colors"
+                      <Button
+                        variant="ghost"
+                        className="w-full"
                         onClick={() => setPendingMove(null)}
                       >
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   </>
                 )

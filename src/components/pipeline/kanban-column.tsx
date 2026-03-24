@@ -20,14 +20,22 @@ export function KanbanColumn({ stage, jobs, onCardClick, onAddJob }: KanbanColum
   const config = STAGE_CONFIG[stage]
 
   return (
-    <div className="flex flex-col w-64 min-w-[220px] flex-1 max-w-xs xl:max-w-sm 2xl:max-w-none">
+    <div
+      role="region"
+      aria-label={`${config.label} column`}
+      className="flex flex-col w-64 min-w-[220px] flex-1 max-w-xs xl:max-w-sm 2xl:max-w-none"
+    >
       {/* Column header */}
       <div className={`flex items-center justify-between px-3 py-2 rounded-t-xl ${config.bgColor} border ${config.borderColor}`}>
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${config.dotColor}`} />
+          {/* aria-hidden — color is decorative; label conveys stage identity */}
+          <span aria-hidden="true" className={`w-2 h-2 rounded-full ${config.dotColor}`} />
           <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
         </div>
-        <span className="text-xs text-gray-400 bg-white rounded-full px-2 py-0.5 border">
+        <span
+          aria-label={`${jobs.length} job${jobs.length !== 1 ? 's' : ''}`}
+          className="text-xs text-muted-foreground bg-card rounded-full px-2 py-0.5 border border-border"
+        >
           {jobs.length}
         </span>
       </div>
@@ -36,7 +44,7 @@ export function KanbanColumn({ stage, jobs, onCardClick, onAddJob }: KanbanColum
       <div
         ref={setNodeRef}
         className={`flex-1 min-h-[200px] p-2 space-y-2 rounded-b-xl border-x border-b transition-colors duration-100 ${
-          isOver ? 'bg-blue-50 border-blue-200' : 'bg-gray-50/80 border-gray-200'
+          isOver ? 'bg-primary/5 border-primary/30' : 'bg-muted/50 border-border'
         }`}
       >
         <SortableContext items={jobs.map(j => j.id)} strategy={verticalListSortingStrategy}>

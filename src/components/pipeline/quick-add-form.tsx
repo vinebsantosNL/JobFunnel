@@ -49,7 +49,7 @@ export function QuickAddForm({ stage, onAdd }: QuickAddFormProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="w-full text-gray-400 hover:text-gray-600 border-2 border-dashed border-gray-200 hover:border-gray-300"
+        className="w-full text-muted-foreground hover:text-foreground border-2 border-dashed border-border hover:border-border"
         onClick={() => setOpen(true)}
       >
         + Add job
@@ -58,7 +58,7 @@ export function QuickAddForm({ stage, onAdd }: QuickAddFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 bg-card rounded-lg p-3 border border-border shadow-sm">
       <div>
         <Input
           placeholder="Company name"

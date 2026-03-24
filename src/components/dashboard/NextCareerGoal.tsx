@@ -53,38 +53,39 @@ export function NextCareerGoal({ initialProfile }: NextCareerGoalProps) {
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="bg-card rounded-xl border border-border p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">{greeting}</h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <h3 className="text-2xl font-bold text-foreground">{greeting}</h3>
+            <p className="text-sm text-muted-foreground mt-1">
               You&apos;re making great progress towards your next career milestone.
             </p>
           </div>
+          {/* min-h-[44px] + px-3 ensures 44×44px touch target on mobile */}
           <button
             onClick={() => setModalOpen(true)}
-            className="flex-shrink-0 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            className="flex-shrink-0 min-h-[44px] px-3 rounded-lg text-sm text-primary hover:text-primary/90 font-medium transition-colors"
           >
             Edit Goals
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5 pt-5 border-t border-gray-100">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5 pt-5 border-t border-border">
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Target Title</p>
-            <p className="text-sm font-semibold text-blue-600">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Target Title</p>
+            <p className="text-sm font-semibold text-primary">
               {profile?.target_role ?? '—'}
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Target Date</p>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Target Date</p>
+            <p className="text-sm font-semibold text-foreground">
               {formatDate(profile?.target_date)}
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Target Salary</p>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Target Salary</p>
+            <p className="text-sm font-semibold text-foreground">
               {formatSalary(profile?.target_salary_min, profile?.target_salary_max, profile?.target_salary_currency)}
             </p>
           </div>

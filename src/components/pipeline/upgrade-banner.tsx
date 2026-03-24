@@ -20,7 +20,7 @@ export function UpgradeBanner({ activeCount, limit }: UpgradeBannerProps) {
       }`}
     >
       <div className="flex items-center gap-2">
-        <span className="text-base">{isBlocked ? '🔒' : '⚠️'}</span>
+        <span aria-hidden="true" className="text-base">{isBlocked ? '🔒' : '⚠️'}</span>
         <span>
           {isBlocked
             ? `You've reached the free tier limit of ${limit} active applications.`

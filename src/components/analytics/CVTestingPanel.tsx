@@ -1,39 +1,23 @@
 'use client'
 
-import { useMemo } from 'react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { MetricCard } from '@/components/analytics/metric-card'
 import { CVComparisonChart } from '@/components/analytics/CVComparisonChart'
 import { CVComparisonTable } from '@/components/analytics/CVComparisonTable'
+import {
+  DateFilterPills,
+  DEFAULT_DATE_PRESETS,
+  getDateRange,
+} from '@/components/analytics/date-filter-pills'
 import type { CVComparisonRow } from '@/lib/services/analyticsService'
 import type { CVVersion } from '@/types/database.types'
 
 const EU_AVG_SCREENING_LABEL = '2–4%'
 const LOW_SAMPLE_THRESHOLD = 10
-
-const DATE_PRESETS = [
-  { label: 'Last 30 days', days: 30 },
-  { label: 'Last 45 days', days: 45 },
-  { label: 'Last 90 days', days: 90 },
-] as const
-
-function getDateRange(days: number): { from: string; to: string } {
-  const to = new Date()
-  const from = new Date()
-  from.setDate(from.getDate() - days)
-  return { from: from.toISOString(), to: to.toISOString() }
-}
-
-function formatDateRangeLabel(days: number): string {
-  const to = new Date()
-  const from = new Date()
-  from.setDate(from.getDate() - days)
-  const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-  return `${fmt(from)} – ${fmt(to)}`
-}
 
 async function fetchCVComparison(params: {
   from?: string
@@ -88,9 +72,9 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
       <MetricCard title="Best Performing Version" accentColor="border-l-blue-500">
         {best ? (
           <>
-            <p className="text-xl font-bold text-gray-900 leading-tight">{best.version_name}</p>
+            <p className="text-xl font-bold text-foreground leading-tight">{best.version_name}</p>
             <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-              <span className="inline-flex items-center bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5 rounded-full dark:bg-green-950 dark:text-green-400 dark:border-green-800">
                 +{bestAdvantage}% vs Avg
               </span>
               {bestIsLowSample && (
@@ -99,10 +83,10 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">{best.screening_rate ?? 0}% screening rate</p>
+            <p className="text-xs text-muted-foreground mt-1">{best.screening_rate ?? 0}% screening rate</p>
           </>
         ) : (
-          <p className="text-sm text-gray-400">No data yet</p>
+          <p className="text-sm text-muted-foreground">No data yet</p>
         )}
       </MetricCard>
 
@@ -116,13 +100,13 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
 
       {/* Untagged Applications */}
       <MetricCard title="Untagged Applications" accentColor="border-l-amber-500">
-        <p className={`text-2xl font-bold ${untaggedCount > 0 ? 'text-amber-500' : 'text-gray-900'}`}>
+        <p className={`text-2xl font-bold ${untaggedCount > 0 ? 'text-amber-500' : 'text-foreground'}`}>
           {untaggedCount}
         </p>
         {untaggedCount > 0 && (
           <Link
             href="/pipeline"
-            className="text-xs text-gray-500 hover:text-blue-600 underline underline-offset-2 mt-1 inline-block"
+            className="text-xs text-muted-foreground hover:text-primary underline underline-offset-2 mt-1 inline-block transition-colors"
           >
             Tag them →
           </Link>
@@ -135,7 +119,7 @@ function SummaryCards({ rows }: { rows: CVComparisonRow[] }) {
 export function CVTestingPanel() {
   const [presetIndex, setPresetIndex] = useState(0)
 
-  const preset = DATE_PRESETS[presetIndex]
+  const preset = DEFAULT_DATE_PRESETS[presetIndex]
   const dateRange = useMemo(() => getDateRange(preset.days), [preset.days])
 
   const { data: cvVersions, isLoading: versionsLoading } = useQuery({
@@ -161,27 +145,10 @@ export function CVTestingPanel() {
   const hasNoVersions = !versionsLoading && (cvVersions ?? []).length === 0
   const hasNoData = !comparisonLoading && (comparisonRows ?? []).length === 0
 
-  const dataSection = (
+  return (
     <div className="space-y-6">
-      {/* Time filter header — same as Funnel Overview */}
-      <div className="flex flex-col gap-1 w-fit">
-        <div className="border border-gray-200 rounded-lg overflow-hidden flex">
-          {DATE_PRESETS.map((p, i) => (
-            <button
-              key={i}
-              onClick={() => setPresetIndex(i)}
-              className={`px-4 py-1.5 text-sm transition-colors ${
-                presetIndex === i
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-        <p className="text-xs text-gray-400 pl-1">{formatDateRangeLabel(preset.days)}</p>
-      </div>
+      {/* Time filter */}
+      <DateFilterPills selectedIndex={presetIndex} onSelect={setPresetIndex} />
 
       {/* Summary cards */}
       {!isLoading && !hasNoData && (
@@ -191,12 +158,12 @@ export function CVTestingPanel() {
       {/* Empty: no CV versions at all */}
       {hasNoVersions ? (
         <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             Create your first CV version to start tracking performance
           </p>
           <Link
             href="/cv-versions"
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 underline underline-offset-2"
+            className="text-sm font-medium text-primary hover:opacity-80 underline underline-offset-2 transition-opacity"
           >
             Go to CV Versions
           </Link>
@@ -205,21 +172,24 @@ export function CVTestingPanel() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-gray-200 p-5 animate-pulse">
-                <div className="h-3 bg-gray-100 rounded w-2/3 mb-3" />
-                <div className="h-7 bg-gray-100 rounded w-1/2 mb-2" />
-                <div className="h-2.5 bg-gray-100 rounded w-3/4" />
+              <div
+                key={n}
+                className="bg-card rounded-xl border border-border border-l-4 border-l-border p-5"
+              >
+                <Skeleton className="h-3 w-2/3 mb-3" />
+                <Skeleton className="h-7 w-1/2 mb-2" />
+                <Skeleton className="h-2.5 w-3/4" />
               </div>
             ))}
           </div>
-          <div className="h-56 bg-gray-50 rounded-xl border border-gray-100 animate-pulse" />
+          <Skeleton className="h-56 w-full rounded-xl" />
         </div>
       ) : hasNoData ? (
         <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             No applications found for the selected date range.
           </p>
-          <p className="text-gray-400 text-xs">
+          <p className="text-muted-foreground text-xs">
             Tag your applications with a CV version to start comparing performance.
           </p>
         </div>
@@ -250,6 +220,4 @@ export function CVTestingPanel() {
       )}
     </div>
   )
-
-  return dataSection
 }

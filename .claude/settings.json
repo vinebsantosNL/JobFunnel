@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -oE \"opacity-[0-9]+|bg-[a-z-]+/[0-9]+\" /Users/viniciusbarbosa/JobFunnel/src/components/layout/*.tsx)",
+      "Bash(open /Users/viniciusbarbosa/JobFunnel/app-mockups.html)"
+    ],
+    "additionalDirectories": [
+      "/Users/viniciusbarbosa/.claude"
+    ]
+  }
+}

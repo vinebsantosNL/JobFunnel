@@ -53,7 +53,12 @@ export function MagicLinkForm({
 
     const err = await sendLink(trimmed)
     if (err) {
-      setError(err.message)
+      const isNoAccount = err.message.toLowerCase().includes('signups not allowed')
+      setError(
+        isNoAccount
+          ? "No account found with this email. Please sign up first."
+          : err.message
+      )
     } else {
       setSent(true)
     }
@@ -62,9 +67,15 @@ export function MagicLinkForm({
 
   async function handleResend() {
     setResendStatus('sending')
-    await sendLink(email.trim())
-    setResendStatus('sent')
-    setTimeout(() => setResendStatus('idle'), 3000)
+    const err = await sendLink(email.trim())
+    if (err) {
+      setResendStatus('idle')
+      setError(err.message)
+      setSent(false)
+    } else {
+      setResendStatus('sent')
+      setTimeout(() => setResendStatus('idle'), 3000)
+    }
   }
 
   /* ── Confirmation state ─────────────────────────────────── */

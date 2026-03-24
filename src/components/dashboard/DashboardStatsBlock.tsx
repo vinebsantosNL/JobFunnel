@@ -58,19 +58,24 @@ function StatTile({
   const inner = (
     <Link
       href={href}
-      className={`bg-white rounded-xl border border-gray-200 border-l-4 ${borderColor} p-5 hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98] transition-[colors,box-shadow,transform] duration-150 group block`}
+      className={`bg-card rounded-xl border border-border border-l-4 ${borderColor} p-5 hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98] transition-[colors,box-shadow,transform] duration-150 group block`}
     >
       {loading ? (
         <div className="space-y-2">
-          <div className="h-8 w-16 bg-gray-100 rounded animate-pulse" />
-          <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
+          <div className="h-8 w-16 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-24 bg-muted rounded animate-pulse" />
         </div>
       ) : (
         <>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             {label}
           </p>
-          <p className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+          {/* aria-live polite — announces only the final settled value to screen readers */}
+          <p
+            className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {displayValue}
           </p>
           <p className={`text-xs mt-1 ${descriptorClass}`}>{descriptor}</p>
@@ -110,7 +115,7 @@ export function DashboardStatsBlock() {
           loading={isLoading}
           borderColor="border-l-blue-500"
           descriptor="Last 30 days"
-          descriptorClass="text-gray-400"
+          descriptorClass="text-muted-foreground"
           href="/pipeline"
         />
         <StatTile
@@ -119,7 +124,7 @@ export function DashboardStatsBlock() {
           loading={isLoading}
           borderColor="border-l-blue-400"
           descriptor="Screening · Interviewing · Offer"
-          descriptorClass="text-gray-400"
+          descriptorClass="text-muted-foreground"
           href="/pipeline"
           tooltip={breakdownTooltip}
         />
@@ -129,7 +134,7 @@ export function DashboardStatsBlock() {
           loading={isLoading}
           borderColor="border-l-purple-500"
           descriptor="Active now"
-          descriptorClass="text-gray-400"
+          descriptorClass="text-muted-foreground"
           href="/pipeline"
         />
         <StatTile
@@ -138,7 +143,7 @@ export function DashboardStatsBlock() {
           loading={isLoading}
           borderColor="border-l-amber-500"
           descriptor="All time"
-          descriptorClass="text-gray-400"
+          descriptorClass="text-muted-foreground"
           href="/stories"
         />
       </div>

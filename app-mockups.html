@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobFunnel OS — App Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* App Context Palette */
+  --bg-page: #FAFAFA;
+  --bg-card: #FFFFFF;
+  --bg-subtle: #F8FAFC;
+  --border: #E2E8F0;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --interactive: #2563EB;
+  --interactive-hover: #1D4ED8;
+  --interactive-subtle: rgba(37,99,235,0.08);
+  --interactive-subtle-bg: #EFF6FF;
+
+  /* Stage Colors */
+  --stage-saved: #64748B;
+  --stage-applied: #2563EB;
+  --stage-screening: #8B5CF6;
+  --stage-interviewing: #F59E0B;
+  --stage-offer: #10B981;
+  --stage-rejected: #EF4444;
+  --stage-withdrawn: #94A3B8;
+
+  /* Semantic */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --purple: #8B5CF6;
+
+  /* Fonts */
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.09);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Layout */
+  --sidebar-w: 240px;
+  --header-h: 64px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Viewport Simulator ────────────────────────────────────── */
+.simulator-toolbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 44px;
+  background: #0F172A;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  gap: 12px;
+}
+.simulator-toolbar .brand {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.sim-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+.sim-btn {
+  padding: 4px 14px;
+  border-radius: 6px;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: rgba(255,255,255,0.55);
+  background: transparent;
+}
+.sim-btn.active {
+  background: #2563EB;
+  color: white;
+}
+
+/* ─── App Shell ─────────────────────────────────────────────── */
+.app-shell {
+  margin-top: 44px;
+  display: flex;
+  height: calc(100vh - 44px);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+/* Mobile mode */
+.app-shell.mobile-view {
+  max-width: 390px;
+  margin: 44px auto 0;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+.app-shell.mobile-view .sidebar { display: none; }
+.app-shell.mobile-view .main-area { padding-bottom: 64px; }
+.app-shell.mobile-view .mobile-nav { display: flex; }
+.app-shell.mobile-view .header-actions .notif { display: none; }
+.app-shell.mobile-view .kanban-board { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+.app-shell.mobile-view .kanban-col { min-width: unset; width: 100%; }
+.app-shell.mobile-view .stats-grid { grid-template-columns: 1fr 1fr; }
+.app-shell.mobile-view .stories-grid { grid-template-columns: 1fr; }
+.app-shell.mobile-view .cv-grid { grid-template-columns: 1fr; }
+.app-shell.mobile-view .analytics-grid { grid-template-columns: 1fr; }
+.app-shell.mobile-view .settings-layout { flex-direction: column; }
+.app-shell.mobile-view .settings-subnav { width: 100%; border-right: none; border-bottom: 1px solid var(--border); flex-direction: row; overflow-x: auto; }
+.app-shell.mobile-view .settings-subnav .snav-item { white-space: nowrap; }
+.app-shell.mobile-view .page-switcher { display: none; }
+
+/* ─── Sidebar ─────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  height: 100%;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-logo {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.logo-job { font-size: 16px; font-weight: 700; color: var(--interactive); }
+.logo-funnel { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: var(--bg-subtle); color: var(--text-primary); }
+.nav-item.active { background: var(--interactive-subtle-bg); color: var(--interactive); }
+.nav-item.active svg { color: var(--interactive); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-muted); }
+.nav-item.active svg { color: var(--interactive); }
+
+.sidebar-bottom {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  margin-bottom: 4px;
+}
+.avatar-sm {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316, #EC4899);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+.user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.user-tier {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.signout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  transition: all 0.12s;
+}
+.signout-btn:hover { background: #FEF2F2; color: #EF4444; }
+.signout-btn svg { width: 15px; height: 15px; }
+
+/* ─── Main Area ───────────────────────────────────────────── */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ─── Header ──────────────────────────────────────────────── */
+.header {
+  height: var(--header-h);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+.header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.12s;
+}
+.icon-btn:hover { border-color: var(--text-muted); color: var(--text-secondary); }
+.icon-btn svg { width: 16px; height: 16px; }
+.header-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316, #EC4899);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white;
+  cursor: pointer;
+}
+
+/* Page switcher in header */
+.page-switcher {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+}
+.ps-btn {
+  padding: 5px 12px;
+  border-radius: 7px;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  background: transparent;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.ps-btn.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Page Content ────────────────────────────────────────── */
+.page-content {
+  flex: 1;
+  overflow: auto;
+  display: none;
+}
+.page-content.active { display: block; }
+
+/* ─── Upgrade Banner ──────────────────────────────────────── */
+.upgrade-banner {
+  background: #EFF6FF;
+  border-bottom: 1px solid #DBEAFE;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.upgrade-banner-text {
+  font-size: 13px;
+  color: #1D4ED8;
+  font-weight: 500;
+}
+.upgrade-banner-text span { color: var(--text-secondary); font-weight: 400; }
+.upgrade-btn-sm {
+  padding: 6px 14px;
+  background: var(--interactive);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─── Dashboard Styles ────────────────────────────────────── */
+.dashboard-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.stat-delta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--success);
+  margin-top: 4px;
+}
+.stat-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon svg { width: 18px; height: 18px; }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.card-body { padding: 20px; }
+
+.goal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.goal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.goal-chip .dm { font-family: var(--font-mono); }
+
+.progress-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: var(--interactive);
+}
+.progress-fill.green { background: var(--success); }
+
+.checklist { display: flex; flex-direction: column; gap: 0; }
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.check-item:last-child { border-bottom: none; }
+.check-circle {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.check-circle.done {
+  background: var(--success);
+  border-color: var(--success);
+}
+.check-circle.done svg { color: white; width: 11px; height: 11px; }
+.check-label { font-size: 13px; color: var(--text-secondary); }
+.check-label.done { color: var(--text-muted); text-decoration: line-through; }
+
+/* ─── Pipeline Styles ────────────────────────────────────── */
+.pipeline-topbar {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-size: 13px;
+  flex: 1;
+  max-width: 220px;
+}
+.search-input svg { width: 14px; height: 14px; flex-shrink: 0; }
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.filter-btn svg { width: 14px; height: 14px; }
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--interactive);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: auto;
+}
+.add-btn svg { width: 14px; height: 14px; }
+
+.kanban-wrapper {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 20px 24px;
+}
+.kanban-board {
+  display: flex;
+  gap: 14px;
+  height: 100%;
+  min-width: max-content;
+}
+.kanban-col {
+  width: 220px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.col-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.col-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex: 1;
+}
+.col-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  padding: 1px 6px;
+  border-radius: 100px;
+}
+.col-add {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+}
+.col-cards {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.app-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.app-card:hover { box-shadow: var(--shadow-md); border-color: #CBD5E1; }
+.app-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.company-logo {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.app-card-meta { flex: 1; min-width: 0; }
+.app-company { font-size: 13px; font-weight: 600; color: var(--text-primary); truncate: true; }
+.app-role { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.priority-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+.app-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.app-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.cv-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: rgba(139,92,246,0.08);
+  border: 1px solid rgba(139,92,246,0.2);
+  color: var(--purple);
+}
+.app-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.days-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.days-tag svg { width: 12px; height: 12px; }
+
+/* ─── Analytics Styles ────────────────────────────────────── */
+.analytics-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.funnel-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.funnel-row:last-child { border-bottom: none; }
+.funnel-stage-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  width: 90px;
+  flex-shrink: 0;
+}
+.funnel-bar-wrap {
+  flex: 1;
+  height: 28px;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.funnel-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.funnel-bar-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+}
+.funnel-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  width: 80px;
+  flex-shrink: 0;
+}
+.funnel-pct {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.funnel-bench {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.bench-good { color: var(--success); }
+.bench-warn { color: var(--warning); }
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 100px;
+  padding: 0 4px;
+}
+.chart-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.chart-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: rgba(37,99,235,0.15);
+  transition: background 0.15s;
+  min-height: 4px;
+}
+.chart-bar:hover { background: var(--interactive); }
+.chart-bar-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.stage-time-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.stage-time-row:last-child { border-bottom: none; }
+.stage-dot-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100px;
+  flex-shrink: 0;
+}
+.stage-dot-name .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.stage-dot-name .name { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.stage-days {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+  width: 60px;
+}
+.stage-bar-sm {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-subtle);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.stage-bar-fill { height: 100%; border-radius: 100px; }
+
+.pro-lock {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.pro-lock-blur {
+  filter: blur(3px);
+  opacity: 0.4;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  padding: 20px;
+}
+.pro-lock-overlay {
+  position: relative;
+  z-index: 1;
+}
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.25);
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.pro-lock-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.pro-lock-desc { font-size: 13px; color: var(--text-muted); max-width: 240px; }
+.upgrade-btn {
+  padding: 9px 20px;
+  background: var(--interactive);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ─── Stories Styles ──────────────────────────────────────── */
+.stories-topbar {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.chip:hover { border-color: var(--interactive); color: var(--interactive); }
+.chip.active { background: var(--interactive-subtle-bg); border-color: #BFDBFE; color: var(--interactive); }
+
+.stories-body { padding: 24px; }
+.stories-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.story-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.story-card:hover { box-shadow: var(--shadow-md); border-color: #CBD5E1; }
+.story-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+.story-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.story-tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-family: var(--font-mono);
+}
+.star-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.star-letters { display: flex; gap: 4px; }
+.star-letter {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+}
+.star-letter.filled { background: var(--interactive-subtle-bg); color: var(--interactive); border: 1px solid #BFDBFE; }
+.star-letter.empty { background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border); }
+.story-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.story-action-btns { display: flex; gap: 4px; }
+.action-btn {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.12s;
+}
+.action-btn:hover { background: var(--bg-subtle); color: var(--text-secondary); }
+.action-btn svg { width: 13px; height: 13px; }
+.fav-btn { color: var(--warning); }
+
+/* ─── CV Versions ─────────────────────────────────────────── */
+.cv-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.cv-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.cv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.cv-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cv-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.cv-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.default-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.25);
+  color: var(--success);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cv-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.cv-meta-tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.cv-stats {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.cv-stats strong { color: var(--text-secondary); }
+.cv-date { font-size: 11px; color: var(--text-muted); }
+.cv-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.cv-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.cv-action-btn:hover { background: var(--bg-subtle); }
+.cv-action-btn svg { width: 12px; height: 12px; }
+.cv-action-btn.primary { background: var(--interactive); color: white; border-color: var(--interactive); }
+.cv-action-btn.primary:hover { background: var(--interactive-hover); }
+
+.cv-card-locked {
+  background: var(--bg-subtle);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  min-height: 200px;
+}
+.lock-icon { color: var(--text-muted); }
+.lock-icon svg { width: 24px; height: 24px; }
+
+/* ─── Settings Styles ─────────────────────────────────────── */
+.settings-layout {
+  display: flex;
+  height: 100%;
+}
+.settings-subnav {
+  width: 200px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.snav-item {
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.snav-item:hover { background: var(--bg-subtle); }
+.snav-item.active { background: var(--interactive-subtle-bg); color: var(--interactive); }
+.settings-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+}
+.settings-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full-width { grid-column: 1 / -1; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.form-input {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: border-color 0.12s;
+  outline: none;
+}
+.form-input:focus { border-color: var(--interactive); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.form-input.readonly { background: var(--bg-subtle); color: var(--text-muted); cursor: not-allowed; }
+.avatar-upload {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316, #EC4899);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 700; color: white;
+  cursor: pointer;
+  position: relative;
+  margin-bottom: 20px;
+}
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.avatar-upload:hover .avatar-overlay { opacity: 1; }
+.avatar-overlay svg { width: 20px; height: 20px; color: white; }
+
+.billing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  margin-top: 20px;
+}
+.billing-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.plan-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.free-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.usage-bar-wrap {
+  margin-bottom: 6px;
+}
+.usage-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.usage-label span { font-family: var(--font-mono); color: var(--text-secondary); }
+
+/* ─── Mobile Nav ──────────────────────────────────────────── */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 390px;
+  max-width: 100%;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 12px;
+  z-index: 100;
+}
+.mobile-nav-items {
+  display: flex;
+  justify-content: space-around;
+}
+.mob-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 500;
+}
+.mob-nav-item.active { color: var(--interactive); }
+.mob-nav-item svg { width: 20px; height: 20px; }
+
+/* ─── Helpers ─────────────────────────────────────────────── */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.mt-2 { margin-top: 8px; }
+.text-sm { font-size: 13px; }
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+.mono { font-family: var(--font-mono); }
+.fw-600 { font-weight: 600; }
+.mr-auto { margin-right: auto; }
+</style>
+</head>
+<body>
+
+<!-- ─── Simulator Toolbar ─────────────────────────────────── -->
+<div class="simulator-toolbar">
+  <span class="brand">JobFunnel OS — App Mockups</span>
+  <div class="sim-toggle">
+    <button class="sim-btn active" onclick="setView('desktop')">Desktop</button>
+    <button class="sim-btn" onclick="setView('mobile')">Mobile 390</button>
+  </div>
+</div>
+
+<!-- ─── App Shell ─────────────────────────────────────────── -->
+<div class="app-shell" id="appShell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a class="sidebar-logo">
+      <span class="logo-job">Job</span><span class="logo-funnel">&nbsp;Funnel</span>
+    </a>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 1116 0A8 8 0 012 10zm6.39-2.908a.75.75 0 01.766.027l3.5 2.25a.75.75 0 010 1.262l-3.5 2.25A.75.75 0 018 12.25v-4.5a.75.75 0 01.39-.658z"/></svg>
+        Home
+      </button>
+      <button class="nav-item" data-page="pipeline" onclick="switchPage('pipeline')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>
+        Pipeline
+      </button>
+      <button class="nav-item" data-page="analytics" onclick="switchPage('analytics')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+        Analytics
+      </button>
+      <button class="nav-item" data-page="stories" onclick="switchPage('stories')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+        Story Library
+      </button>
+      <button class="nav-item" data-page="cvversions" onclick="switchPage('cvversions')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9zM3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+        Resume Builder
+      </button>
+      <button class="nav-item" data-page="settings" onclick="switchPage('settings')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+        Settings
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="avatar-sm">VB</div>
+        <div>
+          <div class="user-name">Vinicius B.</div>
+          <div class="user-tier">Free Tier</div>
+        </div>
+      </div>
+      <button class="signout-btn">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Area -->
+  <div class="main-area">
+
+    <!-- Header -->
+    <div class="header">
+      <span class="header-title" id="headerTitle">Home</span>
+      <div class="page-switcher">
+        <button class="ps-btn active" data-page="dashboard" onclick="switchPage('dashboard')">Home</button>
+        <button class="ps-btn" data-page="pipeline" onclick="switchPage('pipeline')">Pipeline</button>
+        <button class="ps-btn" data-page="analytics" onclick="switchPage('analytics')">Analytics</button>
+        <button class="ps-btn" data-page="stories" onclick="switchPage('stories')">Stories</button>
+        <button class="ps-btn" data-page="cvversions" onclick="switchPage('cvversions')">Resume</button>
+        <button class="ps-btn" data-page="settings" onclick="switchPage('settings')">Settings</button>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn notif">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+        </button>
+        <div class="header-avatar">VB</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- PAGE: Dashboard                                    -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="page-content active" id="page-dashboard">
+      <!-- Upgrade Banner -->
+      <div class="upgrade-banner">
+        <div class="upgrade-banner-text">
+          <span>You're on the Free plan. </span>Unlock full analytics, CV A/B testing, and unlimited pipeline →
+        </div>
+        <button class="upgrade-btn-sm">Upgrade to Pro</button>
+      </div>
+
+      <div class="dashboard-body">
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div>
+              <div class="stat-value">23</div>
+              <div class="stat-label">Total Applications</div>
+              <div class="stat-delta">↑ +4 this week</div>
+            </div>
+            <div class="stat-icon" style="background:rgba(37,99,235,0.08)">
+              <svg viewBox="0 0 20 20" fill="#2563EB"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div>
+              <div class="stat-value">8</div>
+              <div class="stat-label">Active Pipeline</div>
+              <div class="stat-delta">→ steady</div>
+            </div>
+            <div class="stat-icon" style="background:rgba(139,92,246,0.08)">
+              <svg viewBox="0 0 20 20" fill="#8B5CF6"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div>
+              <div class="stat-value">3</div>
+              <div class="stat-label">In Interviews</div>
+              <div class="stat-delta" style="color:#F59E0B">↑ +1 this week</div>
+            </div>
+            <div class="stat-icon" style="background:rgba(245,158,11,0.08)">
+              <svg viewBox="0 0 20 20" fill="#F59E0B"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div>
+              <div class="stat-value">5</div>
+              <div class="stat-label">Stories Written</div>
+              <div class="stat-delta">↑ +2 this week</div>
+            </div>
+            <div class="stat-icon" style="background:rgba(16,185,129,0.08)">
+              <svg viewBox="0 0 20 20" fill="#10B981"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two columns -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <!-- Next Career Goal -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Next Career Goal</span>
+              <button style="padding:5px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;color:var(--text-secondary);background:transparent;cursor:pointer">Edit</button>
+            </div>
+            <div class="card-body">
+              <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:12px">Senior Product Manager</div>
+              <div class="goal-meta">
+                <span class="goal-chip"><svg viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>Amsterdam, NL</span>
+                <span class="goal-chip"><span class="dm">€90k–€110k</span></span>
+                <span class="goal-chip">Target: <span class="dm" style="margin-left:4px">Jun 2026</span></span>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Progress toward goal</div>
+              <div class="progress-track">
+                <div class="progress-fill green" style="width:60%"></div>
+              </div>
+              <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:6px">60% — 3 interviews secured</div>
+            </div>
+          </div>
+
+          <!-- Getting Started -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Getting Started</span>
+              <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">3 / 5</span>
+            </div>
+            <div class="card-body" style="padding-top:12px">
+              <div class="progress-track" style="margin-bottom:16px">
+                <div class="progress-fill green" style="width:60%"></div>
+              </div>
+              <div class="checklist">
+                <div class="check-item">
+                  <div class="check-circle done"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M10 3L5 8.5 2 5.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <span class="check-label done">Add first application</span>
+                </div>
+                <div class="check-item">
+                  <div class="check-circle done"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M10 3L5 8.5 2 5.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <span class="check-label done">Set career goal</span>
+                </div>
+                <div class="check-item">
+                  <div class="check-circle done"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M10 3L5 8.5 2 5.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <span class="check-label done">Write first story</span>
+                </div>
+                <div class="check-item">
+                  <div class="check-circle"></div>
+                  <span class="check-label">Enable analytics tracking</span>
+                </div>
+                <div class="check-item">
+                  <div class="check-circle"></div>
+                  <span class="check-label">Upload your first CV version</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- PAGE: Pipeline                                     -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="page-content" id="page-pipeline" style="display:none;flex-direction:column;height:100%">
+      <div class="pipeline-topbar">
+        <div class="search-input">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+          Search applications…
+        </div>
+        <button class="filter-btn">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/></svg>
+          Filter
+        </button>
+        <button class="filter-btn">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>
+          CV Version
+        </button>
+        <button class="add-btn">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+          Add Application
+        </button>
+      </div>
+
+      <div class="kanban-wrapper" style="flex:1;overflow-x:auto;overflow-y:hidden">
+        <div class="kanban-board" style="height:100%">
+
+          <!-- Saved -->
+          <div class="kanban-col">
+            <div class="col-header">
+              <div class="col-dot" style="background:#64748B"></div>
+              <span class="col-name">Saved</span>
+              <span class="col-count">2</span>
+              <button class="col-add">+</button>
+            </div>
+            <div class="col-cards">
+              <div class="app-card">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#1DB954">SP</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">Spotify</div>
+                    <div class="app-role">Senior PM · Stockholm</div>
+                  </div>
+                  <div class="priority-dot" style="background:#EF4444"></div>
+                </div>
+                <div class="app-card-tags">
+                  <span class="cv-tag">PM-Tech-v2</span>
+                  <span class="app-tag">€120k+</span>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>Saved 3d ago</span>
+                  <span style="font-size:11px;color:var(--text-muted)">High</span>
+                </div>
+              </div>
+              <div class="app-card">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#003580">BK</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">Booking.com</div>
+                    <div class="app-role">Product Manager · AMS</div>
+                  </div>
+                  <div class="priority-dot" style="background:#F59E0B"></div>
+                </div>
+                <div class="app-card-tags">
+                  <span class="cv-tag">PM-General</span>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>Saved 7d ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Applied -->
+          <div class="kanban-col">
+            <div class="col-header">
+              <div class="col-dot" style="background:#2563EB"></div>
+              <span class="col-name">Applied</span>
+              <span class="col-count">3</span>
+              <button class="col-add">+</button>
+            </div>
+            <div class="col-cards">
+              <div class="app-card">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#00B8D9">AS</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">ASML</div>
+                    <div class="app-role">Technical PM · Eindhoven</div>
+                  </div>
+                  <div class="priority-dot" style="background:#EF4444"></div>
+                </div>
+                <div class="app-card-tags">
+                  <span class="cv-tag">PM-Tech-v2</span>
+                  <span class="app-tag">Hybrid</span>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>1d in stage</span>
+                </div>
+              </div>
+              <div class="app-card">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#0A0A0A">AD</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">Adyen</div>
+                    <div class="app-role">PM Analytics · Amsterdam</div>
+                  </div>
+                  <div class="priority-dot" style="background:#F59E0B"></div>
+                </div>
+                <div class="app-card-tags">
+                  <span class="cv-tag">PM-General</span>
+                  <span class="app-tag">€100k</span>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>12d in stage</span>
+                </div>
+              </div>
+              <div class="app-card">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#FF5722">PH</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">Philips</div>
+                    <div class="app-role">Sr. PM Health · AMS</div>
+                  </div>
+                  <div class="priority-dot" style="background:#10B981"></div>
+                </div>
+                <div class="app-card-tags">
+                  <span class="cv-tag">PM-Tech-v2</span>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>5d in stage</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screening -->
+          <div class="kanban-col">
+            <div class="col-header">
+              <div class="col-dot" style="background:#8B5CF6"></div>
+              <span class="col-name">Screening</span>
+              <span class="col-count">2</span>
+              <button class="col-add">+</button>
+            </div>
+            <div class="col-cards">
+              <div class="app-card">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#E50914">NF</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">Netflix</div>
+                    <div class="app-role">PM Platform · AMS</div>
+                  </div>
+                  <div class="priority-dot" style="background:#EF4444"></div>
+                </div>
+                <div class="app-card-tags">
+                  <span class="cv-tag">PM-Tech-v2</span>
+                  <span class="app-tag">€130k+</span>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>2d in stage</span>
+                </div>
+              </div>
+              <div class="app-card">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#4CAF50">TK</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">Takeaway</div>
+                    <div class="app-role">Sr. PM Growth · AMS</div>
+                  </div>
+                  <div class="priority-dot" style="background:#F59E0B"></div>
+                </div>
+                <div class="app-card-tags">
+                  <span class="cv-tag">PM-General</span>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>8d in stage</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interviewing -->
+          <div class="kanban-col">
+            <div class="col-header">
+              <div class="col-dot" style="background:#F59E0B"></div>
+              <span class="col-name">Interviewing</span>
+              <span class="col-count">1</span>
+              <button class="col-add">+</button>
+            </div>
+            <div class="col-cards">
+              <div class="app-card" style="border-color:rgba(245,158,11,0.3)">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#FF6B00">CM</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">Catawiki</div>
+                    <div class="app-role">Head of PM · AMS</div>
+                  </div>
+                  <div class="priority-dot" style="background:#EF4444"></div>
+                </div>
+                <div class="app-card-tags">
+                  <span class="cv-tag">PM-Leadership</span>
+                  <span class="app-tag">Round 3</span>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag" style="color:#F59E0B"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>14d in stage</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Offer -->
+          <div class="kanban-col">
+            <div class="col-header">
+              <div class="col-dot" style="background:#10B981"></div>
+              <span class="col-name">Offer</span>
+              <span class="col-count">0</span>
+              <button class="col-add">+</button>
+            </div>
+            <div class="col-cards">
+              <div style="padding:20px 12px;text-align:center;color:var(--text-muted);font-size:12px;border:1px dashed var(--border);border-radius:10px">
+                No offers yet
+              </div>
+            </div>
+          </div>
+
+          <!-- Rejected -->
+          <div class="kanban-col">
+            <div class="col-header">
+              <div class="col-dot" style="background:#EF4444"></div>
+              <span class="col-name">Rejected</span>
+              <span class="col-count">3</span>
+              <button class="col-add">+</button>
+            </div>
+            <div class="col-cards">
+              <div class="app-card" style="opacity:0.65">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#4A90D9">MS</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">MessageBird</div>
+                    <div class="app-role">PM Mobile · AMS</div>
+                  </div>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag">Rejected after screening</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Withdrawn -->
+          <div class="kanban-col">
+            <div class="col-header">
+              <div class="col-dot" style="background:#94A3B8"></div>
+              <span class="col-name">Withdrawn</span>
+              <span class="col-count">1</span>
+              <button class="col-add">+</button>
+            </div>
+            <div class="col-cards">
+              <div class="app-card" style="opacity:0.5">
+                <div class="app-card-top">
+                  <div class="company-logo" style="background:#607D8B">AB</div>
+                  <div class="app-card-meta">
+                    <div class="app-company">ABN AMRO</div>
+                    <div class="app-role">PM Digital · AMS</div>
+                  </div>
+                </div>
+                <div class="app-card-footer">
+                  <span class="days-tag">Withdrew offer</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- PAGE: Analytics                                    -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="page-content" id="page-analytics" style="display:none">
+      <div class="analytics-body">
+
+        <!-- Funnel + Time Series row -->
+        <div class="analytics-grid">
+
+          <!-- Funnel -->
+          <div class="card" style="grid-column:1/2">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Application Funnel</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Last 90 days · 23 applications</div>
+              </div>
+              <span style="font-family:var(--font-mono);font-size:11px;background:rgba(239,68,68,0.08);color:#EF4444;border:1px solid rgba(239,68,68,0.2);padding:3px 8px;border-radius:100px">Applied→Screen: 18% (bench 22%)</span>
+            </div>
+            <div class="card-body">
+              <div class="funnel-row">
+                <span class="funnel-stage-name">Applied</span>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar-fill" style="width:100%;background:#2563EB">
+                    <span class="funnel-bar-label">23 apps</span>
+                  </div>
+                </div>
+                <div class="funnel-stats">
+                  <span class="funnel-pct">100%</span>
+                  <span class="funnel-bench">baseline</span>
+                </div>
+              </div>
+              <div class="funnel-row">
+                <span class="funnel-stage-name">Screening</span>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar-fill" style="width:18%;background:#8B5CF6">
+                    <span class="funnel-bar-label">4</span>
+                  </div>
+                </div>
+                <div class="funnel-stats">
+                  <span class="funnel-pct">18%</span>
+                  <span class="funnel-bench bench-warn">bench 22%</span>
+                </div>
+              </div>
+              <div class="funnel-row">
+                <span class="funnel-stage-name">Interviewing</span>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar-fill" style="width:8%;background:#F59E0B">
+                    <span class="funnel-bar-label" style="color:rgba(0,0,0,0.7)">2</span>
+                  </div>
+                </div>
+                <div class="funnel-stats">
+                  <span class="funnel-pct">8%</span>
+                  <span class="funnel-bench bench-warn">bench 12%</span>
+                </div>
+              </div>
+              <div class="funnel-row">
+                <span class="funnel-stage-name">Offer</span>
+                <div class="funnel-bar-wrap">
+                  <div class="funnel-bar-fill" style="width:3%;background:#10B981;min-width:4px">
+                  </div>
+                </div>
+                <div class="funnel-stats">
+                  <span class="funnel-pct">3%</span>
+                  <span class="funnel-bench bench-good">bench 3%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly bar chart -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Applications Over Time</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Weekly volume · last 8 weeks</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-bars">
+                <div class="chart-bar-wrap"><div class="chart-bar" style="height:35%"></div><span class="chart-bar-label">W1</span></div>
+                <div class="chart-bar-wrap"><div class="chart-bar" style="height:50%"></div><span class="chart-bar-label">W2</span></div>
+                <div class="chart-bar-wrap"><div class="chart-bar" style="height:40%"></div><span class="chart-bar-label">W3</span></div>
+                <div class="chart-bar-wrap"><div class="chart-bar" style="height:70%"></div><span class="chart-bar-label">W4</span></div>
+                <div class="chart-bar-wrap"><div class="chart-bar" style="height:90%"></div><span class="chart-bar-label">W5</span></div>
+                <div class="chart-bar-wrap"><div class="chart-bar" style="height:60%"></div><span class="chart-bar-label">W6</span></div>
+                <div class="chart-bar-wrap"><div class="chart-bar" style="height:75%"></div><span class="chart-bar-label">W7</span></div>
+                <div class="chart-bar-wrap"><div class="chart-bar" style="height:55%"></div><span class="chart-bar-label">W8</span></div>
+              </div>
+              <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px">Avg. days per stage</div>
+                <div class="stage-time-row">
+                  <div class="stage-dot-name"><div class="dot" style="background:#2563EB"></div><span class="name">Applied</span></div>
+                  <span class="stage-days">3.2d</span>
+                  <div class="stage-bar-sm"><div class="stage-bar-fill" style="width:20%;background:#2563EB"></div></div>
+                </div>
+                <div class="stage-time-row">
+                  <div class="stage-dot-name"><div class="dot" style="background:#8B5CF6"></div><span class="name">Screening</span></div>
+                  <span class="stage-days">7.4d</span>
+                  <div class="stage-bar-sm"><div class="stage-bar-fill" style="width:46%;background:#8B5CF6"></div></div>
+                </div>
+                <div class="stage-time-row">
+                  <div class="stage-dot-name"><div class="dot" style="background:#F59E0B"></div><span class="name">Interviewing</span></div>
+                  <span class="stage-days">16d</span>
+                  <div class="stage-bar-sm"><div class="stage-bar-fill" style="width:100%;background:#F59E0B"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CV A/B — Pro Lock -->
+        <div class="pro-lock">
+          <div style="position:absolute;inset:0;overflow:hidden;border-radius:var(--radius-xl)">
+            <div style="padding:20px;filter:blur(4px);opacity:0.3;pointer-events:none">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                <div style="height:80px;background:var(--bg-subtle);border-radius:10px"></div>
+                <div style="height:80px;background:var(--bg-subtle);border-radius:10px"></div>
+                <div style="height:80px;background:var(--bg-subtle);border-radius:10px"></div>
+              </div>
+            </div>
+          </div>
+          <div class="pro-lock-overlay">
+            <span class="pro-badge">
+              <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px"><path d="M8 1l2.163 4.38 4.837.703-3.5 3.411.826 4.818L8 12l-4.326 2.312.826-4.818L1 6.083l4.837-.703z"/></svg>
+              Pro Feature
+            </span>
+            <div class="pro-lock-title">CV A/B Performance Testing</div>
+            <div class="pro-lock-desc">Compare which CV version gets more screenings and interviews. The clearest signal in your funnel.</div>
+            <button class="upgrade-btn">Upgrade to Pro — €15/mo</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- PAGE: Stories                                      -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="page-content" id="page-stories" style="display:none">
+      <div class="stories-topbar">
+        <div class="search-input" style="max-width:200px">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+          Search stories…
+        </div>
+        <div class="filter-chips">
+          <span class="chip active">All</span>
+          <span class="chip">Leadership</span>
+          <span class="chip">Technical</span>
+          <span class="chip">Collaboration</span>
+          <span class="chip">Execution</span>
+          <span class="chip">Growth</span>
+        </div>
+        <button class="add-btn" style="margin-left:auto">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+          New Story
+        </button>
+      </div>
+
+      <div class="stories-body">
+        <div class="stories-grid">
+
+          <div class="story-card">
+            <div class="story-title">Led 0→1 product launch at N26 — mobile onboarding redesign</div>
+            <div class="story-tags">
+              <span class="story-tag" style="background:rgba(37,99,235,0.08);color:#2563EB;border:1px solid rgba(37,99,235,0.2)">Execution</span>
+              <span class="story-tag" style="background:rgba(139,92,246,0.08);color:#8B5CF6;border:1px solid rgba(139,92,246,0.2)">Leadership</span>
+            </div>
+            <div class="star-row">
+              <div class="star-letters">
+                <div class="star-letter filled">S</div>
+                <div class="star-letter filled">T</div>
+                <div class="star-letter filled">A</div>
+                <div class="star-letter filled">R</div>
+              </div>
+              <span style="font-size:11px;color:var(--success);font-family:var(--font-mono)">Complete</span>
+            </div>
+            <div class="story-actions">
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">Updated 2d ago</span>
+              <div class="story-action-btns">
+                <button class="action-btn fav-btn"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></button>
+                <button class="action-btn"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg></button>
+                <button class="action-btn"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="story-card">
+            <div class="story-title">Resolved cross-team conflict on Booking.com checkout redesign</div>
+            <div class="story-tags">
+              <span class="story-tag" style="background:rgba(16,185,129,0.08);color:#10B981;border:1px solid rgba(16,185,129,0.2)">Collaboration</span>
+              <span class="story-tag" style="background:rgba(139,92,246,0.08);color:#8B5CF6;border:1px solid rgba(139,92,246,0.2)">Leadership</span>
+            </div>
+            <div class="star-row">
+              <div class="star-letters">
+                <div class="star-letter filled">S</div>
+                <div class="star-letter filled">T</div>
+                <div class="star-letter filled">A</div>
+                <div class="star-letter empty">R</div>
+              </div>
+              <span style="font-size:11px;color:var(--warning);font-family:var(--font-mono)">Missing Result</span>
+            </div>
+            <div class="story-actions">
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">Updated 5d ago</span>
+              <div class="story-action-btns">
+                <button class="action-btn" style="color:var(--border)"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></button>
+                <button class="action-btn"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg></button>
+                <button class="action-btn"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="story-card">
+            <div class="story-title">System design: scaled payments API to 10M req/day with 99.99% uptime</div>
+            <div class="story-tags">
+              <span class="story-tag" style="background:rgba(37,99,235,0.08);color:#2563EB;border:1px solid rgba(37,99,235,0.2)">Technical</span>
+              <span class="story-tag" style="background:rgba(37,99,235,0.08);color:#2563EB;border:1px solid rgba(37,99,235,0.2)">Execution</span>
+            </div>
+            <div class="star-row">
+              <div class="star-letters">
+                <div class="star-letter filled">S</div>
+                <div class="star-letter filled">T</div>
+                <div class="star-letter empty">A</div>
+                <div class="star-letter empty">R</div>
+              </div>
+              <span style="font-size:11px;color:var(--error);font-family:var(--font-mono)">In progress</span>
+            </div>
+            <div class="story-actions">
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">Updated 1d ago</span>
+              <div class="story-action-btns">
+                <button class="action-btn" style="color:var(--border)"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></button>
+                <button class="action-btn"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg></button>
+                <button class="action-btn"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div class="story-card" style="border:2px dashed var(--border);box-shadow:none;align-items:center;justify-content:center;min-height:160px;background:var(--bg-subtle);text-align:center;gap:10px">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(37,99,235,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto">
+              <svg viewBox="0 0 20 20" fill="#2563EB" style="width:20px;height:20px"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+            </div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-secondary)">Write your next story</div>
+            <div style="font-size:12px;color:var(--text-muted);max-width:160px">Capture a STAR moment before you forget it</div>
+            <button class="add-btn" style="font-size:12px;padding:7px 14px">New Story</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- PAGE: CV Versions                                  -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="page-content" id="page-cvversions" style="display:none">
+      <div class="cv-body">
+        <div class="cv-section-header">
+          <div>
+            <div class="section-title">CV Versions</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Manage and compare your CV versions · Free plan: 2 / 2 used</div>
+          </div>
+          <button class="add-btn">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+            New Version
+          </button>
+        </div>
+
+        <div class="cv-grid">
+
+          <!-- CV 1 -->
+          <div class="cv-card">
+            <div class="cv-card-header">
+              <div>
+                <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-bottom:4px">VERSION 01</div>
+                <div class="cv-name">PM-Tech-v2</div>
+              </div>
+              <span class="default-badge">Default</span>
+            </div>
+            <div class="cv-tags">
+              <span class="cv-meta-tag">Tech-focused</span>
+              <span class="cv-meta-tag">B2B</span>
+              <span class="cv-meta-tag">Senior</span>
+            </div>
+            <div class="cv-stats">
+              <strong>12</strong> applications · <strong>25%</strong> screening rate · <strong>8%</strong> interview rate
+            </div>
+            <div class="cv-date" style="font-family:var(--font-mono)">Updated Mar 18, 2026</div>
+            <div class="cv-actions">
+              <button class="cv-action-btn primary">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                PDF
+              </button>
+              <button class="cv-action-btn">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z"/><path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z"/></svg>
+                Duplicate
+              </button>
+              <button class="cv-action-btn">Archive</button>
+            </div>
+          </div>
+
+          <!-- CV 2 -->
+          <div class="cv-card">
+            <div class="cv-card-header">
+              <div>
+                <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-bottom:4px">VERSION 02</div>
+                <div class="cv-name">PM-General</div>
+              </div>
+            </div>
+            <div class="cv-tags">
+              <span class="cv-meta-tag">General</span>
+              <span class="cv-meta-tag">B2C</span>
+            </div>
+            <div class="cv-stats">
+              <strong>8</strong> applications · <strong>12%</strong> screening rate · <strong>0%</strong> interview rate
+            </div>
+            <div class="cv-date" style="font-family:var(--font-mono)">Updated Mar 10, 2026</div>
+            <div class="cv-actions">
+              <button class="cv-action-btn primary">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                PDF
+              </button>
+              <button class="cv-action-btn">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z"/><path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z"/></svg>
+                Duplicate
+              </button>
+              <button class="cv-action-btn">Set Default</button>
+            </div>
+          </div>
+
+          <!-- CV 3 — Locked -->
+          <div class="cv-card-locked">
+            <div class="lock-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg></div>
+            <span class="pro-badge">Pro Only</span>
+            <div style="font-size:13px;font-weight:600;color:var(--text-secondary)">Add a 3rd CV version</div>
+            <div style="font-size:12px;color:var(--text-muted)">Upgrade to Pro for unlimited versions and A/B testing</div>
+            <button class="upgrade-btn" style="font-size:12px;padding:8px 16px">Upgrade → €15/mo</button>
+          </div>
+
+        </div>
+
+        <!-- Insights comparison -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Performance Comparison</div>
+            <span style="font-family:var(--font-mono);font-size:11px;background:rgba(139,92,246,0.08);color:var(--purple);border:1px solid rgba(139,92,246,0.2);padding:3px 8px;border-radius:100px">Low confidence — need 10+ apps per version</span>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px">PM-Tech-v2 (12 apps)</div>
+                <div class="funnel-row" style="padding:8px 0">
+                  <span class="funnel-stage-name" style="font-size:11px;width:70px">Screening</span>
+                  <div class="funnel-bar-wrap" style="height:20px">
+                    <div class="funnel-bar-fill" style="width:25%;background:#8B5CF6">
+                      <span class="funnel-bar-label" style="font-size:10px">25%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="funnel-row" style="padding:8px 0">
+                  <span class="funnel-stage-name" style="font-size:11px;width:70px">Interview</span>
+                  <div class="funnel-bar-wrap" style="height:20px">
+                    <div class="funnel-bar-fill" style="width:8%;background:#F59E0B;min-width:24px">
+                      <span class="funnel-bar-label" style="font-size:10px;color:rgba(0,0,0,0.7)">8%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px">PM-General (8 apps)</div>
+                <div class="funnel-row" style="padding:8px 0">
+                  <span class="funnel-stage-name" style="font-size:11px;width:70px">Screening</span>
+                  <div class="funnel-bar-wrap" style="height:20px">
+                    <div class="funnel-bar-fill" style="width:12%;background:#8B5CF6;min-width:30px">
+                      <span class="funnel-bar-label" style="font-size:10px">12%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="funnel-row" style="padding:8px 0">
+                  <span class="funnel-stage-name" style="font-size:11px;width:70px">Interview</span>
+                  <div class="funnel-bar-wrap" style="height:20px">
+                    <div class="funnel-bar-fill" style="width:2%;background:#F59E0B;min-width:24px">
+                      <span class="funnel-bar-label" style="font-size:10px;color:rgba(0,0,0,0.7)">0%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- PAGE: Settings                                     -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <div class="page-content" id="page-settings" style="display:none;height:100%">
+      <div class="settings-layout" style="height:100%">
+
+        <!-- Sub-nav -->
+        <div class="settings-subnav">
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;padding:4px 12px 8px">Account</div>
+          <div class="snav-item active">Profile</div>
+          <div class="snav-item">Notifications</div>
+          <div class="snav-item">Billing</div>
+          <div class="snav-item" style="color:var(--error)">Danger Zone</div>
+        </div>
+
+        <!-- Main settings content -->
+        <div class="settings-main">
+          <div class="settings-section-title">Profile</div>
+
+          <div class="avatar-upload">
+            VB
+            <div class="avatar-overlay">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input class="form-input" type="text" value="Vinicius Barbosa">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input readonly" type="email" value="vinicius@jobfunnel.io" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <select class="form-input">
+                <option selected>Product Manager</option>
+                <option>Software Engineer</option>
+                <option>Data Scientist</option>
+                <option>ML Engineer</option>
+                <option>UX Designer</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Years of Experience</label>
+              <input class="form-input" type="number" value="7">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Location</label>
+              <input class="form-input" type="text" value="Amsterdam, Netherlands">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Countries</label>
+              <input class="form-input" type="text" value="Netherlands, Germany, Spain">
+            </div>
+          </div>
+
+          <button class="add-btn" style="width:auto">Save Changes</button>
+
+          <!-- Billing card -->
+          <div class="billing-card">
+            <div class="billing-plan-row">
+              <div>
+                <div class="plan-name">Free Plan</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">No credit card required</div>
+              </div>
+              <span class="free-badge">Free</span>
+            </div>
+            <div class="usage-bar-wrap">
+              <div class="usage-label">Applications: <span>2 / 5</span> used</div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:40%"></div>
+              </div>
+            </div>
+            <div style="margin-top:14px;padding:12px;background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.12);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Upgrade to Pro — €15/month</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Unlimited pipeline, full analytics, CV A/B testing, interview vault</div>
+              </div>
+              <button class="upgrade-btn-sm" style="flex-shrink:0">Upgrade</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main-area -->
+
+</div><!-- end app-shell -->
+
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-items">
+    <button class="mob-nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+      Home
+    </button>
+    <button class="mob-nav-item" data-page="pipeline" onclick="switchPage('pipeline')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>
+      Pipeline
+    </button>
+    <button class="mob-nav-item" data-page="analytics" onclick="switchPage('analytics')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+      Analytics
+    </button>
+    <button class="mob-nav-item" data-page="stories" onclick="switchPage('stories')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>
+      Stories
+    </button>
+    <button class="mob-nav-item" data-page="settings" onclick="switchPage('settings')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+      Settings
+    </button>
+  </div>
+</div>
+
+<script>
+const pageTitles = {
+  dashboard: 'Home',
+  pipeline: 'Pipeline',
+  analytics: 'Analytics',
+  stories: 'Story Library',
+  cvversions: 'Resume Builder',
+  settings: 'Settings'
+};
+
+function switchPage(page) {
+  // Hide all pages
+  document.querySelectorAll('.page-content').forEach(p => {
+    p.style.display = 'none';
+    p.classList.remove('active');
+  });
+
+  // Show target page
+  const target = document.getElementById('page-' + page);
+  if (target) {
+    if (page === 'pipeline') {
+      target.style.display = 'flex';
+    } else if (page === 'settings') {
+      target.style.display = 'flex';
+    } else {
+      target.style.display = 'block';
+    }
+    target.classList.add('active');
+  }
+
+  // Update header title
+  document.getElementById('headerTitle').textContent = pageTitles[page] || page;
+
+  // Update sidebar nav
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === page);
+  });
+
+  // Update page switcher
+  document.querySelectorAll('.ps-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === page);
+  });
+
+  // Update mobile nav
+  document.querySelectorAll('.mob-nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === page);
+  });
+}
+
+function setView(mode) {
+  const shell = document.getElementById('appShell');
+  const mobileNav = document.getElementById('mobileNav');
+  const btns = document.querySelectorAll('.sim-btn');
+
+  if (mode === 'mobile') {
+    shell.classList.add('mobile-view');
+    mobileNav.style.display = 'block';
+    btns[0].classList.remove('active');
+    btns[1].classList.add('active');
+  } else {
+    shell.classList.remove('mobile-view');
+    mobileNav.style.display = 'none';
+    btns[0].classList.add('active');
+    btns[1].classList.remove('active');
+  }
+}
+
+// Initialize
+switchPage('dashboard');
+</script>
+</body>
+</html>

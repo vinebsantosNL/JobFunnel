@@ -72,31 +72,35 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
       style={dndStyle}
       {...attributes}
       {...listeners}
-      className="cursor-grab active:cursor-grabbing"
+      className="cursor-grab active:cursor-grabbing rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
     >
     {/* Inner: Framer Motion handles visual micro-interactions only */}
     <motion.div
       onClick={() => onClick(job)}
       animate={justDropped ? { scale: [1, 1.02, 1] } : { scale: 1 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className={`bg-white rounded-lg border border-gray-100 p-3 shadow-sm select-none transition-[box-shadow,border-color,translate] duration-150${isOverlay ? ' shadow-xl ring-1 ring-blue-200 rotate-1 cursor-grabbing' : ' hover:shadow-md hover:-translate-y-0.5 hover:border-gray-200 cursor-grab active:cursor-grabbing'}${isStale && !isDragging ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
+      className={`bg-card rounded-lg border border-border p-3 shadow-sm select-none transition-[box-shadow,border-color,translate] duration-150${isOverlay ? ' shadow-xl ring-1 ring-primary/30 rotate-1 cursor-grabbing' : ' hover:shadow-md hover:-translate-y-0.5 hover:border-border cursor-grab active:cursor-grabbing'}${isStale && !isDragging ? ' ring-1 ring-amber-300 animate-pulse' : ''}`}
     >
       {/* Top row: avatar + company + priority dot + days */}
       <div className="flex items-center gap-2">
+        {/* aria-hidden — avatar is decorative; company name provides the label */}
         <div
+          aria-hidden="true"
           className="w-7 h-7 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
           style={{ backgroundColor: avatarColor }}
         >
           {firstLetter}
         </div>
-        <span className="text-xs text-gray-500 truncate flex-1">{job.company_name}</span>
-        <div
+        <span className="text-xs text-muted-foreground truncate flex-1">{job.company_name}</span>
+        {/* role="img" makes priority accessible to touch + keyboard users (title alone is not) */}
+        <span
+          role="img"
+          aria-label={`${priority.label} priority`}
           className={`w-2 h-2 rounded-full flex-shrink-0 ${priority.color}`}
-          title={`${priority.label} priority`}
         />
         {isStale && (
-          <span title="Follow-up recommended">
-            <Clock className="w-3 h-3 text-amber-500 flex-shrink-0" />
+          <span aria-label="Follow-up recommended">
+            <Clock aria-hidden="true" className="w-3 h-3 text-amber-500 flex-shrink-0" />
           </span>
         )}
         <Badge variant="secondary" className="text-xs flex-shrink-0">
@@ -105,17 +109,17 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
       </div>
 
       {/* Job title */}
-      <p className="font-bold text-sm text-gray-900 truncate mt-1.5">{job.job_title}</p>
+      <p className="font-bold text-sm text-foreground truncate mt-1.5">{job.job_title}</p>
 
       {/* Tags row */}
       <div className="flex items-center gap-1.5 mt-2 flex-wrap">
         {job.location && (
-          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+          <span className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full">
             {job.location}
           </span>
         )}
         {job.salary_min && (
-          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+          <span className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full">
             {job.salary_currency ?? '€'}{job.salary_min.toLocaleString()}
             {job.salary_max ? `–${job.salary_max.toLocaleString()}` : '+'}
           </span>
@@ -124,8 +128,8 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
 
       {/* Thin progress bar for applied stage */}
       {job.stage === 'applied' && (
-        <div className="w-full h-1 bg-gray-100 rounded-full mt-2">
-          <div className="bg-blue-500 h-full rounded-full" style={{ width: '66%' }} />
+        <div className="w-full h-1 bg-muted rounded-full mt-2">
+          <div className="bg-primary h-full rounded-full" style={{ width: '66%' }} />
         </div>
       )}
     </motion.div>
