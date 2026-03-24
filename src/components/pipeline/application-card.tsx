@@ -13,11 +13,11 @@ interface ApplicationCardProps {
   isOverlay?: boolean
 }
 
-const AVATAR_COLORS = ['#2563EB', '#7C3AED', '#059669', '#D97706', '#DC2626']
-
-function getDaysInStage(stageUpdatedAt: string): number {
-  const diff = Date.now() - new Date(stageUpdatedAt).getTime()
-  return Math.floor(diff / (1000 * 60 * 60 * 24))
+function getCompanyColor(name: string): string {
+  const colors = ['#1DB954','#003580','#E50914','#FF6B00','#0A0A0A','#00B8D9','#FF5722','#4A90D9','#607D8B','#4CAF50']
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return colors[Math.abs(hash) % colors.length]
 }
 
 function getInitials(name: string): string {
@@ -26,10 +26,15 @@ function getInitials(name: string): string {
   return name.slice(0, 2).toUpperCase()
 }
 
-const PRIORITY_HEX: Record<string, string | undefined> = {
+function getDaysInStage(stageUpdatedAt: string): number {
+  const diff = Date.now() - new Date(stageUpdatedAt).getTime()
+  return Math.floor(diff / (1000 * 60 * 60 * 24))
+}
+
+const PRIORITY_DOT_HEX: Record<string, string | undefined> = {
   high: '#EF4444',
   medium: '#F59E0B',
-  low: undefined,
+  low: '#10B981',
 }
 
 export function ApplicationCard({ job, onClick, isOverlay = false }: ApplicationCardProps) {
@@ -58,19 +63,19 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
 
   const days = getDaysInStage(job.stage_updated_at)
   const priority = PRIORITY_CONFIG[job.priority]
+  const priorityDotColor = PRIORITY_DOT_HEX[job.priority]
+  const isRejectedOrWithdrawn = job.stage === 'rejected' || job.stage === 'withdrawn'
+  const isInterviewing = job.stage === 'interviewing'
 
-  const colorIdx = job.company_name.charCodeAt(0) % AVATAR_COLORS.length
-  const avatarColor = AVATAR_COLORS[colorIdx]
-  const initials = getInitials(job.company_name)
+  // Days label
+  const isAppliedOrLater = job.stage !== 'saved'
+  const daysLabel = days === 0 ? 'Today' : `${days}d ${isAppliedOrLater ? 'in stage' : 'ago'}`
+  const daysColor = days >= 14 ? 'var(--jf-warning)' : 'var(--jf-text-muted)'
 
-  const priorityDotColor = PRIORITY_HEX[job.priority]
-
-  // Days color coding
-  let daysColor = 'var(--jf-text-muted)'
-  if (days >= 30) daysColor = 'var(--jf-error)'
-  else if (days >= 14) daysColor = 'var(--jf-warning)'
-
-  const daysLabel = days === 0 ? 'Today' : `${days}d`
+  // Salary display
+  const salaryDisplay = (job.salary_min || job.salary_max)
+    ? `€${job.salary_min ? Math.round(job.salary_min / 1000) + 'k' : '?'}–€${job.salary_max ? Math.round(job.salary_max / 1000) + 'k' : '?'}`
+    : null
 
   return (
     <div
@@ -78,23 +83,25 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
       style={dndStyle}
       {...attributes}
       {...listeners}
-      className="cursor-grab active:cursor-grabbing rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+      className="cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+      style-x-extra=""
     >
       <motion.div
         onClick={() => onClick(job)}
         animate={justDropped ? { scale: [1, 1.02, 1] } : { scale: 1 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className={`select-none transition-[box-shadow,border-color] duration-150${
-          isOverlay ? ' rotate-1 cursor-grabbing' : ' cursor-grab active:cursor-grabbing'
-        }`}
         style={{
           background: 'var(--jf-bg-card)',
-          border: '1px solid var(--jf-border)',
+          border: `1px solid ${isInterviewing ? 'rgba(245,158,11,0.3)' : 'var(--jf-border)'}`,
           borderRadius: 12,
-          padding: '12px 14px',
+          padding: 14,
           boxShadow: isOverlay
             ? '0 10px 25px rgba(0,0,0,.15), 0 0 0 1px rgba(37,99,235,.3)'
             : 'var(--jf-shadow-sm)',
+          cursor: isOverlay ? 'grabbing' : 'pointer',
+          transition: 'box-shadow 0.15s, border-color 0.15s',
+          opacity: isRejectedOrWithdrawn ? 0.6 : 1,
+          userSelect: 'none' as const,
         }}
         onMouseEnter={(e) => {
           if (!isOverlay) {
@@ -105,112 +112,154 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
         onMouseLeave={(e) => {
           if (!isOverlay) {
             e.currentTarget.style.boxShadow = 'var(--jf-shadow-sm)'
-            e.currentTarget.style.borderColor = 'var(--jf-border)'
+            e.currentTarget.style.borderColor = isInterviewing ? 'rgba(245,158,11,0.3)' : 'var(--jf-border)'
           }
         }}
       >
-        {/* Row 1: Company identity */}
-        <div className="flex items-center gap-2">
+        {/* Top row: company identity */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <div
             aria-hidden="true"
-            className="flex items-center justify-center text-white flex-shrink-0"
             style={{
-              width: 32,
-              height: 32,
+              width: 30,
+              height: 30,
               borderRadius: 8,
-              backgroundColor: avatarColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               fontSize: 11,
               fontWeight: 700,
+              color: '#fff',
+              flexShrink: 0,
+              background: getCompanyColor(job.company_name),
             }}
           >
-            {initials}
+            {getInitials(job.company_name)}
           </div>
-          <span
-            className="truncate flex-1"
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'var(--jf-text-primary)',
-            }}
-          >
-            {job.company_name}
-          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--jf-text-primary)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {job.company_name}
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--jf-text-muted)',
+                marginTop: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {job.job_title}{job.location ? ` · ${job.location}` : ''}
+            </div>
+          </div>
           {priorityDotColor && (
             <span
               role="img"
               aria-label={`${priority.label} priority`}
-              className="flex-shrink-0"
               style={{
-                width: 6,
-                height: 6,
+                width: 7,
+                height: 7,
                 borderRadius: '50%',
                 background: priorityDotColor,
+                flexShrink: 0,
               }}
             />
           )}
         </div>
 
-        {/* Row 2: Job title */}
-        <p
-          className="truncate mt-1.5"
+        {/* Tags row */}
+        {(job.cv_versions?.name || salaryDisplay) && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
+            {job.cv_versions?.name && (
+              <span
+                style={{
+                  fontFamily: 'var(--font-dm-mono, monospace)',
+                  fontSize: 10,
+                  padding: '2px 7px',
+                  borderRadius: 100,
+                  background: 'rgba(139,92,246,0.08)',
+                  border: '1px solid rgba(139,92,246,0.2)',
+                  color: 'var(--jf-purple, #8B5CF6)',
+                  maxWidth: 120,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {job.cv_versions.name}
+              </span>
+            )}
+            {salaryDisplay && (
+              <span
+                style={{
+                  fontFamily: 'var(--font-dm-mono, monospace)',
+                  fontSize: 10,
+                  padding: '2px 7px',
+                  borderRadius: 100,
+                  background: 'var(--jf-bg-subtle)',
+                  border: '1px solid var(--jf-border)',
+                  color: 'var(--jf-text-muted)',
+                }}
+              >
+                {salaryDisplay}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Footer row */}
+        <div
           style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: 'var(--jf-text-secondary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: 10,
+            borderTop: '1px solid var(--jf-border)',
           }}
         >
-          {job.job_title}
-        </p>
-
-        {/* Row 3: Meta row */}
-        <div className="flex items-center flex-wrap mt-2" style={{ gap: 6 }}>
-          {job.location && (
-            <span
-              className="flex items-center"
-              style={{
-                fontSize: 11,
-                color: 'var(--jf-text-muted)',
-                gap: 3,
-              }}
-            >
-              <span aria-hidden="true" style={{ fontSize: 10 }}>&#x1F4CD;</span>
-              {job.location}
-            </span>
-          )}
           <span
             style={{
               fontFamily: 'var(--font-dm-mono, monospace)',
               fontSize: 11,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
               color: daysColor,
             }}
           >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              style={{ width: 12, height: 12 }}
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                clipRule="evenodd"
+              />
+            </svg>
             {daysLabel}
           </span>
-        </div>
-
-        {/* Row 4: CV version badge */}
-        {job.cv_versions?.name && (
-          <div
-            className="mt-2"
+          <span
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '2px 8px',
-              borderRadius: 6,
-              background: 'rgba(37,99,235,0.08)',
-              border: '1px solid rgba(37,99,235,0.2)',
-              fontFamily: 'var(--font-dm-mono, monospace)',
               fontSize: 11,
-              color: 'var(--jf-interactive)',
-              maxWidth: 140,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              color: 'var(--jf-text-muted)',
             }}
           >
-            {job.cv_versions.name}
-          </div>
-        )}
+            {priority.label}
+          </span>
+        </div>
       </motion.div>
     </div>
   )

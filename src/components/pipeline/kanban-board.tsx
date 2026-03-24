@@ -19,11 +19,9 @@ import { ApplicationCard } from './application-card'
 import { ApplicationModal } from './application-modal'
 import { FilterBar } from './filter-bar'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/use-jobs'
 import { createJobSchema, type CreateJobInput, type UpdateJobInput } from '@/lib/validations/job'
+import { useCVVersions } from '@/hooks/useCVVersions'
 import {
   Dialog,
   DialogContent,
@@ -32,7 +30,12 @@ import {
 } from '@/components/ui/dialog'
 
 /* ------------------------------------------------------------------ */
-/*  AddJobForm — local component for the "Add Application" dialog     */
+/*  ADD_MODAL_STAGES — stages available when creating a new app        */
+/* ------------------------------------------------------------------ */
+const ADD_MODAL_STAGES: Stage[] = ['saved', 'applied', 'screening', 'interviewing', 'offer']
+
+/* ------------------------------------------------------------------ */
+/*  AddJobForm — local component for the "Add Application" dialog      */
 /* ------------------------------------------------------------------ */
 
 interface AddJobFormProps {
@@ -47,7 +50,6 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = useForm<CreateJobInput>({
     resolver: zodResolver(createJobSchema) as never,
     defaultValues: {
@@ -61,74 +63,125 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
     },
   })
 
+  const { data: versions = [] } = useCVVersions(false)
+  const activeVersions = versions.filter((v) => !v.is_archived)
+
+  const inputStyle: React.CSSProperties = {
+    padding: '9px 12px',
+    border: '1px solid var(--jf-border)',
+    borderRadius: 10,
+    fontSize: 13,
+    color: 'var(--jf-text-primary)',
+    background: 'var(--jf-bg-card)',
+    outline: 'none',
+    width: '100%',
+  }
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 12,
+    fontWeight: 600,
+    color: 'var(--jf-text-secondary)',
+  }
+
+  function handleInputFocus(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
+    e.currentTarget.style.borderColor = 'var(--jf-interactive)'
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)'
+  }
+  function handleInputBlur(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
+    e.currentTarget.style.borderColor = 'var(--jf-border)'
+    e.currentTarget.style.boxShadow = 'none'
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <Label htmlFor="add-company" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Company Name *
-          </Label>
-          <Input
-            id="add-company"
-            className="mt-1"
-            aria-invalid={!!errors.company_name}
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* Form fields */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        {/* Company Name — full width */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={labelStyle}>Company Name *</label>
+          <input
             {...register('company_name')}
+            aria-invalid={!!errors.company_name}
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
           />
-          {errors.company_name && <p className="text-xs text-red-500 mt-0.5">{errors.company_name.message}</p>}
+          {errors.company_name && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.company_name.message}</p>}
         </div>
-        <div>
-          <Label htmlFor="add-title" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Job Title *
-          </Label>
-          <Input
-            id="add-title"
-            className="mt-1"
-            aria-invalid={!!errors.job_title}
+
+        {/* Job Title — full width */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={labelStyle}>Job Title *</label>
+          <input
             {...register('job_title')}
+            aria-invalid={!!errors.job_title}
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
           />
-          {errors.job_title && <p className="text-xs text-red-500 mt-0.5">{errors.job_title.message}</p>}
+          {errors.job_title && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.job_title.message}</p>}
         </div>
-      </div>
 
-      <div>
-        <Label htmlFor="add-location" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Location
-        </Label>
-        <Input id="add-location" placeholder="Amsterdam, NL" className="mt-1" {...register('location')} />
-      </div>
-
-      <div>
-        <Label htmlFor="add-url" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Job URL
-        </Label>
-        <Input id="add-url" type="url" placeholder="https://..." className="mt-1" {...register('job_url')} />
-        {errors.job_url && <p className="text-xs text-red-500 mt-0.5">{errors.job_url.message}</p>}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
+        {/* Location */}
         <div>
-          <Label htmlFor="add-smin" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Salary Min
-          </Label>
-          <Input id="add-smin" type="number" className="mt-1" {...register('salary_min', { valueAsNumber: true })} />
+          <label style={labelStyle}>Location</label>
+          <input
+            {...register('location')}
+            placeholder="Amsterdam, NL"
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
         </div>
+
+        {/* Job URL */}
         <div>
-          <Label htmlFor="add-smax" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Salary Max
-          </Label>
-          <Input id="add-smax" type="number" className="mt-1" {...register('salary_max', { valueAsNumber: true })} />
+          <label style={labelStyle}>Job URL</label>
+          <input
+            {...register('job_url')}
+            type="url"
+            placeholder="https://..."
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+          {errors.job_url && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.job_url.message}</p>}
+        </div>
+
+        {/* Salary Min */}
+        <div>
+          <label style={labelStyle}>Salary Min (&euro;)</label>
+          <input
+            type="number"
+            {...register('salary_min', { valueAsNumber: true })}
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+        </div>
+
+        {/* Salary Max */}
+        <div>
+          <label style={labelStyle}>Salary Max (&euro;)</label>
+          <input
+            type="number"
+            {...register('salary_max', { valueAsNumber: true })}
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
         </div>
       </div>
 
-      {/* Stage pills */}
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Stage</Label>
+      {/* Stage selector */}
+      <div style={{ marginTop: 14 }}>
+        <label style={labelStyle}>Stage</label>
         <Controller
           name="stage"
           control={control}
           render={({ field }) => (
-            <div className="flex flex-wrap gap-2 mt-1.5">
-              {STAGES.filter(s => s !== 'hired').map((stage) => {
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+              {ADD_MODAL_STAGES.map((stage) => {
                 const cfg = STAGE_CONFIG[stage]
                 const selected = field.value === stage
                 return (
@@ -136,22 +189,20 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
                     key={stage}
                     type="button"
                     onClick={() => field.onChange(stage)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
                     style={{
-                      border: selected ? `2px solid ${cfg.hex}` : '1px solid var(--jf-border)',
-                      background: selected ? `${cfg.hex}15` : 'transparent',
-                      color: selected ? cfg.hex : 'var(--jf-text-secondary)',
+                      padding: '6px 14px',
+                      borderRadius: 100,
+                      border: selected
+                        ? `1px solid ${cfg.hex}`
+                        : '1px solid var(--jf-border)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font-dm-mono, monospace)',
+                      background: selected ? cfg.hex : 'var(--jf-bg-subtle)',
+                      color: selected ? '#fff' : 'var(--jf-text-secondary)',
                     }}
                   >
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        background: cfg.hex,
-                      }}
-                    />
                     {cfg.label}
                   </button>
                 )
@@ -161,20 +212,20 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
         />
       </div>
 
-      {/* Priority pills */}
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Priority</Label>
+      {/* Priority selector */}
+      <div style={{ marginTop: 14 }}>
+        <label style={labelStyle}>Priority</label>
         <Controller
           name="priority"
           control={control}
           render={({ field }) => {
-            const priorities: { value: Priority; label: string; color: string }[] = [
-              { value: 'high', label: 'High', color: '#EF4444' },
-              { value: 'medium', label: 'Medium', color: '#F59E0B' },
-              { value: 'low', label: 'Low', color: '#94A3B8' },
+            const priorities: { value: Priority; label: string; emoji: string; bg: string; border: string; color: string }[] = [
+              { value: 'high', label: 'High', emoji: '\uD83D\uDD34', bg: '#FEF2F2', border: '#FCA5A5', color: '#EF4444' },
+              { value: 'medium', label: 'Medium', emoji: '\uD83D\uDFE1', bg: '#FFFBEB', border: '#FCD34D', color: '#F59E0B' },
+              { value: 'low', label: 'Low', emoji: '\uD83D\uDFE2', bg: 'var(--jf-interactive-subtle)', border: '#BFDBFE', color: 'var(--jf-interactive)' },
             ]
             return (
-              <div className="flex gap-2 mt-1.5">
+              <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
                 {priorities.map((p) => {
                   const selected = field.value === p.value
                   return (
@@ -182,23 +233,18 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
                       key={p.value}
                       type="button"
                       onClick={() => field.onChange(p.value)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
                       style={{
-                        border: selected ? `2px solid ${p.color}` : '1px solid var(--jf-border)',
-                        background: selected ? `${p.color}15` : 'transparent',
+                        padding: '6px 14px',
+                        borderRadius: 10,
+                        border: `1px solid ${selected ? p.border : 'var(--jf-border)'}`,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        background: selected ? p.bg : 'var(--jf-bg-subtle)',
                         color: selected ? p.color : 'var(--jf-text-secondary)',
                       }}
                     >
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: '50%',
-                          background: p.color,
-                        }}
-                      />
-                      {p.label}
+                      {p.emoji} {p.label}
                     </button>
                   )
                 })}
@@ -208,22 +254,79 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
         />
       </div>
 
-      {/* Notes */}
-      <div>
-        <Label htmlFor="add-notes" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Notes
-        </Label>
-        <Textarea id="add-notes" rows={3} className="mt-1" {...register('notes')} />
-      </div>
+      {/* CV Version select */}
+      {activeVersions.length > 0 && (
+        <div style={{ marginTop: 14 }}>
+          <label style={labelStyle}>CV Version</label>
+          <Controller
+            name="cv_version_id"
+            control={control}
+            render={({ field }) => (
+              <select
+                value={field.value ?? ''}
+                onChange={(e) => field.onChange(e.target.value || undefined)}
+                style={{ ...inputStyle, marginTop: 4 }}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+              >
+                <option value="">No CV version</option>
+                {activeVersions.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name}</option>
+                ))}
+              </select>
+            )}
+          />
+        </div>
+      )}
 
-      {/* Actions */}
-      <div className="flex flex-col gap-2 pt-1">
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Adding...' : 'Add Application'}
-        </Button>
-        <Button type="button" variant="ghost" className="w-full" onClick={onCancel}>
+      {/* Footer */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        gap: 10,
+        marginTop: 20,
+        paddingTop: 16,
+        borderTop: '1px solid var(--jf-border)',
+      }}>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{
+            border: '1px solid var(--jf-border)',
+            borderRadius: 10,
+            padding: '8px 16px',
+            fontSize: 13,
+            fontWeight: 500,
+            color: 'var(--jf-text-secondary)',
+            background: 'transparent',
+            cursor: 'pointer',
+          }}
+        >
           Cancel
-        </Button>
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            borderRadius: 10,
+            padding: '8px 16px',
+            fontSize: 13,
+            fontWeight: 600,
+            color: '#fff',
+            background: 'var(--jf-interactive)',
+            border: 'none',
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            opacity: isSubmitting ? 0.7 : 1,
+          }}
+        >
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" style={{ width: 14, height: 14 }}>
+            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
+          {isSubmitting ? 'Adding...' : 'Add to Pipeline'}
+        </button>
       </div>
     </form>
   )
@@ -342,7 +445,7 @@ export function KanbanBoard() {
   }
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full">
       <FilterBar
         search={search}
         priority={priority}
@@ -355,7 +458,7 @@ export function KanbanBoard() {
       />
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="flex gap-3 overflow-x-auto pb-4 min-w-0">
+        <div className="flex gap-3 overflow-x-auto p-4 min-w-0 flex-1">
           {STAGES.map((stage) => (
             <KanbanColumn
               key={stage}
@@ -386,18 +489,51 @@ export function KanbanBoard() {
       {/* Add Application Modal */}
       {addModalOpen && (
         <Dialog open={addModalOpen} onOpenChange={(o) => { if (!o) setAddModalOpen(false) }}>
-          <DialogContent size="lg">
-            <DialogHeader>
-              <DialogTitle>Add Application</DialogTitle>
-            </DialogHeader>
-            <AddJobForm
-              defaultStage={addModalStage}
-              onSubmit={async (input) => {
-                await handleAddJob(input)
-                setAddModalOpen(false)
+          <DialogContent size="lg" showCloseButton={false} className="p-0 gap-0">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px 24px',
+                borderBottom: '1px solid var(--jf-border)',
               }}
-              onCancel={() => setAddModalOpen(false)}
-            />
+            >
+              <DialogTitle style={{ fontSize: 17, fontWeight: 700, color: 'var(--jf-text-primary)' }}>
+                Add Application
+              </DialogTitle>
+              <button
+                type="button"
+                onClick={() => setAddModalOpen(false)}
+                style={{
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  color: 'var(--jf-text-muted)',
+                }}
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor" style={{ width: 16, height: 16 }}>
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div style={{ padding: 24 }}>
+              <AddJobForm
+                defaultStage={addModalStage}
+                onSubmit={async (input) => {
+                  await handleAddJob(input)
+                  setAddModalOpen(false)
+                }}
+                onCancel={() => setAddModalOpen(false)}
+              />
+            </div>
           </DialogContent>
         </Dialog>
       )}

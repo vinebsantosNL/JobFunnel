@@ -24,106 +24,129 @@ export function KanbanColumn({ stage, jobs, onCardClick, onAddJob, onAddClick }:
     <div
       role="region"
       aria-label={`${config.label} column`}
-      className="flex flex-col w-64 min-w-[220px] flex-1 max-w-xs xl:max-w-sm 2xl:max-w-none"
+      style={{
+        width: 220,
+        minWidth: 220,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        height: '100%',
+        flexShrink: 0,
+      }}
     >
       {/* Column header */}
       <div
-        className="flex items-center justify-between"
         style={{
-          padding: '10px 12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 10px',
+          borderRadius: 10,
           background: 'var(--jf-bg-card)',
           border: '1px solid var(--jf-border)',
-          borderRadius: '12px 12px 0 0',
-          borderBottom: 'none',
+          flexShrink: 0,
         }}
       >
-        <div className="flex items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="flex-shrink-0"
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: config.hex,
-            }}
-          />
-          <span
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'var(--jf-text-primary)',
-            }}
-          >
-            {config.label}
-          </span>
-        </div>
-        <div className="flex items-center" style={{ gap: 6 }}>
-          <span
-            aria-label={`${jobs.length} job${jobs.length !== 1 ? 's' : ''}`}
-            style={{
-              fontFamily: 'var(--font-dm-mono, monospace)',
-              fontSize: 11,
-              color: 'var(--jf-text-muted)',
-              background: 'var(--jf-bg-subtle)',
-              border: '1px solid var(--jf-border)',
-              borderRadius: 100,
-              padding: '1px 7px',
-            }}
-          >
-            {jobs.length}
-          </span>
-          <button
-            type="button"
-            onClick={() => onAddClick?.(stage)}
-            className="flex items-center justify-center w-6 h-6 rounded-md transition-colors"
-            style={{
-              border: '1px solid var(--jf-border)',
-              background: 'var(--jf-bg-card)',
-              color: 'var(--jf-text-muted)',
-              fontSize: 14,
-              lineHeight: 1,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'var(--jf-interactive)'
-              e.currentTarget.style.color = 'var(--jf-interactive)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--jf-border)'
-              e.currentTarget.style.color = 'var(--jf-text-muted)'
-            }}
-            aria-label={`Add application to ${config.label}`}
-          >
-            +
-          </button>
-        </div>
+        <span
+          aria-hidden="true"
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: config.hex,
+            flexShrink: 0,
+          }}
+        />
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--jf-text-secondary)',
+            flex: 1,
+          }}
+        >
+          {config.label}
+        </span>
+        <span
+          aria-label={`${jobs.length} job${jobs.length !== 1 ? 's' : ''}`}
+          style={{
+            fontFamily: 'var(--font-dm-mono, monospace)',
+            fontSize: 11,
+            color: 'var(--jf-text-muted)',
+            background: 'var(--jf-bg-subtle)',
+            padding: '1px 6px',
+            borderRadius: 100,
+          }}
+        >
+          {jobs.length}
+        </span>
+        <button
+          type="button"
+          onClick={() => onAddClick?.(stage)}
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            border: '1px solid var(--jf-border)',
+            background: 'transparent',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--jf-text-muted)',
+            fontSize: 16,
+            lineHeight: 1,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--jf-interactive)'
+            e.currentTarget.style.color = 'var(--jf-interactive)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--jf-border)'
+            e.currentTarget.style.color = 'var(--jf-text-muted)'
+          }}
+          aria-label={`Add application to ${config.label}`}
+        >
+          +
+        </button>
       </div>
 
-      {/* Drop zone */}
+      {/* Cards area / drop zone */}
       <div
         ref={setNodeRef}
-        className="flex-1 flex flex-col transition-colors duration-100"
         style={{
-          minHeight: 180,
-          padding: 10,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
           gap: 8,
-          borderRadius: '0 0 12px 12px',
+          overflowY: 'auto',
+          minHeight: 80,
+          transition: 'background 0.1s',
           ...(isOver
             ? {
                 background: 'var(--jf-interactive-subtle)',
-                borderLeft: '1px dashed var(--jf-interactive)',
-                borderRight: '1px dashed var(--jf-interactive)',
-                borderBottom: '1px dashed var(--jf-interactive)',
+                borderRadius: 10,
+                border: '1px dashed var(--jf-interactive)',
+                padding: 4,
               }
-            : {
-                background: 'var(--jf-bg-subtle)',
-                borderLeft: '1px solid var(--jf-border)',
-                borderRight: '1px solid var(--jf-border)',
-                borderBottom: '1px solid var(--jf-border)',
-              }),
+            : {}),
         }}
       >
         <SortableContext items={jobs.map(j => j.id)} strategy={verticalListSortingStrategy}>
+          {jobs.length === 0 && !isOver && (
+            <div
+              style={{
+                padding: '20px 12px',
+                textAlign: 'center',
+                color: 'var(--jf-text-muted)',
+                fontSize: 12,
+                border: '1px dashed var(--jf-border)',
+                borderRadius: 10,
+              }}
+            >
+              No {config.label.toLowerCase()} yet
+            </div>
+          )}
           {jobs.map(job => (
             <ApplicationCard key={job.id} job={job} onClick={onCardClick} />
           ))}
