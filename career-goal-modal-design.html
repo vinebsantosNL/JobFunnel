@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Goal Modal — JobFunnel OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-page: #FAFAFA;
+      --bg-card: #FFFFFF;
+      --border: #E2E8F0;
+      --border-hover: #CBD5E1;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #94A3B8;
+      --interactive: #2563EB;
+      --interactive-hover: #1D4ED8;
+      --interactive-subtle: #EFF6FF;
+      --interactive-subtle-border: #BFDBFE;
+      --success: #10B981;
+      --error: #EF4444;
+      --radius-card: 16px;
+      --radius-input: 10px;
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.12);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-page);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* Demo trigger button */
+    .demo-trigger {
+      font-family: 'Inter', sans-serif;
+      background: var(--interactive);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-input);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .demo-trigger:hover {
+      background: var(--interactive-hover);
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* Modal */
+    .modal {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-modal);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(8px) scale(0.99);
+      transition: transform 0.2s ease;
+      border: 1px solid var(--border);
+    }
+    .overlay.open .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    /* Header */
+    .modal-header {
+      padding: 20px 20px 0 20px;
+      flex-shrink: 0;
+    }
+    .modal-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: background 0.12s ease, color 0.12s ease;
+      flex-shrink: 0;
+    }
+    .modal-close:hover {
+      background: #F1F5F9;
+      color: var(--text-secondary);
+    }
+    .modal-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 380px;
+    }
+    .modal-divider {
+      height: 1px;
+      background: var(--border);
+      margin-top: 16px;
+    }
+
+    /* Body */
+    .modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* Field label */
+    .field-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    /* Role Selector */
+    .role-selector {
+      width: 100%;
+      position: relative;
+    }
+    .role-trigger {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease;
+      user-select: none;
+    }
+    .role-trigger:hover {
+      border-color: var(--border-hover);
+    }
+    .role-trigger.open {
+      border-color: var(--interactive);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+    }
+    .role-trigger-icon {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+    .role-trigger-value {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .role-trigger-placeholder {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .role-trigger-chevron {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+      display: flex;
+      align-items: center;
+    }
+    .role-trigger.open .role-trigger-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Role Dropdown */
+    .role-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      z-index: 50;
+      overflow: hidden;
+      display: none;
+    }
+    .role-dropdown.open {
+      display: block;
+    }
+    .role-dropdown-inner {
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 6px;
+    }
+    .role-dropdown-inner::-webkit-scrollbar {
+      width: 4px;
+    }
+    .role-dropdown-inner::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .role-dropdown-inner::-webkit-scrollbar-thumb {
+      background: #E2E8F0;
+      border-radius: 2px;
+    }
+    .role-group-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 8px 8px 4px 8px;
+    }
+    .role-group-label:not(:first-child) {
+      margin-top: 4px;
+    }
+    .role-item {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 7px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s ease, color 0.1s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .role-item:hover {
+      background: #F8FAFC;
+      color: var(--text-primary);
+    }
+    .role-item.selected {
+      background: var(--interactive-subtle);
+      color: var(--interactive);
+      font-weight: 500;
+    }
+    .role-item-check {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      visibility: hidden;
+      color: var(--interactive);
+      display: flex;
+      align-items: center;
+    }
+    .role-item.selected .role-item-check {
+      visibility: visible;
+    }
+
+    /* Date Field */
+    .date-field {
+      position: relative;
+    }
+    .date-trigger {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease;
+      position: relative;
+    }
+    .date-trigger:hover {
+      border-color: var(--border-hover);
+    }
+    .date-trigger.focused {
+      border-color: var(--interactive);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+    }
+    .date-trigger-icon {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+    .date-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .date-placeholder {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+    }
+    .date-native {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+    }
+    .date-helper {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    /* Salary Pills */
+    .salary-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .salary-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0 12px;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .salary-pill:hover {
+      border-color: var(--border-hover);
+      background: #F8FAFC;
+    }
+    .salary-pill.active {
+      background: var(--interactive-subtle);
+      border-color: var(--interactive-subtle-border);
+      color: var(--interactive);
+    }
+
+    /* Footer */
+    .modal-footer {
+      border-top: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius-input);
+      padding: 0 16px;
+      min-height: 44px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      background: #F8FAFC;
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+    }
+    .btn-primary {
+      background: var(--interactive);
+      color: #fff;
+      min-width: 110px;
+    }
+    .btn-primary:hover {
+      background: var(--interactive-hover);
+    }
+    .btn-primary.loading {
+      background: var(--interactive);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+    .btn-primary.success {
+      background: var(--success);
+      pointer-events: none;
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Scrollbar for modal body */
+    .modal-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+      background: #E2E8F0;
+      border-radius: 2px;
+    }
+
+    /* Mobile bottom sheet */
+    @media (max-width: 640px) {
+      body {
+        padding: 0;
+      }
+      .overlay {
+        align-items: flex-end;
+        padding: 0;
+      }
+      .modal {
+        max-width: 100%;
+        width: 100%;
+        max-height: 85vh;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(40px);
+      }
+      .overlay.open .modal {
+        transform: translateY(0);
+      }
+      .salary-pills {
+        gap: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Demo trigger -->
+  <button class="demo-trigger" id="openBtn">Open Career Goal Modal</button>
+
+  <!-- Overlay + Modal -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+    <div class="modal" id="modal">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-header-row">
+          <span class="modal-title" id="modalTitle">Edit Career Goal</span>
+          <button class="modal-close" id="closeBtn" aria-label="Close modal">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <p class="modal-subtitle">Define where you want to be — JobFunnel tracks your progress and flags if you're off pace.</p>
+        <div class="modal-divider"></div>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Field 1: Target Role -->
+        <div>
+          <label class="field-label">Target Role</label>
+          <div class="role-selector" id="roleSelector">
+            <div class="role-trigger" id="roleTrigger" tabindex="0" role="combobox" aria-expanded="false" aria-haspopup="listbox">
+              <span class="role-trigger-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="1.5" y="5.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M5.5 5.5V4a2.5 2.5 0 015 0v1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="role-trigger-placeholder" id="roleTriggerText">Select a role…</span>
+              <span class="role-trigger-chevron">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </div>
+            <div class="role-dropdown" id="roleDropdown" role="listbox">
+              <div class="role-dropdown-inner">
+
+                <div class="role-group-label">Engineering</div>
+                <div class="role-item" data-value="Software Engineer" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Software Engineer
+                </div>
+                <div class="role-item" data-value="Senior Software Engineer" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Senior Software Engineer
+                </div>
+                <div class="role-item" data-value="Staff Engineer" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Staff Engineer
+                </div>
+                <div class="role-item" data-value="Engineering Manager" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Engineering Manager
+                </div>
+
+                <div class="role-group-label">Product</div>
+                <div class="role-item" data-value="Product Manager" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Product Manager
+                </div>
+                <div class="role-item" data-value="Senior Product Manager" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Senior Product Manager
+                </div>
+                <div class="role-item" data-value="Group Product Manager" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Group Product Manager
+                </div>
+                <div class="role-item" data-value="Director of Product" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Director of Product
+                </div>
+
+                <div class="role-group-label">Data & AI</div>
+                <div class="role-item" data-value="Data Scientist" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Data Scientist
+                </div>
+                <div class="role-item" data-value="ML Engineer" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  ML Engineer
+                </div>
+                <div class="role-item" data-value="Data Engineer" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Data Engineer
+                </div>
+                <div class="role-item" data-value="AI Research Scientist" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  AI Research Scientist
+                </div>
+
+                <div class="role-group-label">Design</div>
+                <div class="role-item" data-value="Product Designer" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Product Designer
+                </div>
+                <div class="role-item" data-value="UX Designer" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  UX Designer
+                </div>
+                <div class="role-item" data-value="Design Lead" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Design Lead
+                </div>
+
+                <div class="role-group-label">Other</div>
+                <div class="role-item" data-value="Engineering Director" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Engineering Director
+                </div>
+                <div class="role-item" data-value="Technical Lead" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Technical Lead
+                </div>
+                <div class="role-item" data-value="Scrum Master / Agile Coach" role="option">
+                  <span class="role-item-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  Scrum Master / Agile Coach
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Field 2: Target Date -->
+        <div>
+          <label class="field-label">Target Date</label>
+          <div class="date-field">
+            <div class="date-trigger" id="dateTrigger">
+              <span class="date-trigger-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="1.5" y="2.5" width="13" height="12" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M1.5 6.5h13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                  <path d="M5 1v3M11 1v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span id="dateDisplay" class="date-placeholder">e.g. Jun 2026</span>
+              <input
+                type="month"
+                id="dateNative"
+                class="date-native"
+                min="2025-01"
+                max="2030-12"
+                aria-label="Target date"
+              />
+            </div>
+            <p class="date-helper">The month you aim to have an offer</p>
+          </div>
+        </div>
+
+        <!-- Field 3: Target Salary -->
+        <div>
+          <label class="field-label">Target Salary (EUR)</label>
+          <div class="salary-pills" role="group" aria-label="Target salary range">
+            <button class="salary-pill" data-salary="up-to-50k" type="button">Up to €50k</button>
+            <button class="salary-pill" data-salary="50-75k" type="button">€50–75k</button>
+            <button class="salary-pill" data-salary="75-100k" type="button">€75–100k</button>
+            <button class="salary-pill" data-salary="100-125k" type="button">€100–125k</button>
+            <button class="salary-pill" data-salary="125-150k" type="button">€125–150k</button>
+            <button class="salary-pill" data-salary="150-200k" type="button">€150–200k</button>
+            <button class="salary-pill" data-salary="200k-plus" type="button">€200k+</button>
+          </div>
+        </div>
+
+      </div><!-- /modal-body -->
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="cancelBtn" type="button">Cancel</button>
+        <button class="btn btn-primary" id="saveBtn" type="button">
+          <span id="saveBtnContent">Save Goal</span>
+        </button>
+      </div>
+
+    </div><!-- /modal -->
+  </div><!-- /overlay -->
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ── Elements ── */
+      const overlay    = document.getElementById('overlay');
+      const openBtn    = document.getElementById('openBtn');
+      const closeBtn   = document.getElementById('closeBtn');
+      const cancelBtn  = document.getElementById('cancelBtn');
+      const saveBtn    = document.getElementById('saveBtn');
+      const saveBtnContent = document.getElementById('saveBtnContent');
+
+      /* Role selector */
+      const roleTrigger    = document.getElementById('roleTrigger');
+      const roleDropdown   = document.getElementById('roleDropdown');
+      const roleTriggerText = document.getElementById('roleTriggerText');
+      const roleItems      = document.querySelectorAll('.role-item');
+
+      /* Date */
+      const dateTrigger = document.getElementById('dateTrigger');
+      const dateNative  = document.getElementById('dateNative');
+      const dateDisplay = document.getElementById('dateDisplay');
+
+      /* Salary pills */
+      const salaryPills = document.querySelectorAll('.salary-pill');
+
+      /* ── State ── */
+      let selectedRole   = null;
+      let selectedSalary = null;
+      let saveState      = 'idle'; // idle | loading | success
+
+      /* ── Open / Close Modal ── */
+      function openModal() {
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        closeRoleDropdown();
+      }
+
+      function closeModal() {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        closeRoleDropdown();
+      }
+
+      openBtn.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', closeModal);
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) {
+          closeModal();
+        }
+      });
+
+      /* ── Role Dropdown ── */
+      function openRoleDropdown() {
+        roleDropdown.classList.add('open');
+        roleTrigger.classList.add('open');
+        roleTrigger.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeRoleDropdown() {
+        roleDropdown.classList.remove('open');
+        roleTrigger.classList.remove('open');
+        roleTrigger.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggleRoleDropdown() {
+        roleDropdown.classList.contains('open') ? closeRoleDropdown() : openRoleDropdown();
+      }
+
+      roleTrigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleRoleDropdown();
+      });
+
+      roleTrigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleRoleDropdown();
+        }
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!document.getElementById('roleSelector').contains(e.target)) {
+          closeRoleDropdown();
+        }
+      });
+
+      roleItems.forEach(function (item) {
+        item.addEventListener('click', function () {
+          const value = item.getAttribute('data-value');
+          selectedRole = value;
+
+          roleItems.forEach(function (i) { i.classList.remove('selected'); });
+          item.classList.add('selected');
+
+          roleTriggerText.textContent = value;
+          roleTriggerText.classList.remove('role-trigger-placeholder');
+          roleTriggerText.classList.add('role-trigger-value');
+
+          closeRoleDropdown();
+        });
+      });
+
+      /* ── Date Picker ── */
+      dateNative.addEventListener('change', function () {
+        const val = dateNative.value; // "YYYY-MM"
+        if (!val) {
+          dateDisplay.textContent = 'e.g. Jun 2026';
+          dateDisplay.className = 'date-placeholder';
+          return;
+        }
+        const [year, month] = val.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+        const formatted = date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+        dateDisplay.textContent = formatted;
+        dateDisplay.className = 'date-value';
+      });
+
+      dateNative.addEventListener('focus', function () {
+        dateTrigger.classList.add('focused');
+      });
+
+      dateNative.addEventListener('blur', function () {
+        dateTrigger.classList.remove('focused');
+      });
+
+      /* ── Salary Pills ── */
+      salaryPills.forEach(function (pill) {
+        pill.addEventListener('click', function () {
+          const salary = pill.getAttribute('data-salary');
+          if (selectedSalary === salary) {
+            selectedSalary = null;
+            pill.classList.remove('active');
+          } else {
+            salaryPills.forEach(function (p) { p.classList.remove('active'); });
+            selectedSalary = salary;
+            pill.classList.add('active');
+          }
+        });
+      });
+
+      /* ── Save Button ── */
+      saveBtn.addEventListener('click', function () {
+        if (saveState !== 'idle') return;
+        saveState = 'loading';
+        saveBtn.classList.add('loading');
+        saveBtnContent.innerHTML = '<span class="spinner"></span>Saving\u2026';
+
+        setTimeout(function () {
+          saveBtn.classList.remove('loading');
+          saveBtn.classList.add('success');
+          saveBtnContent.innerHTML = [
+            '<svg width="15" height="15" viewBox="0 0 15 15" fill="none">',
+            '<path d="M2.5 7.5l3.5 3.5 6.5-7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+            '</svg>',
+            'Saved!'
+          ].join('');
+          saveState = 'success';
+
+          setTimeout(function () {
+            saveBtn.classList.remove('success');
+            saveBtnContent.textContent = 'Save Goal';
+            saveState = 'idle';
+            closeModal();
+          }, 1000);
+        }, 1500);
+      });
+
+    })();
+  </script>
+</body>
+</html>
