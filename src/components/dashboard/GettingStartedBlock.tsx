@@ -15,22 +15,25 @@ interface ChecklistItem {
 
 function CheckItem({ item }: { item: ChecklistItem }) {
   const content = (
-    <div className="flex items-center gap-3 py-3.5 border-b border-border last:border-0">
-      {/* Visual checkbox — role + aria-checked for screen readers */}
+    <div
+      className="flex items-center gap-3 py-3.5 last:border-0"
+      style={{ borderBottom: '1px solid var(--jf-border)' }}
+    >
+      {/* Visual checkbox */}
       <div
         role="checkbox"
         aria-checked={item.done}
         aria-label={item.label}
-        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-          item.done
-            ? 'bg-primary border-primary'
-            : item.soon
-            ? 'border-border'
-            : 'border-muted-foreground'
-        }`}
+        className="flex-shrink-0 w-5 h-5 rounded flex items-center justify-center transition-colors"
+        style={{
+          borderWidth: 2,
+          borderStyle: 'solid',
+          borderColor: item.done ? 'var(--jf-success)' : 'var(--jf-border)',
+          background: item.done ? 'var(--jf-success)' : 'transparent',
+        }}
       >
         {item.done && (
-          <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 12 12" aria-hidden="true">
+          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12" aria-hidden="true">
             <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
@@ -39,32 +42,50 @@ function CheckItem({ item }: { item: ChecklistItem }) {
       {/* Text */}
       <div className="flex-1 min-w-0">
         <p
-          className={`text-sm font-medium ${
-            item.done ? 'text-muted-foreground line-through' : item.soon ? 'text-muted-foreground' : 'text-foreground'
-          }`}
+          className="text-sm font-medium"
+          style={{
+            color: item.done ? 'var(--jf-text-muted)' : 'var(--jf-text-primary)',
+            textDecoration: item.done ? 'line-through' : 'none',
+          }}
         >
           {item.label}
-          {item.soon && <span className="ml-2 text-xs text-muted-foreground font-normal">(Soon)</span>}
+          {item.soon && (
+            <span className="ml-2 text-xs font-normal" style={{ color: 'var(--jf-text-muted)' }}>(Soon)</span>
+          )}
         </p>
         {item.subtitle && !item.done && (
-          <p className={`text-xs mt-0.5 ${item.priority === 'high' ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+          <p
+            className="text-xs mt-0.5"
+            style={{ color: item.priority === 'high' ? 'var(--jf-interactive)' : 'var(--jf-text-muted)' }}
+          >
             {item.subtitle}
           </p>
         )}
         {item.subtitle && item.done && (
-          <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--jf-text-muted)' }}>{item.subtitle}</p>
         )}
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {item.priority === 'high' && !item.done && (
-          <span className="text-xs font-medium text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full uppercase tracking-wide">
+          <span
+            className="uppercase tracking-wide"
+            style={{
+              fontFamily: 'var(--font-dm-mono, monospace)',
+              fontSize: 10,
+              background: 'rgba(37,99,235,0.08)',
+              border: '1px solid rgba(37,99,235,0.2)',
+              color: 'var(--jf-interactive)',
+              padding: '2px 8px',
+              borderRadius: 100,
+            }}
+          >
             High Priority
           </span>
         )}
         {!item.done && !item.soon && item.href && (
-          <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true" style={{ color: 'var(--jf-text-muted)' }}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         )}
@@ -122,49 +143,81 @@ export function GettingStartedBlock() {
     },
   ]
 
+  const allDone = completedCount === totalCompletable && !isLoading
+
   return (
-    <div className="bg-card rounded-xl border border-border p-5">
+    <div
+      className="rounded-2xl"
+      style={{
+        background: 'var(--jf-bg-card)',
+        border: '1px solid var(--jf-border)',
+        borderRadius: 16,
+        padding: '18px 20px',
+        boxShadow: 'var(--jf-shadow-sm)',
+      }}
+    >
       {/* Header row */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Getting Started</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">Complete these tasks to kickstart your job search.</p>
+          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--jf-text-primary)' }}>Getting Started</h2>
+          <p className="mt-0.5" style={{ fontSize: 12, color: 'var(--jf-text-muted)' }}>Complete these tasks to kickstart your job search.</p>
         </div>
         <div className="text-right flex-shrink-0 ml-4">
           {isLoading ? (
-            <div className="h-4 w-20 bg-muted rounded animate-pulse mb-1" />
+            <div className="h-4 w-20 rounded animate-pulse mb-1" style={{ background: 'var(--jf-border)' }} />
           ) : (
-            <span className="text-sm font-semibold text-foreground">{pct}% Complete</span>
+            <span
+              style={{
+                fontFamily: 'var(--font-dm-mono, monospace)',
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--jf-text-primary)',
+              }}
+            >
+              {pct}% Complete
+            </span>
           )}
-          {/* Progress bar — progressbar role + aria values */}
+          {/* Progress bar */}
           <div
             role="progressbar"
             aria-valuenow={isLoading ? 0 : pct}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="Getting started progress"
-            className="w-32 h-1.5 bg-muted rounded-full mt-1.5 overflow-hidden"
+            className="w-32 mt-1.5 overflow-hidden"
+            style={{ height: 6, background: 'var(--jf-border)', borderRadius: 100 }}
           >
             <div
-              className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: isLoading ? '0%' : `${pct}%` }}
+              style={{
+                height: '100%',
+                background: 'var(--jf-success)',
+                borderRadius: 100,
+                width: isLoading ? '0%' : `${pct}%`,
+                transition: 'width 500ms ease',
+              }}
             />
           </div>
         </div>
       </div>
 
-      {/* Checklist */}
+      {/* Checklist or all-done state */}
       {isLoading ? (
         <div className="space-y-1">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center gap-3 py-3 border-b border-border">
-              <div className="w-5 h-5 rounded bg-muted animate-pulse flex-shrink-0" />
+            <div key={i} className="flex items-center gap-3 py-3" style={{ borderBottom: '1px solid var(--jf-border)' }}>
+              <div className="w-5 h-5 rounded animate-pulse flex-shrink-0" style={{ background: 'var(--jf-border)' }} />
               <div className="flex-1 space-y-1">
-                <div className="h-3.5 bg-muted rounded animate-pulse w-3/4" />
-                <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                <div className="h-3.5 rounded animate-pulse w-3/4" style={{ background: 'var(--jf-border)' }} />
+                <div className="h-3 rounded animate-pulse w-1/2" style={{ background: 'var(--jf-border)' }} />
               </div>
             </div>
           ))}
+        </div>
+      ) : allDone ? (
+        <div className="text-center py-4">
+          <p style={{ fontSize: 24 }}>&#127881;</p>
+          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--jf-success)' }}>All done!</p>
+          <p className="mt-1" style={{ fontSize: 12, color: 'var(--jf-text-muted)' }}>Your job search foundation is set.</p>
         </div>
       ) : (
         <motion.div

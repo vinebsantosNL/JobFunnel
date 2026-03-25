@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { JobApplication } from '@/types/database.types'
 import type { CreateJobInput, UpdateJobInput } from '@/lib/validations/job'
 
@@ -45,6 +45,7 @@ export function useJobs(params?: { priority?: string; search?: string }) {
   return useQuery({
     queryKey: ['jobs', params],
     queryFn: () => fetchJobs(params),
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -52,7 +53,15 @@ export function useCreateJob() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: createJob,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+    onSuccess: (newJob) => {
+      // Seed only the base (unfiltered) cache so the card appears immediately
+      // with correct cv_versions data; filtered caches are refreshed by invalidate
+      queryClient.setQueryData<JobApplication[]>(
+        ['jobs', undefined],
+        (old) => (old ? [newJob, ...old] : [newJob])
+      )
+      queryClient.invalidateQueries({ queryKey: ['jobs'] })
+    },
   })
 }
 

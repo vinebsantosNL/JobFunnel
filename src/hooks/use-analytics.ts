@@ -12,8 +12,11 @@ async function fetchFunnel(params?: { from?: string; to?: string }): Promise<Fun
   return res.json()
 }
 
-async function fetchTimeline(): Promise<TimelinePoint[]> {
-  const res = await fetch('/api/analytics/timeline')
+async function fetchTimeline(params?: { from?: string; to?: string }): Promise<TimelinePoint[]> {
+  const url = new URL('/api/analytics/timeline', window.location.origin)
+  if (params?.from) url.searchParams.set('from', params.from)
+  if (params?.to) url.searchParams.set('to', params.to)
+  const res = await fetch(url.toString())
   if (!res.ok) throw new Error('Failed to fetch timeline data')
   return res.json()
 }
@@ -34,10 +37,10 @@ export function useFunnelData(params?: { from?: string; to?: string }) {
   })
 }
 
-export function useTimelineData() {
+export function useTimelineData(params?: { from?: string; to?: string }) {
   return useQuery({
-    queryKey: ['analytics', 'timeline'],
-    queryFn: fetchTimeline,
+    queryKey: ['analytics', 'timeline', params],
+    queryFn: () => fetchTimeline(params),
   })
 }
 

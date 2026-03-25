@@ -111,17 +111,30 @@ export async function createJobApplication(
       stage_updated_at: new Date().toISOString(),
       cv_version_id: resolvedCVVersionId,
     })
-    .select()
+    .select('*, cv_versions(name)')
     .single()
 
   if (error || !job) throw new AppError(error?.message ?? 'Failed to create job application')
 
-  // Log initial stage to history
-  await supabase.from('stage_history').insert({
-    job_id: job.id,
-    from_stage: null,
-    to_stage: job.stage,
-  })
+  // Log stage history — backfill all intermediate stages if created beyond 'saved'
+  const stageIdx = STAGE_ORDER[job.stage as string]
+  const historyRows: Array<{ job_id: string; from_stage: string | null; to_stage: string }> = []
+
+  if (stageIdx === undefined || stageIdx === 0) {
+    historyRows.push({ job_id: job.id, from_stage: null, to_stage: job.stage })
+  } else {
+    historyRows.push({ job_id: job.id, from_stage: null, to_stage: SEQUENTIAL_STAGES[0] })
+    for (let i = 0; i < stageIdx; i++) {
+      historyRows.push({
+        job_id: job.id,
+        from_stage: SEQUENTIAL_STAGES[i],
+        to_stage: SEQUENTIAL_STAGES[i + 1],
+      })
+    }
+  }
+
+  const { error: histError } = await supabase.from('stage_history').insert(historyRows)
+  if (histError) console.error('stage_history insert failed:', histError.message)
 
   return job as JobApplication
 }

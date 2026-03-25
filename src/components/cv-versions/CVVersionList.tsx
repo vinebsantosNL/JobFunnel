@@ -59,9 +59,9 @@ export function CVVersionList() {
             <div key={t} className="h-8 w-16 bg-gray-100 rounded-full animate-pulse" />
           ))}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="h-64 bg-gray-100 rounded-xl animate-pulse" />
+        <div className="grid gap-[14px] grid-cols-1 sm:grid-cols-2">
+          {[1, 2].map((n) => (
+            <div key={n} className="h-64 bg-gray-100 rounded-[16px] animate-pulse" />
           ))}
         </div>
       </div>
@@ -69,51 +69,30 @@ export function CVVersionList() {
   }
 
   return (
-    <div className="space-y-5">
-      {/* Filter pills + action */}
+    <div className="flex flex-col gap-5">
+      {/* ─── Section Heading Row ─────────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
-          {(['active', 'all', 'archived'] as FilterTab[]).map((tab) => {
-            const label = tab === 'active' ? 'Active' : tab === 'all' ? 'All' : 'Archived'
-            const count =
-              tab === 'active' ? activeCount : tab === 'all' ? (allVersions ?? []).length : archived.length
-            return (
-              <button
-                key={tab}
-                onClick={() => setFilter(tab)}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
-                  filter === tab
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                )}
-              >
-                {label}
-                <span
-                  className={cn(
-                    'text-xs px-1.5 py-0.5 rounded-full font-semibold leading-none',
-                    filter === tab ? 'bg-blue-500 text-white' : 'bg-white text-gray-500'
-                  )}
-                >
-                  {count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
+        <div />
         {atFreeLimit ? (
           <Button
             disabled
-            size="sm"
-            className="flex-shrink-0"
+            className="flex-shrink-0 rounded-xl min-h-[44px]"
             title="Upgrade to Pro for unlimited resume versions"
           >
-            + New resume
+            + New Version
           </Button>
         ) : (
-          <Link href={NEW_RESUME_HREF} className={cn(buttonVariants({ size: 'sm' }), 'flex-shrink-0')}>
-            + New resume
+          <Link
+            href={NEW_RESUME_HREF}
+            className={cn(
+              buttonVariants(),
+              'flex-shrink-0 rounded-xl min-h-[44px] inline-flex items-center gap-1.5'
+            )}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            New Version
           </Link>
         )}
       </div>
@@ -128,29 +107,19 @@ export function CVVersionList() {
         </div>
       )}
 
-      {/* Grid */}
+      {/* ─── CV Cards Grid ───────────────────────────────────────────────── */}
       {displayVersions.length === 0 && !atFreeLimit ? (
         <EmptyState filter={filter} />
       ) : (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {displayVersions.map((version) => (
+        <div className="grid gap-[14px] grid-cols-1 sm:grid-cols-2">
+          {displayVersions.map((version, idx) => (
             <CVVersionCard
               key={version.id}
               version={version}
               stats={statsMap[version.id]}
+              index={idx}
             />
           ))}
-
-          {/* "+ New" dashed card — shown in active/all when not at limit */}
-          {(filter === 'active' || filter === 'all') && !atFreeLimit && (
-            <Link
-              href={NEW_RESUME_HREF}
-              className="rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 py-12 text-gray-400 hover:border-blue-300 hover:text-blue-400 transition-colors min-h-[200px]"
-            >
-              <span className="text-2xl font-light leading-none">+</span>
-              <span className="text-sm">New resume version</span>
-            </Link>
-          )}
 
           {/* Pro-locked placeholder for free users at limit */}
           {(filter === 'active' || filter === 'all') && atFreeLimit && <ProLockedCard />}
@@ -194,7 +163,7 @@ function EmptyState({ filter }: { filter: FilterTab }) {
 
 function ProLockedCard() {
   return (
-    <div className="relative rounded-xl border-2 border-dashed border-gray-200 min-h-[200px] overflow-hidden flex flex-col items-center justify-center gap-3 p-6 text-center">
+    <div className="relative rounded-[16px] border-2 border-dashed border-gray-200 min-h-[200px] overflow-hidden flex flex-col items-center justify-center gap-3 p-6 text-center">
       {/* Blurred fake content */}
       <div className="absolute inset-0 flex flex-col gap-2 p-4 pointer-events-none select-none">
         <div className="h-[90px] rounded-lg bg-gray-100" />

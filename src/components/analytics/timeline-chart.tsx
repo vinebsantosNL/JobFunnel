@@ -1,8 +1,7 @@
 'use client'
 
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import type { TimelinePoint } from '@/types/analytics'
-import { STAGE_HEX } from '@/lib/stages'
 
 interface TimelineChartProps {
   data: TimelinePoint[]
@@ -14,17 +13,37 @@ export function TimelineChart({ data }: TimelineChartProps) {
     label: new Date(d.week).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
   }))
 
+  const monoTick = {
+    fontFamily: 'DM Mono, monospace',
+    fontSize: 11,
+    fill: 'var(--jf-text-muted)',
+  }
+
   return (
-    <div className="w-full h-56">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ left: 0, right: 16, top: 8, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-          <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-          <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-          <Tooltip contentStyle={{ fontSize: 12 }} />
-          <Line type="monotone" dataKey="count" stroke={STAGE_HEX.applied} strokeWidth={2} dot={{ r: 3 }} />
-        </LineChart>
-      </ResponsiveContainer>
+    <div>
+      <p className="text-sm font-medium text-[--jf-text-secondary] mb-3">
+        Applications / week
+      </p>
+      <div className="w-full" style={{ height: 200 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} margin={{ left: 0, right: 16, top: 8, bottom: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+            <XAxis dataKey="label" tick={monoTick} />
+            <YAxis allowDecimals={false} tick={monoTick} />
+            <Tooltip
+              contentStyle={{
+                fontSize: 12,
+                fontFamily: 'DM Mono, monospace',
+              }}
+            />
+            <Bar
+              dataKey="count"
+              fill="var(--jf-interactive)"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }

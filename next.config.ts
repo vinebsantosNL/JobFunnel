@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   experimental: {
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react', 'recharts'],
   },

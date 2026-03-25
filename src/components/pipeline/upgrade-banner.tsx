@@ -13,14 +13,26 @@ export function UpgradeBanner({ activeCount, limit }: UpgradeBannerProps) {
 
   return (
     <div
-      className={`flex items-center justify-between gap-4 px-4 py-3 rounded-lg border text-sm ${
-        isBlocked
-          ? 'bg-red-50 border-red-200 text-red-800'
-          : 'bg-amber-50 border-amber-200 text-amber-800'
-      }`}
+      className="flex items-center justify-between gap-4"
+      style={{
+        padding: '10px 16px',
+        borderRadius: 12,
+        fontSize: 13,
+        ...(isBlocked
+          ? {
+              background: 'rgba(239,68,68,0.08)',
+              border: '1px solid rgba(239,68,68,0.25)',
+              color: 'var(--jf-error)',
+            }
+          : {
+              background: 'rgba(245,158,11,0.08)',
+              border: '1px solid rgba(245,158,11,0.25)',
+              color: 'var(--jf-warning)',
+            }),
+      }}
     >
       <div className="flex items-center gap-2">
-        <span aria-hidden="true" className="text-base">{isBlocked ? '🔒' : '⚠️'}</span>
+        <span aria-hidden="true" className="text-base">{isBlocked ? '\uD83D\uDD12' : '\u26A0\uFE0F'}</span>
         <span>
           {isBlocked
             ? `You've reached the free tier limit of ${limit} active applications.`
@@ -29,11 +41,14 @@ export function UpgradeBanner({ activeCount, limit }: UpgradeBannerProps) {
       </div>
       <a
         href="/settings"
-        className={`shrink-0 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-          isBlocked
-            ? 'bg-red-600 text-white hover:bg-red-700'
-            : 'bg-amber-500 text-white hover:bg-amber-600'
-        }`}
+        className="shrink-0 inline-flex items-center justify-center transition-colors text-white"
+        style={{
+          padding: '5px 14px',
+          borderRadius: 8,
+          fontSize: 12,
+          fontWeight: 600,
+          background: isBlocked ? 'var(--jf-error)' : 'var(--jf-warning)',
+        }}
       >
         Upgrade to Pro
       </a>

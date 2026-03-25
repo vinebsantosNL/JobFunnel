@@ -4,6 +4,7 @@ import './globals.css'
 import { QueryProvider } from '@/components/providers/query-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ subsets: ['latin'] })
 const dmMono = DM_Mono({
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <QueryProvider>{children}</QueryProvider>
         <Toaster />
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )

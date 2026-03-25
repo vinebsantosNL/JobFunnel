@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -10,7 +10,9 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import type { JobApplication, Stage } from '@/types/database.types'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { JobApplication, Stage, Priority } from '@/types/database.types'
 import { STAGES, STAGE_CONFIG, SEQUENTIAL_STAGES, STAGE_ORDER, ACTIVE_STAGES } from '@/lib/stages'
 import { KanbanColumn } from './kanban-column'
 import { ApplicationCard } from './application-card'
@@ -18,7 +20,8 @@ import { ApplicationModal } from './application-modal'
 import { FilterBar } from './filter-bar'
 import { Button } from '@/components/ui/button'
 import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/use-jobs'
-import type { CreateJobInput, UpdateJobInput } from '@/lib/validations/job'
+import { createJobSchema, type CreateJobInput, type UpdateJobInput } from '@/lib/validations/job'
+import { useCVVersions } from '@/hooks/useCVVersions'
 import {
   Dialog,
   DialogContent,
@@ -26,15 +29,331 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
+/* ------------------------------------------------------------------ */
+/*  ADD_MODAL_STAGES — stages available when creating a new app        */
+/* ------------------------------------------------------------------ */
+const ADD_MODAL_STAGES: Stage[] = ['saved', 'applied', 'screening', 'interviewing', 'offer']
+
+/* ------------------------------------------------------------------ */
+/*  AddJobForm — local component for the "Add Application" dialog      */
+/* ------------------------------------------------------------------ */
+
+interface AddJobFormProps {
+  defaultStage: Stage
+  onSubmit: (input: CreateJobInput) => Promise<void>
+  onCancel: () => void
+}
+
+function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateJobInput>({
+    resolver: zodResolver(createJobSchema) as never,
+    defaultValues: {
+      stage: defaultStage,
+      priority: 'medium',
+      company_name: '',
+      job_title: '',
+      job_url: '',
+      location: '',
+      notes: '',
+    },
+  })
+
+  const { data: versions = [] } = useCVVersions(false)
+  const activeVersions = versions.filter((v) => !v.is_archived)
+
+  const inputStyle: React.CSSProperties = {
+    padding: '9px 12px',
+    border: '1px solid var(--jf-border)',
+    borderRadius: 10,
+    fontSize: 13,
+    color: 'var(--jf-text-primary)',
+    background: 'var(--jf-bg-card)',
+    outline: 'none',
+    width: '100%',
+  }
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 12,
+    fontWeight: 600,
+    color: 'var(--jf-text-secondary)',
+  }
+
+  function handleInputFocus(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
+    e.currentTarget.style.borderColor = 'var(--jf-interactive)'
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)'
+  }
+  function handleInputBlur(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
+    e.currentTarget.style.borderColor = 'var(--jf-border)'
+    e.currentTarget.style.boxShadow = 'none'
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* Form fields */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        {/* Company Name — full width */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={labelStyle}>Company Name *</label>
+          <input
+            {...register('company_name')}
+            aria-invalid={!!errors.company_name}
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+          {errors.company_name && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.company_name.message}</p>}
+        </div>
+
+        {/* Job Title — full width */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={labelStyle}>Job Title *</label>
+          <input
+            {...register('job_title')}
+            aria-invalid={!!errors.job_title}
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+          {errors.job_title && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.job_title.message}</p>}
+        </div>
+
+        {/* Location */}
+        <div>
+          <label style={labelStyle}>Location</label>
+          <input
+            {...register('location')}
+            placeholder="Amsterdam, NL"
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+        </div>
+
+        {/* Job URL */}
+        <div>
+          <label style={labelStyle}>Job URL</label>
+          <input
+            {...register('job_url')}
+            type="url"
+            placeholder="https://..."
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+          {errors.job_url && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.job_url.message}</p>}
+        </div>
+
+        {/* Salary Min */}
+        <div>
+          <label style={labelStyle}>Salary Min (&euro;)</label>
+          <input
+            type="number"
+            {...register('salary_min', { valueAsNumber: true })}
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+        </div>
+
+        {/* Salary Max */}
+        <div>
+          <label style={labelStyle}>Salary Max (&euro;)</label>
+          <input
+            type="number"
+            {...register('salary_max', { valueAsNumber: true })}
+            style={{ ...inputStyle, marginTop: 4 }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+        </div>
+      </div>
+
+      {/* Stage selector */}
+      <div style={{ marginTop: 14 }}>
+        <label style={labelStyle}>Stage</label>
+        <Controller
+          name="stage"
+          control={control}
+          render={({ field }) => (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+              {ADD_MODAL_STAGES.map((stage) => {
+                const cfg = STAGE_CONFIG[stage]
+                const selected = field.value === stage
+                return (
+                  <button
+                    key={stage}
+                    type="button"
+                    onClick={() => field.onChange(stage)}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: 100,
+                      border: selected
+                        ? `1px solid ${cfg.hex}`
+                        : '1px solid var(--jf-border)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font-dm-mono, monospace)',
+                      background: selected ? cfg.hex : 'var(--jf-bg-subtle)',
+                      color: selected ? '#fff' : 'var(--jf-text-secondary)',
+                    }}
+                  >
+                    {cfg.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        />
+      </div>
+
+      {/* Priority selector */}
+      <div style={{ marginTop: 14 }}>
+        <label style={labelStyle}>Priority</label>
+        <Controller
+          name="priority"
+          control={control}
+          render={({ field }) => {
+            const priorities: { value: Priority; label: string; emoji: string; bg: string; border: string; color: string }[] = [
+              { value: 'high', label: 'High', emoji: '\uD83D\uDD34', bg: '#FEF2F2', border: '#FCA5A5', color: '#EF4444' },
+              { value: 'medium', label: 'Medium', emoji: '\uD83D\uDFE1', bg: '#FFFBEB', border: '#FCD34D', color: '#F59E0B' },
+              { value: 'low', label: 'Low', emoji: '\uD83D\uDFE2', bg: 'var(--jf-interactive-subtle)', border: '#BFDBFE', color: 'var(--jf-interactive)' },
+            ]
+            return (
+              <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                {priorities.map((p) => {
+                  const selected = field.value === p.value
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => field.onChange(p.value)}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: 10,
+                        border: `1px solid ${selected ? p.border : 'var(--jf-border)'}`,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        background: selected ? p.bg : 'var(--jf-bg-subtle)',
+                        color: selected ? p.color : 'var(--jf-text-secondary)',
+                      }}
+                    >
+                      {p.emoji} {p.label}
+                    </button>
+                  )
+                })}
+              </div>
+            )
+          }}
+        />
+      </div>
+
+      {/* CV Version select */}
+      {activeVersions.length > 0 && (
+        <div style={{ marginTop: 14 }}>
+          <label style={labelStyle}>CV Version</label>
+          <Controller
+            name="cv_version_id"
+            control={control}
+            render={({ field }) => (
+              <select
+                value={field.value ?? ''}
+                onChange={(e) => field.onChange(e.target.value || undefined)}
+                style={{ ...inputStyle, marginTop: 4 }}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+              >
+                <option value="">No CV version</option>
+                {activeVersions.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name}</option>
+                ))}
+              </select>
+            )}
+          />
+        </div>
+      )}
+
+      {/* Footer */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        gap: 10,
+        marginTop: 20,
+        paddingTop: 16,
+        borderTop: '1px solid var(--jf-border)',
+      }}>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{
+            border: '1px solid var(--jf-border)',
+            borderRadius: 10,
+            padding: '8px 16px',
+            fontSize: 13,
+            fontWeight: 500,
+            color: 'var(--jf-text-secondary)',
+            background: 'transparent',
+            cursor: 'pointer',
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            borderRadius: 10,
+            padding: '8px 16px',
+            fontSize: 13,
+            fontWeight: 600,
+            color: '#fff',
+            background: 'var(--jf-interactive)',
+            border: 'none',
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            opacity: isSubmitting ? 0.7 : 1,
+          }}
+        >
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" style={{ width: 14, height: 14 }}>
+            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
+          {isSubmitting ? 'Adding...' : 'Add to Pipeline'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  KanbanBoard                                                        */
+/* ------------------------------------------------------------------ */
+
 export function KanbanBoard() {
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [priority, setPriority] = useState('all')
   const [cvVersionIds, setCVVersionIds] = useState<string[]>([])
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null)
   const [activeJob, setActiveJob] = useState<JobApplication | null>(null)
   const [pendingMove, setPendingMove] = useState<{ job: JobApplication; newStage: Stage } | null>(null)
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [addModalStage, setAddModalStage] = useState<Stage>('saved')
 
-  const { data: rawJobs = [], isLoading, error, refetch } = useJobs({ search, priority })
+  // Debounce search to avoid re-fetching on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  const { data: rawJobs = [], isLoading, isFetching, error, refetch } = useJobs({ search: debouncedSearch, priority })
 
   // Client-side CV version filter (AND logic with server-side priority/search filters)
   const jobs = useMemo(() => {
@@ -108,7 +427,7 @@ export function KanbanBoard() {
   if (isLoading) {
     return (
       <div role="status" aria-label="Loading pipeline" className="flex gap-3 p-4 overflow-x-auto">
-        <span className="sr-only">Loading your pipeline…</span>
+        <span className="sr-only">Loading your pipeline...</span>
         {[1, 2, 3, 4, 5].map((col) => (
           <div key={col} className="w-64 min-w-[220px] flex-shrink-0 space-y-2">
             <div className="h-9 bg-muted rounded-lg animate-pulse" />
@@ -133,7 +452,7 @@ export function KanbanBoard() {
   }
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full">
       <FilterBar
         search={search}
         priority={priority}
@@ -142,10 +461,14 @@ export function KanbanBoard() {
         onPriorityChange={setPriority}
         onCVVersionChange={setCVVersionIds}
         activeCount={activeCount}
+        onOpenAddModal={() => { setAddModalStage('saved'); setAddModalOpen(true) }}
       />
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="flex gap-3 overflow-x-auto pb-4 min-w-0">
+        <div
+          className="flex gap-3 overflow-x-auto p-4 min-w-0 flex-1"
+          style={{ opacity: isFetching ? 0.6 : 1, transition: 'opacity 0.2s ease' }}
+        >
           {STAGES.map((stage) => (
             <KanbanColumn
               key={stage}
@@ -153,6 +476,7 @@ export function KanbanBoard() {
               jobs={jobsByStage[stage]}
               onCardClick={setSelectedJob}
               onAddJob={handleAddJob}
+              onAddClick={(s) => { setAddModalStage(s); setAddModalOpen(true) }}
             />
           ))}
         </div>
@@ -171,6 +495,58 @@ export function KanbanBoard() {
         onUpdate={handleUpdate}
         onDelete={handleDelete}
       />
+
+      {/* Add Application Modal */}
+      {addModalOpen && (
+        <Dialog open={addModalOpen} onOpenChange={(o) => { if (!o) setAddModalOpen(false) }}>
+          <DialogContent size="lg" showCloseButton={false} className="p-0 gap-0">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px 24px',
+                borderBottom: '1px solid var(--jf-border)',
+              }}
+            >
+              <DialogTitle style={{ fontSize: 17, fontWeight: 700, color: 'var(--jf-text-primary)' }}>
+                Add Application
+              </DialogTitle>
+              <button
+                type="button"
+                onClick={() => setAddModalOpen(false)}
+                style={{
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  color: 'var(--jf-text-muted)',
+                }}
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor" style={{ width: 16, height: 16 }}>
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div style={{ padding: 24 }}>
+              <AddJobForm
+                defaultStage={addModalStage}
+                onSubmit={async (input) => {
+                  await handleAddJob(input)
+                  setAddModalOpen(false)
+                }}
+                onCancel={() => setAddModalOpen(false)}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Skip Stage Confirmation Modal */}
       {pendingMove && (
