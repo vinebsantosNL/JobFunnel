@@ -15,7 +15,15 @@ export const createJobSchema = z.object({
   cv_version_id: z.string().uuid().optional().nullable(),
 })
 
-export const updateJobSchema = createJobSchema.partial()
+// updateJobSchema must NOT inherit the .default('saved') from createJobSchema —
+// that default would reset the stage to 'saved' when editing a form that omits the stage field.
+export const updateJobSchema = createJobSchema
+  .extend({
+    stage: z
+      .enum(['saved', 'applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn'])
+      .optional(),
+  })
+  .partial()
 
 export const updateStageSchema = z.object({
   stage: z.enum(['saved', 'applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn']),

@@ -146,7 +146,8 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
   if (!job) return null
 
   const LOCKED_STAGES: Stage[] = ['screening', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn']
-  const isCVVersionLocked = LOCKED_STAGES.includes(job.stage)
+  // Lock if stage is past saved/applied, OR if a resume is already attached (to preserve analytics integrity)
+  const isCVVersionLocked = LOCKED_STAGES.includes(job.stage) || !!job.cv_version_id
 
   const stageConfig = STAGE_CONFIG[job.stage]
   const days = getDaysInStage(job.stage_updated_at)

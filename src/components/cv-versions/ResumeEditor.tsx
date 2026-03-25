@@ -51,7 +51,7 @@ const CEFR_LABELS: Record<CEFRLevel, string> = {
   C2: 'C2 – Mastery',
 }
 
-type EditorTab = 'content' | 'design' | 'ats' | 'keywords'
+type EditorTab = 'content' | 'ats'
 
 function newId() {
   return crypto.randomUUID()
@@ -1039,9 +1039,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
   // ── Tabs ───────────────────────────────────────────────────────────────────
   const tabs: { id: EditorTab; label: string }[] = [
     { id: 'content', label: 'Content' },
-    { id: 'design', label: 'Design' },
     { id: 'ats', label: 'ATS Score' },
-    { id: 'keywords', label: 'Pipeline Keywords' },
   ]
 
   // ── Download handlers ──────────────────────────────────────────────────────
@@ -1334,21 +1332,8 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
               </div>
             )}
 
-            {activeTab === 'design' && (
-              <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-                <p className="text-sm font-medium text-gray-500">Template design controls</p>
-                <p className="text-xs text-gray-400 max-w-xs">
-                  Colour, font, and spacing customisation will be available in a future update.
-                </p>
-              </div>
-            )}
-
             {activeTab === 'ats' && (
               <AtsScoreTab data={data} templateId={version.template_id as TemplateId} />
-            )}
-
-            {activeTab === 'keywords' && (
-              <PipelineKeywordsTab data={data} />
             )}
           </div>
         </div>

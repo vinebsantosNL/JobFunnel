@@ -1,30 +1,20 @@
 'use client'
 
+import { useRef, useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Loader2, Check } from 'lucide-react'
-import { useState } from 'react'
+import { Loader2, Check, X, Briefcase, Calendar, ChevronRight } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+
+// ─── Data ────────────────────────────────────────────────────────────────────
 
 const TECH_ROLES = [
   { group: 'Engineering', roles: [
@@ -57,26 +47,36 @@ const TECH_ROLES = [
 ]
 
 const SALARY_RANGES = [
-  { label: 'Up to €50,000',         min: 0,      max: 50000  },
-  { label: '€50,000 – €75,000',     min: 50000,  max: 75000  },
-  { label: '€75,000 – €100,000',    min: 75000,  max: 100000 },
-  { label: '€100,000 – €125,000',   min: 100000, max: 125000 },
-  { label: '€125,000 – €150,000',   min: 125000, max: 150000 },
-  { label: '€150,000 – €200,000',   min: 150000, max: 200000 },
-  { label: '€200,000+',             min: 200000, max: null   },
+  { label: 'Up to €50k',   min: 0,      max: 50000  },
+  { label: '€50–75k',      min: 50000,  max: 75000  },
+  { label: '€75–100k',     min: 75000,  max: 100000 },
+  { label: '€100–125k',    min: 100000, max: 125000 },
+  { label: '€125–150k',    min: 125000, max: 150000 },
+  { label: '€150–200k',    min: 150000, max: 200000 },
+  { label: '€200k+',       min: 200000, max: null   },
 ]
 
 function salaryKey(min: number | null | undefined, max: number | null | undefined): string {
   return `${min ?? ''}-${max ?? ''}`
 }
 
-// Form schema uses string keys for selects; transformation happens at submit
+function formatMonthDisplay(ym: string): string {
+  if (!ym) return ''
+  const [year, month] = ym.split('-')
+  const d = new Date(parseInt(year), parseInt(month) - 1)
+  return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+}
+
+// ─── Schema ───────────────────────────────────────────────────────────────────
+
 const careerGoalSchema = z.object({
-  target_role:   z.string().optional(),
-  target_date:   z.string().optional(),
-  salary_key:    z.string().optional(),
+  target_role:  z.string().optional(),
+  target_date:  z.string().optional(),
+  salary_key:   z.string().optional(),
 })
 type CareerGoalFormData = z.infer<typeof careerGoalSchema>
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface CareerGoalModalProps {
   open: boolean
@@ -89,9 +89,261 @@ interface CareerGoalModalProps {
   }
 }
 
+// ─── Shared label style ───────────────────────────────────────────────────────
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: 10,
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.08em',
+  color: 'var(--jf-text-muted)',
+  marginBottom: 6,
+}
+
+// ─── Role selector sub-component ─────────────────────────────────────────────
+
+function RoleSelector({ value, onChange }: { value: string | undefined; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handler(e: MouseEvent) {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          width: '100%',
+          background: 'var(--jf-bg-card)',
+          border: `1px solid ${open ? 'var(--jf-interactive)' : 'var(--jf-border)'}`,
+          borderRadius: 10,
+          padding: '9px 12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          cursor: 'pointer',
+          transition: 'border-color 0.12s, box-shadow 0.12s',
+          boxShadow: open ? '0 0 0 3px rgba(37,99,235,0.08)' : 'none',
+          textAlign: 'left',
+          minHeight: 44,
+        }}
+      >
+        <Briefcase style={{ width: 15, height: 15, color: 'var(--jf-text-muted)', flexShrink: 0 }} />
+        <span
+          style={{
+            flex: 1,
+            fontSize: 13,
+            color: value ? 'var(--jf-text-primary)' : 'var(--jf-text-muted)',
+            fontWeight: value ? 500 : 400,
+          }}
+        >
+          {value || 'Select a role…'}
+        </span>
+        <ChevronRight
+          style={{
+            width: 14,
+            height: 14,
+            color: 'var(--jf-text-muted)',
+            flexShrink: 0,
+            transform: open ? 'rotate(90deg)' : 'none',
+            transition: 'transform 0.15s ease',
+          }}
+        />
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            background: 'var(--jf-bg-card)',
+            border: '1px solid var(--jf-border)',
+            borderRadius: 10,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+            zIndex: 50,
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ maxHeight: 220, overflowY: 'auto', padding: 6 }}>
+            {TECH_ROLES.map(({ group, roles }) => (
+              <div key={group}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    color: 'var(--jf-text-muted)',
+                    padding: '8px 8px 4px',
+                  }}
+                >
+                  {group}
+                </div>
+                {roles.map((role) => {
+                  const selected = value === role
+                  return (
+                    <div
+                      key={role}
+                      onClick={() => { onChange(role); setOpen(false) }}
+                      style={{
+                        fontSize: 13,
+                        color: selected ? 'var(--jf-interactive)' : 'var(--jf-text-secondary)',
+                        padding: '7px 8px',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontWeight: selected ? 500 : 400,
+                        background: selected ? 'var(--jf-interactive-subtle)' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        transition: 'background 0.1s, color 0.1s',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!selected) (e.currentTarget as HTMLDivElement).style.background = '#F8FAFC'
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                      }}
+                    >
+                      <Check
+                        style={{
+                          width: 13,
+                          height: 13,
+                          flexShrink: 0,
+                          visibility: selected ? 'visible' : 'hidden',
+                          color: 'var(--jf-interactive)',
+                        }}
+                      />
+                      {role}
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Date selector ────────────────────────────────────────────────────────────
+
+function DateSelector({ value, onChange }: { value: string | undefined; onChange: (v: string) => void }) {
+  const nativeRef = useRef<HTMLInputElement>(null)
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        type="button"
+        onClick={() => nativeRef.current?.showPicker?.()}
+        style={{
+          width: '100%',
+          background: 'var(--jf-bg-card)',
+          border: '1px solid var(--jf-border)',
+          borderRadius: 10,
+          padding: '9px 12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          cursor: 'pointer',
+          textAlign: 'left',
+          minHeight: 44,
+        }}
+      >
+        <Calendar style={{ width: 15, height: 15, color: 'var(--jf-text-muted)', flexShrink: 0 }} />
+        <span
+          style={{
+            flex: 1,
+            fontSize: 13,
+            fontFamily: value ? 'var(--font-dm-mono, monospace)' : 'inherit',
+            color: value ? 'var(--jf-text-primary)' : 'var(--jf-text-muted)',
+            fontWeight: value ? 500 : 400,
+          }}
+        >
+          {value ? formatMonthDisplay(value) : 'e.g. Jun 2026'}
+        </span>
+      </button>
+      <input
+        ref={nativeRef}
+        type="month"
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value)}
+        min={new Date().toISOString().slice(0, 7)}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0,
+          pointerEvents: 'none',
+          width: '100%',
+          height: '100%',
+        }}
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+      <p style={{ fontSize: 11, color: 'var(--jf-text-muted)', marginTop: 4 }}>
+        The month you aim to have an offer
+      </p>
+    </div>
+  )
+}
+
+// ─── Salary pills ─────────────────────────────────────────────────────────────
+
+function SalaryPills({ value, onChange }: { value: string | undefined; onChange: (v: string) => void }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      {SALARY_RANGES.map((r) => {
+        const key = salaryKey(r.min, r.max)
+        const active = value === key
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onChange(active ? '' : key)}
+            style={{
+              padding: '5px 12px',
+              borderRadius: 100,
+              border: `1px solid ${active ? '#BFDBFE' : 'var(--jf-border)'}`,
+              background: active ? 'var(--jf-interactive-subtle)' : 'var(--jf-bg-card)',
+              color: active ? 'var(--jf-interactive)' : 'var(--jf-text-secondary)',
+              fontSize: 11,
+              fontFamily: 'var(--font-dm-mono, monospace)',
+              fontWeight: 500,
+              cursor: 'pointer',
+              minHeight: 32,
+              transition: 'background 0.12s, border-color 0.12s, color 0.12s',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {r.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── Main modal ───────────────────────────────────────────────────────────────
+
 export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoalModalProps) {
   const queryClient = useQueryClient()
   const [justSaved, setJustSaved] = useState(false)
+
+  const hasGoal = !!(initialValues?.target_role?.trim())
 
   const {
     handleSubmit,
@@ -100,9 +352,9 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
   } = useForm<CareerGoalFormData>({
     resolver: zodResolver(careerGoalSchema),
     defaultValues: {
-      target_role: initialValues?.target_role ?? '',
-      target_date: initialValues?.target_date?.slice(0, 7) ?? '',
-      salary_key: salaryKey(initialValues?.target_salary_min, initialValues?.target_salary_max),
+      target_role:  initialValues?.target_role ?? '',
+      target_date:  initialValues?.target_date?.slice(0, 7) ?? '',
+      salary_key:   salaryKey(initialValues?.target_salary_min, initialValues?.target_salary_max),
     },
   })
 
@@ -113,10 +365,10 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
       ) ?? null
 
       const payload = {
-        target_role: data.target_role || null,
-        target_date: data.target_date ? `${data.target_date}-01` : null,
-        target_salary_min: selectedRange?.min ?? null,
-        target_salary_max: selectedRange?.max ?? null,
+        target_role:            data.target_role || null,
+        target_date:            data.target_date ? `${data.target_date}-01` : null,
+        target_salary_min:      selectedRange?.min ?? null,
+        target_salary_max:      selectedRange?.max ?? null,
         target_salary_currency: 'EUR',
       }
       const res = await fetch('/api/profile', {
@@ -144,94 +396,152 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="md">
-        <DialogHeader>
-          <DialogTitle>Edit Career Goal</DialogTitle>
-        </DialogHeader>
+      <DialogContent
+        size="md"
+        showCloseButton={false}
+        className="p-0 gap-0 overflow-hidden"
+        style={{ maxWidth: 480 }}
+      >
+        <DialogTitle className="sr-only">
+          {hasGoal ? 'Edit Career Goal' : 'Set Career Goal'}
+        </DialogTitle>
 
-        <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-5 pt-2">
-          {/* Target Role */}
-          <div className="space-y-1.5">
-            <Label>Target Role</Label>
-            <Controller
-              name="target_role"
-              control={control}
-              render={({ field }) => (
-                <Select value={field.value || undefined} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full h-9">
-                    <SelectValue placeholder="Select a role…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TECH_ROLES.map(({ group, roles }) => (
-                      <SelectGroup key={group}>
-                        <SelectLabel>{group}</SelectLabel>
-                        {roles.map((r) => (
-                          <SelectItem key={r} value={r}>{r}</SelectItem>
-                        ))}
-                      </SelectGroup>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
+        {/* ── Header ── */}
+        <div style={{ padding: '20px 20px 0 20px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
+            <h2
+              style={{
+                fontSize: 16,
+                fontWeight: 700,
+                color: 'var(--jf-text-primary)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {hasGoal ? 'Edit Career Goal' : 'Set Career Goal'}
+            </h2>
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                border: 'none',
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: 'var(--jf-text-muted)',
+                flexShrink: 0,
+                marginTop: -4,
+                marginRight: -4,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#F1F5F9'
+                e.currentTarget.style.color = 'var(--jf-text-secondary)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = 'var(--jf-text-muted)'
+              }}
+              aria-label="Close"
+            >
+              <X style={{ width: 16, height: 16 }} />
+            </button>
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--jf-text-muted)', lineHeight: 1.5, maxWidth: 380 }}>
+            Define where you want to be — JobFunnel tracks your progress and flags if you&apos;re off pace.
+          </p>
+          <div style={{ height: 1, background: 'var(--jf-border)', marginTop: 16 }} />
+        </div>
+
+        {/* ── Body ── */}
+        <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
+          <div
+            style={{
+              padding: 20,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+              overflowY: 'auto',
+              maxHeight: 'calc(90vh - 180px)',
+            }}
+          >
+            {/* Target Role */}
+            <div>
+              <label style={labelStyle}>Target Role</label>
+              <Controller
+                name="target_role"
+                control={control}
+                render={({ field }) => (
+                  <RoleSelector value={field.value ?? undefined} onChange={field.onChange} />
+                )}
+              />
+            </div>
+
+            {/* Target Date */}
+            <div>
+              <label style={labelStyle}>Target Date</label>
+              <Controller
+                name="target_date"
+                control={control}
+                render={({ field }) => (
+                  <DateSelector value={field.value ?? undefined} onChange={field.onChange} />
+                )}
+              />
+            </div>
+
+            {/* Target Salary */}
+            <div>
+              <label style={labelStyle}>Target Salary (EUR)</label>
+              <Controller
+                name="salary_key"
+                control={control}
+                render={({ field }) => (
+                  <SalaryPills value={field.value ?? undefined} onChange={field.onChange} />
+                )}
+              />
+            </div>
           </div>
 
-          {/* Target Date */}
-          <div className="space-y-1.5">
-            <Label htmlFor="target-date">Target Date</Label>
-            <Controller
-              name="target_date"
-              control={control}
-              render={({ field }) => (
-                <input
-                  id="target-date"
-                  type="month"
-                  value={field.value ?? ''}
-                  onChange={field.onChange}
-                  min={new Date().toISOString().slice(0, 7)}
-                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
-                />
-              )}
-            />
-            <p className="text-xs text-gray-500">The month you aim to have an offer</p>
-          </div>
-
-          {/* Target Salary */}
-          <div className="space-y-1.5">
-            <Label>Target Salary Range</Label>
-            <Controller
-              name="salary_key"
-              control={control}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full h-9">
-                    <SelectValue placeholder="Select a range…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SALARY_RANGES.map((r) => (
-                      <SelectItem key={salaryKey(r.min, r.max)} value={salaryKey(r.min, r.max)}>
-                        {r.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-
-          {/* Actions */}
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+          {/* ── Footer ── */}
+          <div
+            style={{
+              borderTop: '1px solid var(--jf-border)',
+              padding: '14px 20px',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: 8,
+              flexShrink: 0,
+            }}
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              style={{ minHeight: 44 }}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="gap-1.5">
+            <Button
+              type="submit"
+              disabled={isPending}
+              style={{
+                minHeight: 44,
+                background: justSaved ? 'var(--jf-success)' : undefined,
+              }}
+              className="gap-1.5"
+            >
               {isPending ? (
                 <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving…</>
               ) : justSaved ? (
                 <><Check className="w-3.5 h-3.5" />Saved!</>
-              ) : 'Save Goal'}
+              ) : (
+                'Save Goal'
+              )}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

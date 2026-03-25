@@ -312,20 +312,14 @@ function TemplateCard({
           ))}
         </div>
 
-        {/* Hover CTA */}
-        <div className="mt-auto pt-2 opacity-0 group-hover:opacity-100 sm:transition-opacity">
+        <div className="mt-auto pt-2">
           <Button
             size="sm"
+            variant={selected ? 'default' : 'outline'}
             className="w-full"
             onClick={(e) => { e.stopPropagation(); onSelect(template.id) }}
           >
-            Use {template.name} →
-          </Button>
-        </div>
-        {/* Mobile: always visible */}
-        <div className="sm:hidden">
-          <Button size="sm" variant={selected ? 'default' : 'outline'} className="w-full">
-            {selected ? '✓ Selected' : `Use ${template.name}`}
+            {selected ? '✓ Selected' : `Use ${template.name} →`}
           </Button>
         </div>
       </div>
