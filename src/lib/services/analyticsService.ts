@@ -111,18 +111,22 @@ function getWeekStart(date: Date): string {
 
 export async function getTimeline(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  filters: DateRangeFilters = {}
 ): Promise<TimelinePoint[]> {
-  const ninetyDaysAgo = new Date()
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+  const defaultFrom = new Date()
+  defaultFrom.setDate(defaultFrom.getDate() - 90)
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('job_applications')
     .select('applied_at')
     .eq('user_id', userId)
     .not('applied_at', 'is', null)
-    .gte('applied_at', ninetyDaysAgo.toISOString())
-    .order('applied_at', { ascending: true })
+    .gte('applied_at', filters.from ?? defaultFrom.toISOString())
+
+  if (filters.to) query = query.lte('applied_at', filters.to)
+
+  const { data, error } = await query.order('applied_at', { ascending: true })
 
   if (error) throw new AppError(error.message)
 

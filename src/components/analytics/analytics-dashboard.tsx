@@ -16,29 +16,48 @@ import Link from 'next/link'
 
 const FILTER_LABELS: Record<DateFilterValue, string> = {
   '7d': 'Last 7 days',
-  '30d': 'Last 30 days',
   '60d': 'Last 60 days',
-  '90d': 'Last 90 days',
   custom: 'Custom range',
 }
 
 export function AnalyticsDashboard() {
-  const [dateFilter, setDateFilter] = useState<DateFilterValue>('30d')
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>('60d')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
 
-  const days = getDaysFromFilter(dateFilter)
-  const dateRange = useMemo(() => getDateRange(days), [days])
+  const dateRange = useMemo(() => {
+    if (dateFilter === 'custom' && customFrom && customTo) {
+      return {
+        from: new Date(customFrom).toISOString(),
+        to: new Date(customTo + 'T23:59:59').toISOString(),
+      }
+    }
+    return getDateRange(getDaysFromFilter(dateFilter))
+  }, [dateFilter, customFrom, customTo])
 
   const { data: funnel, isLoading: funnelLoading } = useFunnelData(dateRange)
-  const { data: timeline, isLoading: timelineLoading } = useTimelineData()
+  const { data: timeline, isLoading: timelineLoading } = useTimelineData(dateRange)
   const { data: stageTime, isLoading: stageTimeLoading } = useStageTimeData(dateRange)
 
   const totalApplied = funnel?.funnel_counts.applied ?? 0
+
+  const dateLabel =
+    dateFilter === 'custom' && customFrom && customTo
+      ? `${customFrom} – ${customTo}`
+      : FILTER_LABELS[dateFilter].toLowerCase()
 
   return (
     <div className="p-6">
       <div className="space-y-5">
         {/* Date filter bar */}
-        <DateFilterPills value={dateFilter} onChange={setDateFilter} />
+        <DateFilterPills
+          value={dateFilter}
+          onChange={setDateFilter}
+          customFrom={customFrom}
+          customTo={customTo}
+          onCustomFromChange={setCustomFrom}
+          onCustomToChange={setCustomTo}
+        />
 
         {/* Two-column grid: Funnel (left) + Timeline+StageTime (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -115,12 +134,13 @@ export function AnalyticsDashboard() {
               <RightAnalyticsPanel
                 weeklyData={timeline ?? []}
                 stageTimeData={stageTime ?? []}
+                dateLabel={dateLabel}
               />
             )}
           </div>
         </div>
 
-        {/* Full-width: CV A/B Testing */}
+        {/* Full-width: Resume Performance */}
         <CVTestingPanel />
       </div>
     </div>

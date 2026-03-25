@@ -17,11 +17,13 @@ const STAGE_TIME_STAGES: Stage[] = ['applied', 'screening', 'interviewing']
 interface RightAnalyticsPanelProps {
   weeklyData: TimelinePoint[]
   stageTimeData: StageTimePoint[]
+  dateLabel?: string
 }
 
 export function RightAnalyticsPanel({
   weeklyData,
   stageTimeData,
+  dateLabel,
 }: RightAnalyticsPanelProps) {
   // Transform weekly data to W1, W2, etc labels
   const chartData = weeklyData.map((d, i) => ({
@@ -58,7 +60,7 @@ export function RightAnalyticsPanel({
           className="font-mono text-xs mt-0.5 mb-3"
           style={{ color: 'var(--jf-text-muted)' }}
         >
-          Weekly volume &middot; last 30 days
+          Weekly volume &middot; {dateLabel ?? 'last 60 days'}
         </p>
         <div className="w-full" style={{ height: 200 }}>
           <ResponsiveContainer width="100%" height="100%">
