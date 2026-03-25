@@ -212,10 +212,14 @@ function EmptyStateCard({ onClick }: { onClick: () => void }) {
   )
 }
 
+type StarFilter = 'all' | 'complete' | 'in-progress'
+
 /* ── Main page client component ── */
 export function StoriesPageClient() {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('All')
+  const [starFilter, setStarFilter] = useState<StarFilter>('all')
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
 
   const { data: stories, isLoading } = useStories({
     search: search || undefined,
@@ -227,10 +231,21 @@ export function StoriesPageClient() {
 
   const isDetailOpen = expandedView.type !== 'none'
 
-  // Filter stories by category
+  const hasActiveFilters = categoryFilter !== 'All' || starFilter !== 'all' || favoritesOnly
+
+  // Filter stories by all active filters
   const filteredStories = stories?.filter((story) => {
-    if (categoryFilter === 'All') return true
-    return story.competencies.some((c) => getCompetencyCategory(c) === categoryFilter)
+    if (categoryFilter !== 'All' && !story.competencies.some((c) => getCompetencyCategory(c) === categoryFilter)) return false
+    if (favoritesOnly && !story.is_favorite) return false
+    if (starFilter === 'complete') {
+      const filled = [story.situation, story.task, story.action, story.result].filter(Boolean).length
+      if (filled < 4) return false
+    }
+    if (starFilter === 'in-progress') {
+      const filled = [story.situation, story.task, story.action, story.result].filter(Boolean).length
+      if (filled === 0 || filled === 4) return false
+    }
+    return true
   })
 
   // Keyboard shortcuts
@@ -269,7 +284,7 @@ export function StoriesPageClient() {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Top bar (sticky) */}
       <div
-        className="flex items-center gap-[10px] flex-wrap border-b border-[var(--jf-border)] bg-[var(--jf-bg-card)]"
+        className="flex items-center gap-[10px] border-b border-[var(--jf-border)] bg-[var(--jf-bg-card)] overflow-x-auto no-scrollbar"
         style={{ padding: '14px 24px' }}
       >
         {/* Search input */}
@@ -295,30 +310,99 @@ export function StoriesPageClient() {
           />
         </div>
 
-        {/* Filter chips */}
-        {FILTER_CATEGORIES.map((cat) => (
+          {/* Category filter chips */}
+        {FILTER_CATEGORIES.map((cat) => {
+          const isActive = categoryFilter === cat
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setCategoryFilter(cat)}
+              className={cn(
+                'rounded-full text-xs font-medium cursor-pointer transition-colors shrink-0',
+                isActive
+                  ? 'text-[var(--jf-interactive)]'
+                  : 'text-[var(--jf-text-secondary)] hover:border-[var(--jf-interactive)] hover:text-[var(--jf-interactive)]'
+              )}
+              style={{
+                padding: '5px 12px',
+                fontSize: '12px',
+                fontWeight: 500,
+                border: isActive ? '1px solid #BFDBFE' : '1px solid var(--jf-border)',
+                background: isActive ? 'var(--jf-interactive-subtle)' : 'var(--jf-bg-card)',
+                borderRadius: '100px',
+              }}
+            >
+              {cat}
+            </button>
+          )
+        })}
+
+        {/* Divider */}
+        <div style={{ width: 1, height: 18, background: 'var(--jf-border)', flexShrink: 0 }} />
+
+        {/* Favorites filter */}
+        <button
+          type="button"
+          onClick={() => setFavoritesOnly((v) => !v)}
+          className="rounded-full text-xs font-medium cursor-pointer transition-colors shrink-0 flex items-center gap-1"
+          style={{
+            padding: '5px 12px',
+            fontSize: '12px',
+            fontWeight: 500,
+            border: favoritesOnly ? '1px solid #FCD34D' : '1px solid var(--jf-border)',
+            background: favoritesOnly ? '#FFFBEB' : 'var(--jf-bg-card)',
+            color: favoritesOnly ? '#F59E0B' : 'var(--jf-text-secondary)',
+            borderRadius: '100px',
+          }}
+        >
+          ⭐ Favorites
+        </button>
+
+        {/* STAR completion filters */}
+        {(['complete', 'in-progress'] as StarFilter[]).map((sf) => {
+          const label = sf === 'complete' ? 'Complete' : 'In Progress'
+          const isActive = starFilter === sf
+          return (
+            <button
+              key={sf}
+              type="button"
+              onClick={() => setStarFilter(isActive ? 'all' : sf)}
+              className="rounded-full text-xs font-medium cursor-pointer transition-colors shrink-0"
+              style={{
+                padding: '5px 12px',
+                fontSize: '12px',
+                fontWeight: 500,
+                border: isActive ? '1px solid rgba(16,185,129,0.3)' : '1px solid var(--jf-border)',
+                background: isActive ? 'rgba(16,185,129,0.08)' : 'var(--jf-bg-card)',
+                color: isActive ? '#10B981' : 'var(--jf-text-secondary)',
+                borderRadius: '100px',
+              }}
+            >
+              {label}
+            </button>
+          )
+        })}
+
+        {/* Clear filters */}
+        {hasActiveFilters && (
           <button
-            key={cat}
             type="button"
-            onClick={() => setCategoryFilter(cat)}
-            className={cn(
-              'rounded-full text-xs font-medium cursor-pointer transition-colors',
-              categoryFilter === cat
-                ? 'text-[var(--jf-interactive)]'
-                : 'text-[var(--jf-text-secondary)] hover:border-[var(--jf-interactive)] hover:text-[var(--jf-interactive)]'
-            )}
+            onClick={() => { setCategoryFilter('All'); setStarFilter('all'); setFavoritesOnly(false) }}
+            className="rounded-full text-xs font-medium cursor-pointer transition-colors shrink-0"
             style={{
-              padding: '5px 12px',
-              fontSize: '12px',
+              padding: '5px 10px',
+              fontSize: '11px',
               fontWeight: 500,
-              border: categoryFilter === cat ? '1px solid #BFDBFE' : '1px solid var(--jf-border)',
-              background: categoryFilter === cat ? 'var(--jf-interactive-subtle)' : 'var(--jf-bg-card)',
+              border: '1px solid var(--jf-border)',
+              background: 'transparent',
+              color: 'var(--jf-text-muted)',
               borderRadius: '100px',
             }}
           >
-            {cat}
+            Clear ✕
           </button>
-        ))}
+        )}
 
         {/* Spacer + New Story button */}
         <div className="ml-auto">

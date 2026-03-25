@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 
-export type DateFilterValue = '7d' | '60d' | 'custom'
+export type DateFilterValue = '7d' | '30d' | '60d' | 'custom'
 
 const PILL_OPTIONS: { value: DateFilterValue; label: string; days: number }[] = [
   { value: '7d', label: '7d', days: 7 },
+  { value: '30d', label: '30d', days: 30 },
   { value: '60d', label: '60d', days: 60 },
 ]
 

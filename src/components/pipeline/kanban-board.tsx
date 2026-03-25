@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -338,6 +338,7 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
 
 export function KanbanBoard() {
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [priority, setPriority] = useState('all')
   const [cvVersionIds, setCVVersionIds] = useState<string[]>([])
   const [selectedJob, setSelectedJob] = useState<JobApplication | null>(null)
@@ -346,7 +347,13 @@ export function KanbanBoard() {
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [addModalStage, setAddModalStage] = useState<Stage>('saved')
 
-  const { data: rawJobs = [], isLoading, error, refetch } = useJobs({ search, priority })
+  // Debounce search to avoid re-fetching on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  const { data: rawJobs = [], isLoading, isFetching, error, refetch } = useJobs({ search: debouncedSearch, priority })
 
   // Client-side CV version filter (AND logic with server-side priority/search filters)
   const jobs = useMemo(() => {
@@ -458,7 +465,10 @@ export function KanbanBoard() {
       />
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="flex gap-3 overflow-x-auto p-4 min-w-0 flex-1">
+        <div
+          className="flex gap-3 overflow-x-auto p-4 min-w-0 flex-1"
+          style={{ opacity: isFetching ? 0.6 : 1, transition: 'opacity 0.2s ease' }}
+        >
           {STAGES.map((stage) => (
             <KanbanColumn
               key={stage}

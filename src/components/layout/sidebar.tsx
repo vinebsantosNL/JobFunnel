@@ -146,46 +146,6 @@ export function Sidebar() {
 
       {/* Bottom section */}
       <div className="px-3 pb-3" style={{ borderTop: '1px solid var(--jf-border)' }}>
-        {/* User card → navigates to Settings */}
-        <Link
-          href="/settings"
-          title="Account settings"
-          className="group flex items-center gap-[10px] rounded-[10px] mt-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1"
-          style={{
-            padding: '10px 12px',
-            background: isActive('/settings') ? 'var(--jf-interactive-subtle)' : 'var(--jf-bg-subtle, #F8FAFC)',
-            marginBottom: 4,
-          }}
-        >
-          {/* Avatar circle */}
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #F97316, #EC4899)' }}
-            aria-hidden="true"
-          >
-            {getInitials(profile?.full_name)}
-          </div>
-
-          {/* Name + tier */}
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold truncate" style={{ color: 'var(--jf-text-primary)' }}>
-              {profile?.full_name ? `${profile.full_name.split(' ')[0]} ${profile.full_name.split(' ')[1]?.[0] ?? ''}.`.trim() : 'User'}
-            </p>
-            <p
-              className="text-[10px] uppercase tracking-[0.06em]"
-              style={{ fontFamily: 'var(--font-dm-mono, monospace)', color: 'var(--jf-text-muted)' }}
-            >
-              {profile?.subscription_tier === 'pro' ? 'Pro' : 'Free Tier'} · Settings
-            </p>
-          </div>
-
-          {/* Gear icon */}
-          <IconSettings
-            className="flex-shrink-0 transition-opacity"
-            style={{ width: 14, height: 14, color: 'var(--jf-text-muted)', opacity: isActive('/settings') ? 1 : undefined } as React.CSSProperties}
-          />
-        </Link>
-
         {/* Sign out */}
         <button
           onClick={handleSignOut}

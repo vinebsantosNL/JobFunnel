@@ -98,10 +98,9 @@ export function FilterBar({
         />
       </div>
 
-      {/* Filter button (priority) */}
+      {/* Priority filter — dropdown */}
       <div className="relative">
-        <button
-          type="button"
+        <div
           style={{
             border: '1px solid var(--jf-border)',
             borderRadius: 8,
@@ -114,20 +113,14 @@ export function FilterBar({
             alignItems: 'center',
             gap: 6,
             cursor: 'pointer',
-          }}
-          onClick={(e) => {
-            // Cycle through priority values
-            const order = ['all', 'high', 'medium', 'low']
-            const idx = order.indexOf(priority)
-            const next = order[(idx + 1) % order.length]
-            onPriorityChange(next)
+            position: 'relative',
           }}
         >
           <svg
             aria-hidden="true"
             viewBox="0 0 20 20"
             fill="currentColor"
-            style={{ width: 14, height: 14 }}
+            style={{ width: 14, height: 14, flexShrink: 0 }}
           >
             <path
               fillRule="evenodd"
@@ -135,10 +128,25 @@ export function FilterBar({
               clipRule="evenodd"
             />
           </svg>
-          {priority === 'all'
-            ? 'Filter'
-            : `Filter: ${priority.charAt(0).toUpperCase() + priority.slice(1)}`}
-        </button>
+          <select
+            value={priority}
+            onChange={(e) => onPriorityChange(e.target.value)}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0,
+              cursor: 'pointer',
+              width: '100%',
+            }}
+            aria-label="Priority filter"
+          >
+            <option value="all">All priorities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          {priority === 'all' ? 'Priority' : `Priority: ${priority.charAt(0).toUpperCase() + priority.slice(1)}`}
+        </div>
       </div>
 
       {/* CV Version button */}

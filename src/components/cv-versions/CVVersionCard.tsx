@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { Pencil, Copy, Archive, ArchiveRestore, Lock, MoreHorizontal, ExternalLink } from 'lucide-react'
+import { Pencil, Copy, Archive, ArchiveRestore, Lock, MoreHorizontal, ExternalLink, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
   Dialog,
   DialogContent,
@@ -39,10 +39,46 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
   const [editOpen, setEditOpen] = useState(false)
   const [duplicateOpen, setDuplicateOpen] = useState(false)
   const [duplicateName, setDuplicateName] = useState('')
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const updateMutation = useUpdateCVVersion()
   const duplicateMutation = useDuplicateCVVersion()
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return
+    function handleClick(e: MouseEvent) {
+      if (!dropdownRef.current?.contains(e.target as Node)) setDropdownOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [dropdownOpen])
+
+  async function handleDownloadPDF() {
+    if (isDownloading) return
+    setIsDownloading(true)
+    try {
+      const res = await fetch(`/api/cv-versions/${version.id}/export/pdf`, { method: 'POST' })
+      if (!res.ok) throw new Error('PDF export failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const safeName = version.name.replace(/[^\w\s-]/g, '_')
+      a.download = `${safeName}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      toast.error('Failed to download PDF. Please try again.')
+      console.error('PDF download error:', err)
+    } finally {
+      setIsDownloading(false)
+    }
+  }
 
   const totalApplied = stats?.total_applied ?? 0
   const screeningRate = stats?.screening_rate ?? null
@@ -61,7 +97,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
       id: version.id,
       input: { is_archived: !version.is_archived },
     })
-    setMobileSheetOpen(false)
+    setDropdownOpen(false)
   }
 
   async function handleSetDefault() {
@@ -69,7 +105,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
       id: version.id,
       input: { is_default: true },
     })
-    setMobileSheetOpen(false)
+    setDropdownOpen(false)
   }
 
   async function handleDuplicateConfirm() {
@@ -82,12 +118,12 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
   function openDuplicate() {
     setDuplicateName(`${version.name} – Copy`)
     setDuplicateOpen(true)
-    setMobileSheetOpen(false)
+    setDropdownOpen(false)
   }
 
   function openEdit() {
     setEditOpen(true)
-    setMobileSheetOpen(false)
+    setDropdownOpen(false)
   }
 
   return (
@@ -145,15 +181,82 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
                 Default
               </span>
             )}
-            {/* Mobile actions trigger */}
-            <button
-              onClick={() => setMobileSheetOpen(true)}
-              className="sm:hidden p-1 rounded-md hover:bg-[var(--jf-bg-subtle)]"
-              style={{ color: 'var(--jf-text-muted)', minHeight: '44px', minWidth: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              aria-label="Actions"
-            >
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
+            {/* Actions dropdown */}
+            <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <button
+                onClick={() => setDropdownOpen((v) => !v)}
+                className="p-1 rounded-md hover:bg-[var(--jf-bg-subtle)]"
+                style={{ color: 'var(--jf-text-muted)', minHeight: '36px', minWidth: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Actions"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+              {dropdownOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    zIndex: 50,
+                    marginTop: 4,
+                    minWidth: 180,
+                    background: 'var(--jf-bg-card)',
+                    border: '1px solid var(--jf-border)',
+                    borderRadius: 12,
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                    padding: '4px',
+                  }}
+                >
+                  <Link
+                    href={`/cv-versions/${version.id}/edit`}
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm hover:bg-[var(--jf-bg-subtle)] transition-colors min-h-[40px]"
+                    style={{ color: 'var(--jf-text-primary)', textDecoration: 'none' }}
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" style={{ color: 'var(--jf-text-muted)' }} />
+                    {version.is_locked ? 'View resume' : 'Open editor'}
+                  </Link>
+                  <button
+                    onClick={() => { openEdit(); setDropdownOpen(false) }}
+                    className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm hover:bg-[var(--jf-bg-subtle)] transition-colors min-h-[40px] text-left"
+                    style={{ color: 'var(--jf-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%' }}
+                  >
+                    <Pencil className="w-3.5 h-3.5" style={{ color: 'var(--jf-text-muted)' }} />
+                    Rename
+                  </button>
+                  <button
+                    onClick={() => { openDuplicate(); setDropdownOpen(false) }}
+                    className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm hover:bg-[var(--jf-bg-subtle)] transition-colors min-h-[40px] text-left"
+                    style={{ color: 'var(--jf-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%' }}
+                  >
+                    <Copy className="w-3.5 h-3.5" style={{ color: 'var(--jf-text-muted)' }} />
+                    Duplicate
+                  </button>
+                  {!version.is_default && !version.is_locked && (
+                    <button
+                      onClick={() => { handleSetDefault(); setDropdownOpen(false) }}
+                      className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm hover:bg-[var(--jf-bg-subtle)] transition-colors min-h-[40px] text-left"
+                      style={{ color: 'var(--jf-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%' }}
+                    >
+                      <span className="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center" style={{ borderColor: '#10B981' }} />
+                      Set as default
+                    </button>
+                  )}
+                  <div style={{ height: 1, background: 'var(--jf-border)', margin: '4px 0' }} />
+                  <button
+                    onClick={() => { handleArchiveToggle(); setDropdownOpen(false) }}
+                    className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm hover:bg-[var(--jf-bg-subtle)] transition-colors min-h-[40px] text-left"
+                    style={{ color: version.is_archived ? 'var(--jf-text-secondary)' : '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%' }}
+                  >
+                    {version.is_archived
+                      ? <ArchiveRestore className="w-3.5 h-3.5" />
+                      : <Archive className="w-3.5 h-3.5" />
+                    }
+                    {version.is_archived ? 'Unarchive' : 'Archive'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -227,15 +330,16 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
           {/* PDF button — primary */}
           <CardActionButton
             primary
+            disabled={isDownloading}
             icon={
-              <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
+              isDownloading
+                ? <Loader2 className="w-3 h-3 animate-spin" />
+                : <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
             }
-            label="PDF"
-            onClick={() => {
-              // PDF download — to be wired to export logic
-            }}
+            label={isDownloading ? 'Exporting…' : 'PDF'}
+            onClick={handleDownloadPDF}
           />
 
           {/* Duplicate */}
@@ -245,15 +349,8 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
             onClick={openDuplicate}
           />
 
-          {/* Archive or Set Default */}
-          {version.is_default ? (
-            <CardActionButton
-              icon={version.is_archived ? <ArchiveRestore className="w-3 h-3" /> : <Archive className="w-3 h-3" />}
-              label={version.is_archived ? 'Unarchive' : 'Archive'}
-              onClick={handleArchiveToggle}
-              disabled={updateMutation.isPending}
-            />
-          ) : (
+          {/* Set Default — only if not already default */}
+          {!version.is_default && (
             <CardActionButton
               icon={null}
               label="Set Default"
@@ -261,34 +358,20 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
               disabled={updateMutation.isPending}
             />
           )}
+
+          {/* Archive / Unarchive — always visible */}
+          <CardActionButton
+            icon={version.is_archived ? <ArchiveRestore className="w-3 h-3" /> : <Archive className="w-3 h-3" />}
+            label={version.is_archived ? 'Unarchive' : 'Archive'}
+            onClick={handleArchiveToggle}
+            disabled={updateMutation.isPending}
+          />
         </div>
 
         {updateMutation.error && (
           <p className="text-xs text-red-500">{updateMutation.error.message}</p>
         )}
       </div>
-
-      {/* ─── Mobile bottom sheet ──────────────────────────────────────────── */}
-      <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl pb-8">
-          <SheetHeader className="mb-4">
-            <SheetTitle className="text-left truncate">{version.name}</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col gap-1">
-            <SheetActionLink href={`/cv-versions/${version.id}/edit`} icon={<ExternalLink className="w-4 h-4" />} label={version.is_locked ? 'View resume' : 'Open editor'} onClick={() => setMobileSheetOpen(false)} />
-            <SheetAction icon={<Pencil className="w-4 h-4" />} label="Rename" onClick={openEdit} />
-            <SheetAction icon={<Copy className="w-4 h-4" />} label="Duplicate" onClick={openDuplicate} />
-            {!version.is_default && !version.is_locked && (
-              <SheetAction icon={null} label="Set as default" onClick={handleSetDefault} />
-            )}
-            <SheetAction
-              icon={version.is_archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
-              label={version.is_archived ? 'Unarchive' : 'Archive'}
-              onClick={handleArchiveToggle}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
 
       {/* ─── Edit Dialog ──────────────────────────────────────────────────── */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
@@ -379,47 +462,3 @@ function CardActionButton({
   )
 }
 
-// ─── Mobile sheet helpers ────────────────────────────────────────────────────
-
-function SheetAction({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-3 w-full px-3 py-3.5 rounded-xl text-sm text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors min-h-[44px]"
-    >
-      {icon && <span className="text-gray-500">{icon}</span>}
-      {label}
-    </button>
-  )
-}
-
-function SheetActionLink({
-  href,
-  icon,
-  label,
-  onClick,
-}: {
-  href: string
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className="flex items-center gap-3 w-full px-3 py-3.5 rounded-xl text-sm text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors min-h-[44px]"
-    >
-      <span className="text-gray-500">{icon}</span>
-      {label}
-    </Link>
-  )
-}

@@ -16,6 +16,7 @@ import Link from 'next/link'
 
 const FILTER_LABELS: Record<DateFilterValue, string> = {
   '7d': 'Last 7 days',
+  '30d': 'Last 30 days',
   '60d': 'Last 60 days',
   custom: 'Custom range',
 }
