@@ -25,7 +25,7 @@ export function welcomeEmail(name: string): { subject: string; html: string } {
           track applications, prepare interview stories, and land your next role.
         </p>
         <a
-          href="${process.env.NEXT_PUBLIC_APP_URL}/app/dashboard"
+          href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard"
           style="
             display: inline-block;
             background-color: ${brandColor};
