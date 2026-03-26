@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { AuthErrorRedirect } from '@/components/auth/AuthErrorRedirect'
 import { MarketingNav } from '@/components/marketing/MarketingNav'
 import { HeroSection } from '@/components/marketing/HeroSection'
 import { StatsBar } from '@/components/marketing/StatsBar'
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <main>
+      <AuthErrorRedirect />
       <MarketingNav />
       <HeroSection />
       <StatsBar />
