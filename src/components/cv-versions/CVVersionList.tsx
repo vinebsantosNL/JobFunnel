@@ -59,12 +59,8 @@ export function CVVersionList() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex gap-1.5">
-            {TABS.map((t) => (
-              <div key={t.key} className="h-8 w-20 rounded-lg animate-pulse" style={{ background: 'var(--jf-bg-subtle)' }} />
-            ))}
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-3">
+          <div className="h-9 w-48 rounded-lg animate-pulse" style={{ background: 'var(--jf-bg-subtle)' }} />
           <div className="h-9 w-36 rounded-lg animate-pulse" style={{ background: 'var(--jf-bg-subtle)' }} />
         </div>
         <div className="grid gap-[14px] grid-cols-1 sm:grid-cols-2">
@@ -79,9 +75,9 @@ export function CVVersionList() {
   return (
     <div className="flex flex-col gap-5">
       {/* ─── Toolbar: filters + action ───────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-3">
         <div
-          className="flex gap-1 w-fit rounded-lg p-1"
+          className="flex gap-1 w-fit rounded-lg p-1 h-9"
           role="tablist"
           aria-label="Filter CV versions"
           style={{ background: 'var(--jf-bg-subtle)' }}
@@ -92,7 +88,7 @@ export function CVVersionList() {
               role="tab"
               aria-selected={filter === key}
               onClick={() => setFilter(key)}
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition-all"
+              className="flex items-center gap-1.5 rounded-md px-3 text-sm font-semibold transition-all h-full"
               style={
                 filter === key
                   ? {
@@ -110,7 +106,7 @@ export function CVVersionList() {
             >
               {label}
               <span
-                className="rounded text-[10px] font-medium px-1 py-0"
+                className="rounded text-[10px] font-semibold px-1 leading-[18px]"
                 style={
                   filter === key
                     ? { background: 'var(--jf-bg-subtle)', color: 'var(--jf-text-secondary)', fontFamily: 'var(--font-dm-mono, monospace)' }
@@ -123,7 +119,7 @@ export function CVVersionList() {
           ))}
         </div>
 
-        <Button onClick={() => setCreateOpen(true)}>
+        <Button size="sm" className="h-9 rounded-lg font-semibold" onClick={() => setCreateOpen(true)}>
           <Plus className="mr-1.5 h-4 w-4" />
           New CV version
         </Button>
