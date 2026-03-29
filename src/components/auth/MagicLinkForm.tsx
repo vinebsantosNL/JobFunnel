@@ -33,12 +33,10 @@ export function MagicLinkForm({
 
   async function sendLink(emailAddress: string) {
     const supabase = createClient()
-    // Use the explicit app URL env var when available so the redirect in the
-    // magic link email is always consistent regardless of the browser's current
-    // origin (important for staging previews where origin varies per deploy).
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ??
-      window.location.origin
+    // Always use the current origin so the callback URL matches the host the
+    // user is on — staging, preview, or production. Using NEXT_PUBLIC_APP_URL
+    // here caused magic links on staging to redirect to the wrong host.
+    const appUrl = window.location.origin
 
     const { error } = await supabase.auth.signInWithOtp({
       email: emailAddress,
