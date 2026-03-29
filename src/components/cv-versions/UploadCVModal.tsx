@@ -63,14 +63,6 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
 
   const isDefault = watch('is_default')
 
-  function handleFileChange(f: File | null) {
-    setFile(f)
-    if (f) {
-      setFileError('')
-      return
-    }
-  }
-
   function handleDrop(f: File | null) {
     if (!f) return
     if (!ACCEPTED_MIME.includes(f.type)) {
