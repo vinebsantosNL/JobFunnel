@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const dmMono = DM_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${dmMono.variable}`}>
+      <body className={`${inter.variable} ${dmMono.variable}`} style={{ fontFamily: 'var(--font-inter, ui-sans-serif, system-ui, sans-serif)' }}>
         <QueryProvider>{children}</QueryProvider>
         <Toaster />
         <SpeedInsights />

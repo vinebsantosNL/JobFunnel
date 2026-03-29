@@ -66,7 +66,6 @@ export function AuthShell({ children, leftContent }: AuthShellProps) {
         <p
           className="relative z-10 text-xs"
           style={{
-            fontFamily: 'var(--font-dm-mono)',
             color: 'rgba(255,255,255,0.2)',
             letterSpacing: '0.06em',
           }}
