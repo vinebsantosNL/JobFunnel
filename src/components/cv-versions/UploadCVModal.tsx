@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, AlertTriangle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,8 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState('')
+  const [isParsing, setIsParsing] = useState(false)
+  const [parseWarning, setParseWarning] = useState('')
   const createVersion = useCreateCVVersion()
 
   const {
@@ -89,6 +91,7 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
     reset()
     setFile(null)
     setFileError('')
+    setParseWarning('')
     onClose()
   }
 
@@ -96,7 +99,21 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
     reset()
     setFile(null)
     setFileError('')
+    setParseWarning('')
     onBack()
+  }
+
+  async function parseFile(f: File): Promise<Record<string, unknown> | null> {
+    const formData = new FormData()
+    formData.append('file', f)
+    try {
+      const res = await fetch('/api/cv-versions/parse', { method: 'POST', body: formData })
+      if (!res.ok) return null
+      const json = await res.json()
+      return json.resume_data ?? null
+    } catch {
+      return null
+    }
   }
 
   async function onSubmit(values: FormValues) {
@@ -105,10 +122,24 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
       return
     }
 
+    setIsParsing(true)
+    setParseWarning('')
+    let resume_data: Record<string, unknown> | undefined
+
+    const parsed = await parseFile(file)
+    setIsParsing(false)
+
+    if (parsed) {
+      resume_data = parsed
+    } else {
+      setParseWarning("Couldn't auto-fill from your CV — you can complete the sections in the editor.")
+    }
+
     try {
       const version = await createVersion.mutateAsync({
         name: values.name.trim(),
         is_default: values.is_default,
+        ...(resume_data ? { resume_data } : {}),
       })
       handleClose()
       router.push(
@@ -150,7 +181,7 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
               file={file}
               onFileChange={handleDrop}
               error={fileError}
-              disabled={createVersion.isPending}
+              disabled={isParsing || createVersion.isPending}
             />
 
             {/* Name field */}
@@ -168,7 +199,7 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
               <Input
                 id="cv-name"
                 placeholder="e.g. Backend — NL Market"
-                disabled={createVersion.isPending}
+                disabled={isParsing || createVersion.isPending}
                 {...register('name')}
                 className={errors.name ? 'border-[var(--jf-error)]' : ''}
               />
@@ -197,9 +228,24 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
                 id="cv-default"
                 checked={isDefault}
                 onCheckedChange={(v) => setValue('is_default', v)}
-                disabled={createVersion.isPending}
+                disabled={isParsing || createVersion.isPending}
               />
             </div>
+
+            {/* Parse warning */}
+            {parseWarning && (
+              <p
+                className="flex items-start gap-2 rounded-lg border px-3 py-2 text-[12.5px]"
+                style={{
+                  borderColor: 'rgba(245,158,11,0.25)',
+                  background: 'rgba(245,158,11,0.05)',
+                  color: 'var(--jf-warning, #b45309)',
+                }}
+              >
+                <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-px" />
+                {parseWarning}
+              </p>
+            )}
 
             {/* API error */}
             {createVersion.error && (
@@ -227,12 +273,16 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
               type="button"
               variant="outline"
               onClick={handleBack}
-              disabled={createVersion.isPending}
+              disabled={isParsing || createVersion.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={createVersion.isPending}>
-              {createVersion.isPending ? 'Saving…' : 'Save & choose template →'}
+            <Button type="submit" disabled={isParsing || createVersion.isPending}>
+              {isParsing
+                ? 'Reading CV…'
+                : createVersion.isPending
+                ? 'Saving…'
+                : 'Save & choose template →'}
             </Button>
           </div>
         </form>

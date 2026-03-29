@@ -84,6 +84,7 @@ export async function createCVVersion(
       is_default: shouldBeDefault,
       template_id: data.template_id ?? 'precision',
       target_country: data.target_country ?? null,
+      ...(data.resume_data ? { resume_data: data.resume_data } : {}),
     })
     .select()
     .single()
