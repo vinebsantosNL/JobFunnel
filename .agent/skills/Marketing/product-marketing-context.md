@@ -1,3 +1,17 @@
+---
+name: product-marketing
+description: >
+  Product marketing context for JobFunnel OS — personas, positioning, competitive landscape,
+  differentiation, customer language, objections, brand voice, and proof points.
+  Use when writing copy, landing pages, onboarding flows, upgrade prompts, empty states,
+  email sequences, or any user-facing text. Also trigger when Vinicius asks about messaging,
+  positioning, customer language, what to say on the landing page, how to frame a feature,
+  how to handle an objection, or what words to use (or avoid) for the EU tech audience.
+  Trigger on: "write copy for", "what's the messaging", "how should we frame this",
+  "write the landing page", "onboarding text", "upgrade prompt copy", "empty state copy",
+  "what words should I use", "how do we position this", "competitive angle", "objection handling".
+---
+
 # Product Marketing Context — JobFunnel OS
 
 *Last updated: 2026-03-22*
