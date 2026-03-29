@@ -41,7 +41,7 @@ export function MetricCard({
           </div>
 
           {/* Value */}
-          <p className="font-mono text-3xl font-bold text-[--jf-text-primary]">
+          <p className="text-3xl font-bold text-[--jf-text-primary]" style={{ fontFamily: 'var(--font-dm-mono, ui-monospace, monospace)' }}>
             {value}
           </p>
 
@@ -51,8 +51,9 @@ export function MetricCard({
           {/* Delta */}
           {delta && (
             <p
-              className="font-mono text-xs mt-1"
+              className="text-xs mt-1"
               style={{
+                fontFamily: 'var(--font-dm-mono, ui-monospace, monospace)',
                 color: isPositiveDelta
                   ? 'var(--jf-success)'
                   : isNegativeDelta
