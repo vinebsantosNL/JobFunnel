@@ -149,9 +149,28 @@
   --jf-bg-subtle: #F8FAFC;
   --jf-border:    #E2E8F0;
   /* Elevation */
-  --jf-shadow-sm: 0 1px 2px rgba(0,0,0,.05);
-  --jf-shadow-md: 0 4px 12px rgba(0,0,0,.07);
-  --jf-shadow-lg: 0 8px 28px rgba(0,0,0,.12);
+  --jf-shadow-sm:   0 1px 2px rgba(0,0,0,.05);
+  --jf-shadow-md:   0 4px 12px rgba(0,0,0,.07);
+  --jf-shadow-lg:   0 8px 28px rgba(0,0,0,.12);
+  --jf-shadow-drag: 0 10px 25px rgba(0,0,0,.15), 0 0 0 1px rgba(37,99,235,.3);
+  /* Borders */
+  --jf-border-hover: #CBD5E1;
+  /* Focus ring — used by all inputs on focus */
+  --jf-focus-ring:   0 0 0 3px rgba(37,99,235,0.12);
+  /* Stage contextual */
+  --jf-stage-interviewing-subtle: rgba(245,158,11,0.3);
+  /* Semantic tints — light bg / border for success & error chips */
+  --jf-success-tint:        rgba(16,185,129,0.08);
+  --jf-success-border:      rgba(16,185,129,0.2);
+  --jf-error-tint:          rgba(239,68,68,0.08);
+  --jf-error-border:        rgba(239,68,68,0.2);
+  --jf-interactive-border:  #BFDBFE;
+  /* Priority chip backgrounds */
+  --jf-priority-high-bg:        #FEF2F2;
+  --jf-priority-high-border:    #FCA5A5;
+  --jf-priority-medium-bg:      #FFFBEB;
+  --jf-priority-medium-border:  #FCD34D;
+  --jf-priority-low-border:     #BFDBFE;
   /* Layout */
   --jf-sidebar-w: 240px;
   --jf-header-h:  64px;
@@ -194,10 +213,22 @@
   --jf-bg-card:            #1E293B;
   --jf-bg-subtle:          #1E293B;
   --jf-border:             #334155;
+  --jf-border-hover:       #475569;
   --jf-text-primary:       #F8FAFC;
   --jf-text-secondary:     #94A3B8;
   --jf-text-muted:         #64748B;
   --jf-interactive-subtle: rgba(37,99,235,0.12);
+  --jf-focus-ring:          0 0 0 3px rgba(37,99,235,0.2);
+  --jf-success-tint:        rgba(16,185,129,0.12);
+  --jf-success-border:      rgba(16,185,129,0.3);
+  --jf-error-tint:          rgba(239,68,68,0.12);
+  --jf-error-border:        rgba(239,68,68,0.3);
+  --jf-interactive-border:  rgba(37,99,235,0.4);
+  --jf-priority-high-bg:       rgba(239,68,68,0.12);
+  --jf-priority-high-border:   rgba(239,68,68,0.4);
+  --jf-priority-medium-bg:     rgba(245,158,11,0.12);
+  --jf-priority-medium-border: rgba(245,158,11,0.4);
+  --jf-priority-low-border:    rgba(37,99,235,0.4);
 }
 
 @layer base {
@@ -267,6 +298,25 @@
 .reveal-show {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ─── Auth / display typography ───────────────────────────────── */
+/* Use these classes instead of ad-hoc clamp() inline styles.      */
+
+/* Large marketing headline (left panel of auth shell) */
+.jf-display-lg {
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.0;
+}
+
+/* Form heading inside auth panels */
+.jf-display-sm {
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
 }
 
 /* ─── Reduced motion ───────────────────────────────────────────── */

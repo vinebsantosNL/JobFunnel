@@ -192,7 +192,7 @@ function ResumePerformanceContent() {
                     className="text-xs font-semibold px-2.5 py-1 rounded-full"
                     style={{
                       background: 'rgba(37,99,235,0.08)',
-                      color: '#2563EB',
+                      color: 'var(--jf-interactive)',
                       border: '1px solid rgba(37,99,235,0.2)',
                     }}
                   >
@@ -202,9 +202,9 @@ function ResumePerformanceContent() {
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{
-                        background: 'rgba(16,185,129,0.1)',
-                        color: '#10B981',
-                        border: '1px solid rgba(16,185,129,0.2)',
+                        background: 'var(--jf-success-tint)',
+                        color: 'var(--jf-success)',
+                        border: '1px solid var(--jf-success-border)',
                       }}
                     >
                       Default

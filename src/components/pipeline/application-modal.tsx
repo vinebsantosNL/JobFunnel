@@ -208,7 +208,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                     width: '100%',
                   }}
                 />
-                {errors.company_name && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.company_name.message}</p>}
+                {errors.company_name && <p style={{ fontSize: 11, color: 'var(--jf-error)', marginTop: 2 }}>{errors.company_name.message}</p>}
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--jf-text-secondary)' }}>Job Title *</label>
@@ -227,7 +227,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                     width: '100%',
                   }}
                 />
-                {errors.job_title && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.job_title.message}</p>}
+                {errors.job_title && <p style={{ fontSize: 11, color: 'var(--jf-error)', marginTop: 2 }}>{errors.job_title.message}</p>}
               </div>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--jf-text-secondary)' }}>Location</label>
@@ -308,9 +308,9 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                   render={({ field }) => (
                     <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
                       {([
-                        { value: 'high' as const, label: 'High', bg: '#FEF2F2', border: '#FCA5A5', color: '#EF4444' },
-                        { value: 'medium' as const, label: 'Medium', bg: '#FFFBEB', border: '#FCD34D', color: '#F59E0B' },
-                        { value: 'low' as const, label: 'Low', bg: 'var(--jf-interactive-subtle)', border: '#BFDBFE', color: 'var(--jf-interactive)' },
+                        { value: 'high' as const, label: 'High', bg: 'var(--jf-priority-high-bg)', border: 'var(--jf-priority-high-border)', color: 'var(--jf-error)' },
+                        { value: 'medium' as const, label: 'Medium', bg: 'var(--jf-priority-medium-bg)', border: 'var(--jf-priority-medium-border)', color: 'var(--jf-warning)' },
+                        { value: 'low' as const, label: 'Low', bg: 'var(--jf-interactive-subtle)', border: 'var(--jf-priority-low-border)', color: 'var(--jf-interactive)' },
                       ]).map((p) => {
                         const selected = field.value === p.value
                         return (
@@ -586,7 +586,7 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                 width: 7,
                 height: 7,
                 borderRadius: '50%',
-                background: job.priority === 'high' ? '#EF4444' : job.priority === 'medium' ? '#F59E0B' : '#10B981',
+                background: job.priority === 'high' ? 'var(--jf-error)' : job.priority === 'medium' ? 'var(--jf-warning)' : 'var(--jf-success)',
               }}
             />
             <span style={{ fontWeight: 500, color: 'var(--jf-text-primary)' }}>
@@ -904,10 +904,10 @@ export function ApplicationModal({ job, open, onClose, onUpdate, onDelete }: App
                   alignItems: 'center',
                   gap: 6,
                   padding: '8px 14px',
-                  border: confirmDelete ? '1px solid #EF4444' : '1px solid rgba(239,68,68,0.3)',
+                  border: confirmDelete ? '1px solid var(--jf-error)' : '1px solid var(--jf-error-border)',
                   borderRadius: 10,
-                  background: confirmDelete ? 'rgba(239,68,68,0.1)' : 'rgba(239,68,68,0.04)',
-                  color: '#EF4444',
+                  background: confirmDelete ? 'var(--jf-error-tint)' : 'rgba(239,68,68,0.04)',
+                  color: 'var(--jf-error)',
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: 'pointer',

@@ -11,21 +11,18 @@ function SignupLeftContent() {
           fontFamily: 'var(--font-dm-mono)',
           fontSize: '11px',
           letterSpacing: '0.12em',
-          color: '#10B981',
+          color: 'var(--jf-success)',
           textTransform: 'uppercase',
         }}
       >
-        <span className="w-5 h-px bg-[#10B981]" />
+        <span className="w-5 h-px" style={{ background: 'var(--jf-success)' }} />
         Job search analytics · Built for Europe
       </div>
 
       {/* Headline mirrors hero */}
-      <h2
-        className="text-white font-black mb-8"
-        style={{ fontSize: 'clamp(30px, 2.8vw, 44px)', letterSpacing: '-0.03em', lineHeight: 1.0 }}
-      >
+      <h2 className="jf-display-lg text-white mb-8">
         47 applications.<br />
-        <span style={{ color: '#FC4D4D' }}>3</span> screening calls.<br />
+        <span style={{ color: 'var(--jf-error)' }}>3</span> screening calls.<br />
         <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 300, fontSize: '0.78em' }}>
           You still don&apos;t know why.
         </span>
@@ -41,7 +38,7 @@ function SignupLeftContent() {
           <div key={item.text} className="flex items-start gap-3">
             <span
               className="flex-shrink-0 mt-0.5"
-              style={{ color: '#10B981', fontFamily: 'var(--font-dm-mono)', fontSize: '11px' }}
+              style={{ color: 'var(--jf-success)', fontFamily: 'var(--font-dm-mono)', fontSize: '11px' }}
             >
               {item.icon}
             </span>
@@ -64,7 +61,7 @@ function SignupLeftContent() {
           className="text-xs mb-1"
           style={{
             fontFamily: 'var(--font-dm-mono)',
-            color: '#10B981',
+            color: 'var(--jf-success)',
             letterSpacing: '0.06em',
           }}
         >

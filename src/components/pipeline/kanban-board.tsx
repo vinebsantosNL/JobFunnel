@@ -85,7 +85,7 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
 
   function handleInputFocus(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
     e.currentTarget.style.borderColor = 'var(--jf-interactive)'
-    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)'
+    e.currentTarget.style.boxShadow = 'var(--jf-focus-ring)'
   }
   function handleInputBlur(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
     e.currentTarget.style.borderColor = 'var(--jf-border)'
@@ -106,7 +106,7 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
           />
-          {errors.company_name && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.company_name.message}</p>}
+          {errors.company_name && <p style={{ fontSize: 11, color: 'var(--jf-error)', marginTop: 2 }}>{errors.company_name.message}</p>}
         </div>
 
         {/* Job Title — full width */}
@@ -119,7 +119,7 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
           />
-          {errors.job_title && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.job_title.message}</p>}
+          {errors.job_title && <p style={{ fontSize: 11, color: 'var(--jf-error)', marginTop: 2 }}>{errors.job_title.message}</p>}
         </div>
 
         {/* Location */}
@@ -145,7 +145,7 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
           />
-          {errors.job_url && <p style={{ fontSize: 11, color: '#EF4444', marginTop: 2 }}>{errors.job_url.message}</p>}
+          {errors.job_url && <p style={{ fontSize: 11, color: 'var(--jf-error)', marginTop: 2 }}>{errors.job_url.message}</p>}
         </div>
 
         {/* Salary Min */}
@@ -220,9 +220,9 @@ function AddJobForm({ defaultStage, onSubmit, onCancel }: AddJobFormProps) {
           control={control}
           render={({ field }) => {
             const priorities: { value: Priority; label: string; emoji: string; bg: string; border: string; color: string }[] = [
-              { value: 'high', label: 'High', emoji: '\uD83D\uDD34', bg: '#FEF2F2', border: '#FCA5A5', color: '#EF4444' },
-              { value: 'medium', label: 'Medium', emoji: '\uD83D\uDFE1', bg: '#FFFBEB', border: '#FCD34D', color: '#F59E0B' },
-              { value: 'low', label: 'Low', emoji: '\uD83D\uDFE2', bg: 'var(--jf-interactive-subtle)', border: '#BFDBFE', color: 'var(--jf-interactive)' },
+              { value: 'high', label: 'High', emoji: '\uD83D\uDD34', bg: 'var(--jf-priority-high-bg)', border: 'var(--jf-priority-high-border)', color: 'var(--jf-error)' },
+              { value: 'medium', label: 'Medium', emoji: '\uD83D\uDFE1', bg: 'var(--jf-priority-medium-bg)', border: 'var(--jf-priority-medium-border)', color: 'var(--jf-warning)' },
+              { value: 'low', label: 'Low', emoji: '\uD83D\uDFE2', bg: 'var(--jf-interactive-subtle)', border: 'var(--jf-priority-low-border)', color: 'var(--jf-interactive)' },
             ]
             return (
               <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>

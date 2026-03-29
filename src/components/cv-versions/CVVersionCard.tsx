@@ -173,8 +173,8 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
                   fontSize: '10px',
                   padding: '3px 8px',
                   borderRadius: '100px',
-                  background: 'rgba(16,185,129,0.1)',
-                  border: '1px solid rgba(16,185,129,0.25)',
+                  background: 'var(--jf-success-tint)',
+                  border: '1px solid var(--jf-success-border)',
                   color: 'var(--jf-success)',
                 }}
               >
@@ -203,7 +203,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
                     background: 'var(--jf-bg-card)',
                     border: '1px solid var(--jf-border)',
                     borderRadius: 12,
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                    boxShadow: 'var(--jf-shadow-md)',
                     padding: '4px',
                   }}
                 >
@@ -238,7 +238,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
                       className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm hover:bg-[var(--jf-bg-subtle)] transition-colors min-h-[40px] text-left"
                       style={{ color: 'var(--jf-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%' }}
                     >
-                      <span className="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center" style={{ borderColor: '#10B981' }} />
+                      <span className="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center" style={{ borderColor: 'var(--jf-success)' }} />
                       Set as default
                     </button>
                   )}
@@ -246,7 +246,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
                   <button
                     onClick={() => { handleArchiveToggle(); setDropdownOpen(false) }}
                     className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm hover:bg-[var(--jf-bg-subtle)] transition-colors min-h-[40px] text-left"
-                    style={{ color: version.is_archived ? 'var(--jf-text-secondary)' : '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%' }}
+                    style={{ color: version.is_archived ? 'var(--jf-text-secondary)' : 'var(--jf-error)', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%' }}
                   >
                     {version.is_archived
                       ? <ArchiveRestore className="w-3.5 h-3.5" />
@@ -375,7 +375,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
               color: 'var(--jf-text-primary)',
               background: 'var(--jf-bg-card)',
             }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--jf-interactive)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)' }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--jf-interactive)'; e.currentTarget.style.boxShadow = 'var(--jf-focus-ring)' }}
             onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--jf-border)'; e.currentTarget.style.boxShadow = 'none' }}
             autoFocus
           />

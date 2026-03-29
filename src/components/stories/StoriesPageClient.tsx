@@ -37,11 +37,11 @@ const CATEGORY_MAP: Record<string, string> = {
 
 /* ── Tag color map per category ── */
 const COMPETENCY_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  leadership:    { bg: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: 'rgba(139,92,246,0.2)' },
-  technical:     { bg: 'rgba(37,99,235,0.08)',  color: '#2563EB', border: 'rgba(37,99,235,0.2)' },
-  collaboration: { bg: 'rgba(16,185,129,0.08)', color: '#10B981', border: 'rgba(16,185,129,0.2)' },
-  execution:     { bg: 'rgba(37,99,235,0.08)',  color: '#2563EB', border: 'rgba(37,99,235,0.2)' },
-  growth:        { bg: 'rgba(245,158,11,0.08)', color: '#F59E0B', border: 'rgba(245,158,11,0.2)' },
+  leadership:    { bg: 'rgba(139,92,246,0.08)', color: 'var(--jf-purple)',      border: 'rgba(139,92,246,0.2)'  },
+  technical:     { bg: 'rgba(37,99,235,0.08)',  color: 'var(--jf-interactive)', border: 'rgba(37,99,235,0.2)'  },
+  collaboration: { bg: 'var(--jf-success-tint)', color: 'var(--jf-success)',    border: 'var(--jf-success-border)' },
+  execution:     { bg: 'rgba(37,99,235,0.08)',  color: 'var(--jf-interactive)', border: 'rgba(37,99,235,0.2)'  },
+  growth:        { bg: 'rgba(245,158,11,0.08)', color: 'var(--jf-warning)',     border: 'rgba(245,158,11,0.2)' },
 }
 
 function getCompetencyCategory(competency: string): string {
@@ -350,9 +350,9 @@ export function StoriesPageClient() {
             padding: '5px 12px',
             fontSize: '12px',
             fontWeight: 500,
-            border: favoritesOnly ? '1px solid #FCD34D' : '1px solid var(--jf-border)',
-            background: favoritesOnly ? '#FFFBEB' : 'var(--jf-bg-card)',
-            color: favoritesOnly ? '#F59E0B' : 'var(--jf-text-secondary)',
+            border: favoritesOnly ? '1px solid var(--jf-priority-medium-border)' : '1px solid var(--jf-border)',
+            background: favoritesOnly ? 'var(--jf-priority-medium-bg)' : 'var(--jf-bg-card)',
+            color: favoritesOnly ? 'var(--jf-warning)' : 'var(--jf-text-secondary)',
             borderRadius: '100px',
           }}
         >
@@ -373,9 +373,9 @@ export function StoriesPageClient() {
                 padding: '5px 12px',
                 fontSize: '12px',
                 fontWeight: 500,
-                border: isActive ? '1px solid rgba(16,185,129,0.3)' : '1px solid var(--jf-border)',
-                background: isActive ? 'rgba(16,185,129,0.08)' : 'var(--jf-bg-card)',
-                color: isActive ? '#10B981' : 'var(--jf-text-secondary)',
+                border: isActive ? '1px solid var(--jf-success-border)' : '1px solid var(--jf-border)',
+                background: isActive ? 'var(--jf-success-tint)' : 'var(--jf-bg-card)',
+                color: isActive ? 'var(--jf-success)' : 'var(--jf-text-secondary)',
                 borderRadius: '100px',
               }}
             >

@@ -104,10 +104,7 @@ export function MagicLinkForm({
           </svg>
         </div>
 
-        <h1
-          className="font-black text-[#0F172A] mb-3"
-          style={{ fontSize: 'clamp(28px, 3vw, 36px)', letterSpacing: '-0.03em', lineHeight: 1.05 }}
-        >
+        <h1 className="jf-display-sm text-[#0F172A] mb-3">
           Check your inbox.
         </h1>
 
@@ -151,10 +148,7 @@ export function MagicLinkForm({
   /* ── Form state ─────────────────────────────────────────── */
   return (
     <div>
-      <h1
-        className="font-black text-[#0F172A] mb-2"
-        style={{ fontSize: 'clamp(28px, 3vw, 38px)', letterSpacing: '-0.03em', lineHeight: 1.05 }}
-      >
+      <h1 className="jf-display-sm text-[#0F172A] mb-2">
         {headline}
       </h1>
       <p className="text-sm text-[#64748B] leading-relaxed mb-8">{sub}</p>
@@ -182,14 +176,12 @@ export function MagicLinkForm({
             }}
             className="w-full h-12 px-4 rounded-xl border border-[#E2E8F0] text-[15px] text-[#0F172A] placeholder-[#CBD5E1] outline-none transition-all"
             style={{
-              boxShadow: error
-                ? '0 0 0 3px rgba(239,68,68,0.1)'
-                : undefined,
-              borderColor: error ? '#EF4444' : undefined,
+              boxShadow: error ? 'var(--jf-focus-ring)' : undefined,
+              borderColor: error ? 'var(--jf-error)' : undefined,
             }}
             onFocus={(e) => {
-              if (!error) e.target.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.12)'
-              if (!error) e.target.style.borderColor = '#2563EB'
+              if (!error) e.target.style.boxShadow = 'var(--jf-focus-ring)'
+              if (!error) e.target.style.borderColor = 'var(--jf-interactive)'
             }}
             onBlur={(e) => {
               if (!error) e.target.style.boxShadow = ''
@@ -197,7 +189,7 @@ export function MagicLinkForm({
             }}
           />
           {error && (
-            <p className="mt-1.5 text-xs text-[#EF4444]">{error}</p>
+            <p className="mt-1.5 text-xs" style={{ color: 'var(--jf-error)' }}>{error}</p>
           )}
         </div>
 
@@ -206,12 +198,12 @@ export function MagicLinkForm({
           disabled={loading || !email.trim()}
           className="w-full h-[50px] rounded-xl text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
-            background: '#2563EB',
+            background: 'var(--jf-interactive)',
             boxShadow: '0 4px 14px rgba(37,99,235,0.28)',
             letterSpacing: '-0.01em',
           }}
-          onMouseEnter={(e) => { if (!loading) (e.target as HTMLButtonElement).style.background = '#1D4ED8' }}
-          onMouseLeave={(e) => { (e.target as HTMLButtonElement).style.background = '#2563EB' }}
+          onMouseEnter={(e) => { if (!loading) (e.target as HTMLButtonElement).style.background = 'var(--jf-interactive-hover)' }}
+          onMouseLeave={(e) => { (e.target as HTMLButtonElement).style.background = 'var(--jf-interactive)' }}
         >
           {loading ? (
             <svg
