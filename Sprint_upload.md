@@ -354,13 +354,3 @@ Day 7:    CV badge on ApplicationCard (Kanban)
 Day 8:    CVVersionPicker locked state for screening+ stages
 Day 9:    Getting Started checklist step for CV version
 Day 10:   Mobile audit (390px), Playwright E2E test, Design System component registration
-Open Questions Before Building
-Upload vs. parse — When a user uploads a PDF, do we show a "preview" of it in the CV versions list? Or just store it as a file download? Recommendation: store + allow download; do not parse content (scope creep, complex, not needed for v1).
-
-Default CV on new applications — When a user creates a new application, should it auto-assign their default CV version? Recommendation: yes — reduce friction, easy to change later.
-
-Analytics empty state — The CV Testing tab in Analytics is currently built. When a user has versions but no applications tagged to them, what does it show? Need an interim state: "Tag applications with a CV version to start seeing comparison data."
-
-File size limit — 10MB is generous for PDFs. Most CVs are <500KB. Consider 5MB to reduce Supabase Storage costs, with a clear error message.
-
-DOCX support — Storing a DOCX is straightforward. Previewing it is not (requires server-side conversion). Recommendation: store DOCX for download only; preview only available for PDFs (use react-pdf or the existing ResumePDF infrastructure).
