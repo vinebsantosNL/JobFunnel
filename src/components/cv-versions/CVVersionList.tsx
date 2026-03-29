@@ -1,16 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { FileText, Lock } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useCVVersions } from '@/hooks/useCVVersions'
 import { CVVersionCard } from './CVVersionCard'
-import { buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
+import { CreateCVVersionModal } from './CreateCVVersionModal'
 import type { CVComparisonRow } from '@/lib/services/analyticsService'
-import { cn } from '@/lib/utils'
-
-const NEW_RESUME_HREF = '/cv-versions/new'
 
 type FilterTab = 'all' | 'active' | 'archived'
 
@@ -28,6 +25,7 @@ const TABS: { key: FilterTab; label: string }[] = [
 
 export function CVVersionList() {
   const [filter, setFilter] = useState<FilterTab>('active')
+  const [createOpen, setCreateOpen] = useState(false)
 
   const { data: allVersions, isLoading } = useCVVersions(true)
 
@@ -123,7 +121,7 @@ export function CVVersionList() {
 
       {/* ─── CV Cards Grid ───────────────────────────────────────────────── */}
       {displayVersions.length === 0 ? (
-        <EmptyState filter={filter} />
+        <EmptyState filter={filter} onNew={() => setCreateOpen(true)} />
       ) : (
         <div className="grid gap-[14px] grid-cols-1 sm:grid-cols-2">
           {displayVersions.map((version, idx) => (
@@ -136,13 +134,14 @@ export function CVVersionList() {
           ))}
         </div>
       )}
+      <CreateCVVersionModal open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   )
 }
 
 // ─── Empty state ───────────────────────────────────────────────────────────────
 
-function EmptyState({ filter }: { filter: FilterTab }) {
+function EmptyState({ filter, onNew }: { filter: FilterTab; onNew: () => void }) {
   if (filter === 'archived') {
     return (
       <div
@@ -176,7 +175,7 @@ function EmptyState({ filter }: { filter: FilterTab }) {
       <p className="text-sm mb-5 max-w-xs" style={{ color: 'var(--jf-text-secondary)' }}>
         Upload your CV or build from a template. Assign versions to applications to see which one gets you more interviews.
       </p>
-      <Link href={NEW_RESUME_HREF} className={cn(buttonVariants(), 'rounded-lg')}>Create first CV version</Link>
+      <Button onClick={onNew}>Create first CV version</Button>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,7 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { useCreateCVVersion } from '@/hooks/useCVVersions'
+import { useCreateCVVersion, useUpdateCVVersion } from '@/hooks/useCVVersions'
 import type { TemplateId } from '@/types/database.types'
 import { cn } from '@/lib/utils'
 
@@ -331,17 +331,30 @@ function TemplateCard({
 
 export function TemplateGallery() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const versionId = searchParams.get('version_id')
+
   const [selectedId, setSelectedId] = useState<TemplateId | null>(null)
   const [namingOpen, setNamingOpen] = useState(false)
   const [resumeName, setResumeName] = useState('')
 
   const createMutation = useCreateCVVersion()
+  const updateMutation = useUpdateCVVersion()
 
   const now = new Date()
   const monthYear = now.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
 
-  function handleSelectTemplate(id: TemplateId) {
+  async function handleSelectTemplate(id: TemplateId) {
     setSelectedId(id)
+
+    // Upload flow: version already exists — just update it with the chosen template
+    if (versionId) {
+      await updateMutation.mutateAsync({ id: versionId, input: { template_id: id } })
+      router.push(`/cv-versions/${versionId}/edit`)
+      return
+    }
+
+    // Build-from-template flow: open naming dialog
     const tpl = TEMPLATES.find((t) => t.id === id)
     setResumeName(`${tpl?.name ?? 'My Resume'} – ${monthYear}`)
     setNamingOpen(true)
@@ -388,8 +401,8 @@ export function TemplateGallery() {
             className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
-          {createMutation.error && (
-            <p className="text-xs text-red-500">{createMutation.error.message}</p>
+          {(createMutation.error ?? updateMutation.error) && (
+            <p className="text-xs text-red-500">{(createMutation.error ?? updateMutation.error)?.message}</p>
           )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setNamingOpen(false)}>
