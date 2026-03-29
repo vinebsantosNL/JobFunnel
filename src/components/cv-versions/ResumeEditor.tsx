@@ -51,7 +51,7 @@ const CEFR_LABELS: Record<CEFRLevel, string> = {
   C2: 'C2 – Mastery',
 }
 
-type EditorTab = 'content' | 'ats'
+type EditorTab = 'content' | 'ats' | 'pipeline'
 
 function newId() {
   return crypto.randomUUID()
@@ -1040,6 +1040,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
   const tabs: { id: EditorTab; label: string }[] = [
     { id: 'content', label: 'Content' },
     { id: 'ats', label: 'ATS Score' },
+    { id: 'pipeline', label: 'Pipeline Keywords' },
   ]
 
   // ── Download handlers ──────────────────────────────────────────────────────
@@ -1334,6 +1335,10 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
 
             {activeTab === 'ats' && (
               <AtsScoreTab data={data} templateId={version.template_id as TemplateId} />
+            )}
+
+            {activeTab === 'pipeline' && (
+              <PipelineKeywordsTab data={data} />
             )}
           </div>
         </div>
