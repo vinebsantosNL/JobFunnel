@@ -416,4 +416,4 @@ Page | URL | Nav Location | SEO Priority
 - [site-type-templates.md](site-type-templates.md) — Full JobFunnel site template + generic type references
 - [navigation-patterns.md](navigation-patterns.md) — Detailed nav patterns (header, footer, mobile, breadcrumbs)
 - [mermaid-templates.md](mermaid-templates.md) — Copy-paste Mermaid diagram templates for JobFunnel pages
-- [../DevOps/product-design.md](../DevOps/product-design.md) — UI/UX design system (for component-level design decisions)
+- [../product-design.md](../product-design.md) — UI/UX design system (for component-level design decisions)

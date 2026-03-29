@@ -53,7 +53,7 @@ function LockedResumePanel() {
         </div>
       </div>
       {/* Upgrade overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm p-6 text-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--jf-bg-card)]/80 backdrop-blur-sm p-6 text-center">
         <div
           className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
           style={{ background: 'var(--jf-interactive-subtle)' }}
@@ -191,9 +191,9 @@ function ResumePerformanceContent() {
                   <span
                     className="text-xs font-semibold px-2.5 py-1 rounded-full"
                     style={{
-                      background: 'rgba(37,99,235,0.08)',
-                      color: '#2563EB',
-                      border: '1px solid rgba(37,99,235,0.2)',
+                      background: 'var(--jf-interactive-tint)',
+                      color: 'var(--jf-interactive)',
+                      border: '1px solid var(--jf-interactive-tint-border)',
                     }}
                   >
                     {version.name}
@@ -202,9 +202,9 @@ function ResumePerformanceContent() {
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{
-                        background: 'rgba(16,185,129,0.1)',
-                        color: '#10B981',
-                        border: '1px solid rgba(16,185,129,0.2)',
+                        background: 'var(--jf-success-tint)',
+                        color: 'var(--jf-success)',
+                        border: '1px solid var(--jf-success-border)',
                       }}
                     >
                       Default

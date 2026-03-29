@@ -74,8 +74,8 @@ function CheckItem({ item }: { item: ChecklistItem }) {
             style={{
               fontFamily: 'var(--font-dm-mono, monospace)',
               fontSize: 10,
-              background: 'rgba(37,99,235,0.08)',
-              border: '1px solid rgba(37,99,235,0.2)',
+              background: 'var(--jf-interactive-tint)',
+              border: '1px solid var(--jf-interactive-tint-border)',
               color: 'var(--jf-interactive)',
               padding: '2px 8px',
               borderRadius: 100,

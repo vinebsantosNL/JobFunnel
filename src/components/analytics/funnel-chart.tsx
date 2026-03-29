@@ -107,15 +107,9 @@ export function FunnelChart({ data, dateLabel, totalApplications }: FunnelChartP
           <span
             className="font-mono text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0"
             style={{
-              background: summaryChip.isGood
-                ? 'rgba(16,185,129,0.08)'
-                : 'rgba(239,68,68,0.08)',
-              color: summaryChip.isGood ? '#10B981' : '#EF4444',
-              border: `1px solid ${
-                summaryChip.isGood
-                  ? 'rgba(16,185,129,0.2)'
-                  : 'rgba(239,68,68,0.2)'
-              }`,
+              background: summaryChip.isGood ? 'var(--jf-success-tint)' : 'var(--jf-error-tint)',
+              color: summaryChip.isGood ? 'var(--jf-success)' : 'var(--jf-error)',
+              border: `1px solid ${summaryChip.isGood ? 'var(--jf-success-border)' : 'var(--jf-error-border)'}`,
             }}
           >
             {summaryChip.text}

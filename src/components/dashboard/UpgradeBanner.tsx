@@ -17,7 +17,7 @@ export function UpgradeBanner({ isPro }: UpgradeBannerProps) {
       className="w-full flex-shrink-0 flex items-center justify-between gap-4 px-6 h-11"
       style={{
         background: 'var(--jf-interactive-subtle)',
-        borderBottom: '1px solid #BFDBFE',
+        borderBottom: '1px solid var(--jf-interactive-border)',
       }}
     >
       {/* Left content */}

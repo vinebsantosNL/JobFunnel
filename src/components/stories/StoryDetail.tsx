@@ -13,10 +13,10 @@ interface StoryDetailProps {
 }
 
 const LETTER_COLORS: Record<string, { bg: string; text: string }> = {
-  S: { bg: 'bg-blue-50', text: 'text-blue-600' },
-  T: { bg: 'bg-purple-50', text: 'text-purple-600' },
-  A: { bg: 'bg-amber-50', text: 'text-amber-600' },
-  R: { bg: 'bg-green-50', text: 'text-green-600' },
+  S: { bg: 'bg-[var(--jf-interactive-subtle)]', text: 'text-[var(--jf-interactive)]' },
+  T: { bg: 'bg-[var(--jf-purple-tint)]',        text: 'text-[var(--jf-purple)]' },
+  A: { bg: 'bg-[var(--jf-warning-tint)]',        text: 'text-[var(--jf-warning)]' },
+  R: { bg: 'bg-[var(--jf-success-tint)]',        text: 'text-[var(--jf-success)]' },
 }
 
 function StarSection({
@@ -139,7 +139,7 @@ export function StoryDetail({ story }: StoryDetailProps) {
               className={cn(
                 'px-2.5 py-0.5 rounded-full text-xs font-medium border',
                 i === 0
-                  ? 'bg-blue-50 text-blue-700 border-blue-200'
+                  ? 'bg-[var(--jf-interactive-subtle)] text-[var(--jf-interactive)] border-[var(--jf-interactive-border)]'
                   : 'bg-muted text-muted-foreground border-border'
               )}
             >

@@ -6,24 +6,12 @@ import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'framer-motion'
 import type { JobApplication } from '@/types/database.types'
 import { PRIORITY_CONFIG } from '@/lib/stages'
+import { getCompanyColor, getInitials } from '@/lib/company'
 
 interface ApplicationCardProps {
   job: JobApplication
   onClick: (job: JobApplication) => void
   isOverlay?: boolean
-}
-
-function getCompanyColor(name: string): string {
-  const colors = ['#1DB954','#003580','#E50914','#FF6B00','#0A0A0A','#00B8D9','#FF5722','#4A90D9','#607D8B','#4CAF50']
-  let hash = 0
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  return colors[Math.abs(hash) % colors.length]
-}
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-  return name.slice(0, 2).toUpperCase()
 }
 
 function getDaysInStage(stageUpdatedAt: string): number {
@@ -32,9 +20,9 @@ function getDaysInStage(stageUpdatedAt: string): number {
 }
 
 const PRIORITY_DOT_HEX: Record<string, string | undefined> = {
-  high: '#EF4444',
-  medium: '#F59E0B',
-  low: '#10B981',
+  high: 'var(--jf-error)',
+  medium: 'var(--jf-warning)',
+  low: 'var(--jf-success)',
 }
 
 export function ApplicationCard({ job, onClick, isOverlay = false }: ApplicationCardProps) {
@@ -92,12 +80,10 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         style={{
           background: 'var(--jf-bg-card)',
-          border: `1px solid ${isInterviewing ? 'rgba(245,158,11,0.3)' : 'var(--jf-border)'}`,
+          border: `1px solid ${isInterviewing ? 'var(--jf-stage-interviewing-subtle)' : 'var(--jf-border)'}`,
           borderRadius: 12,
           padding: 14,
-          boxShadow: isOverlay
-            ? '0 10px 25px rgba(0,0,0,.15), 0 0 0 1px rgba(37,99,235,.3)'
-            : 'var(--jf-shadow-sm)',
+          boxShadow: isOverlay ? 'var(--jf-shadow-drag)' : 'var(--jf-shadow-sm)',
           cursor: isOverlay ? 'grabbing' : 'pointer',
           transition: 'box-shadow 0.15s, border-color 0.15s',
           opacity: isRejectedOrWithdrawn ? 0.6 : 1,
@@ -106,13 +92,13 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
         onMouseEnter={(e) => {
           if (!isOverlay) {
             e.currentTarget.style.boxShadow = 'var(--jf-shadow-md)'
-            e.currentTarget.style.borderColor = '#CBD5E1'
+            e.currentTarget.style.borderColor = 'var(--jf-border-hover)'
           }
         }}
         onMouseLeave={(e) => {
           if (!isOverlay) {
             e.currentTarget.style.boxShadow = 'var(--jf-shadow-sm)'
-            e.currentTarget.style.borderColor = isInterviewing ? 'rgba(245,158,11,0.3)' : 'var(--jf-border)'
+            e.currentTarget.style.borderColor = isInterviewing ? 'var(--jf-stage-interviewing-subtle)' : 'var(--jf-border)'
           }
         }}
       >
@@ -187,9 +173,9 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
                   fontSize: 10,
                   padding: '2px 7px',
                   borderRadius: 100,
-                  background: 'rgba(139,92,246,0.08)',
-                  border: '1px solid rgba(139,92,246,0.2)',
-                  color: 'var(--jf-purple, #8B5CF6)',
+                  background: 'var(--jf-purple-tint)',
+                  border: '1px solid var(--jf-purple-border)',
+                  color: 'var(--jf-purple)',
                   maxWidth: 120,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',

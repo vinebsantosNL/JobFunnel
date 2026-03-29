@@ -24,7 +24,7 @@ export function HeaderUserActions() {
         aria-label="Account settings"
         title="Account settings"
         className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-        style={{ background: 'linear-gradient(135deg, #F97316, #EC4899)' }}
+        style={{ background: 'var(--jf-avatar-gradient)' }}
       >
         {getInitials(profile?.full_name)}
       </Link>

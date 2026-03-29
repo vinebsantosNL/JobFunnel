@@ -172,7 +172,7 @@ export function DashboardStatsBlock() {
           value={data?.totalApplications ?? 0}
           loading={isLoading}
           icon={Briefcase}
-          tintBg="rgba(37,99,235,0.08)"
+          tintBg="var(--jf-interactive-tint)"
           iconColor="var(--jf-interactive)"
           href="/pipeline"
         />
@@ -181,7 +181,7 @@ export function DashboardStatsBlock() {
           value={data?.activeApplications ?? 0}
           loading={isLoading}
           icon={Activity}
-          tintBg="rgba(16,185,129,0.08)"
+          tintBg="var(--jf-success-tint)"
           iconColor="var(--jf-success)"
           href="/pipeline"
           tooltip={breakdownTooltip}
@@ -191,7 +191,7 @@ export function DashboardStatsBlock() {
           value={data?.interviews ?? 0}
           loading={isLoading}
           icon={Users}
-          tintBg="rgba(245,158,11,0.08)"
+          tintBg="var(--jf-warning-tint)"
           iconColor="var(--jf-warning)"
           href="/pipeline"
         />
@@ -200,7 +200,7 @@ export function DashboardStatsBlock() {
           value={data?.storiesCreated ?? 0}
           loading={isLoading}
           icon={BookOpen}
-          tintBg="rgba(139,92,246,0.08)"
+          tintBg="var(--jf-purple-tint)"
           iconColor="var(--jf-purple)"
           href="/stories"
         />

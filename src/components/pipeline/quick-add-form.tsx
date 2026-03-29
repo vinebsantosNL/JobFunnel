@@ -68,7 +68,7 @@ export function QuickAddForm({ stage, onAdd }: QuickAddFormProps) {
           {...register('company_name')}
         />
         {errors.company_name && (
-          <p className="text-xs text-red-500 mt-0.5">{errors.company_name.message}</p>
+          <p className="text-xs text-[var(--jf-error)] mt-0.5">{errors.company_name.message}</p>
         )}
       </div>
       <div>
@@ -79,7 +79,7 @@ export function QuickAddForm({ stage, onAdd }: QuickAddFormProps) {
           {...register('job_title')}
         />
         {errors.job_title && (
-          <p className="text-xs text-red-500 mt-0.5">{errors.job_title.message}</p>
+          <p className="text-xs text-[var(--jf-error)] mt-0.5">{errors.job_title.message}</p>
         )}
       </div>
       <div className="flex gap-2">

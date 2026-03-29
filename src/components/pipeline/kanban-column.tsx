@@ -84,8 +84,8 @@ export function KanbanColumn({ stage, jobs, onCardClick, onAddJob, onAddClick }:
           type="button"
           onClick={() => onAddClick?.(stage)}
           style={{
-            width: 22,
-            height: 22,
+            minWidth: 28,
+            minHeight: 28,
             borderRadius: 6,
             border: '1px solid var(--jf-border)',
             background: 'transparent',

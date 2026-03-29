@@ -45,7 +45,7 @@ export function AuthShell({ children, leftContent }: AuthShellProps) {
           <Link href="/" className="inline-flex items-center gap-2.5 no-underline mb-16">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: '#10B981' }}
+              style={{ background: 'var(--jf-success)' }}
             >
               <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
                 <path d="M3 4h12M5 8h8M7 12h4" stroke="white" strokeWidth="2" strokeLinecap="round" />
@@ -83,14 +83,14 @@ export function AuthShell({ children, leftContent }: AuthShellProps) {
           <Link href="/" className="lg:hidden inline-flex items-center gap-2.5 no-underline mb-10">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: '#10B981' }}
+              style={{ background: 'var(--jf-success)' }}
             >
               <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
                 <path d="M3 4h12M5 8h8M7 12h4" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
             <span
-              className="text-[#0F172A] font-bold"
+              className="text-[var(--jf-text-primary)] font-bold"
               style={{ fontSize: '15px', letterSpacing: '-0.02em' }}
             >
               Job Funnel

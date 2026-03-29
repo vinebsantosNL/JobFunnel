@@ -9,6 +9,7 @@ export const createCVVersionSchema = z.object({
   is_default: z.boolean().optional(),
   template_id: z.enum(TEMPLATE_IDS).optional(),
   target_country: z.string().max(2).optional(),
+  resume_data: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const updateCVVersionSchema = z.object({

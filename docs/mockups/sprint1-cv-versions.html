@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobFunnel — Sprint 1: CV Version Management · Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ─── DESIGN TOKENS (exact match to globals.css) ─────────────────────────── */
+:root {
+  --jf-interactive:         #2563EB;
+  --jf-interactive-hover:   #1D4ED8;
+  --jf-interactive-subtle:  rgba(37,99,235,0.07);
+  --jf-purple:              #8B5CF6;
+  --jf-success:             #10B981;
+  --jf-warning:             #F59E0B;
+  --jf-error:               #EF4444;
+
+  --jf-bg-page:             #F8FAFC;
+  --jf-bg-card:             #FFFFFF;
+  --jf-bg-subtle:           #F1F5F9;
+
+  --jf-border:              #E2E8F0;
+  --jf-border-strong:       #CBD5E1;
+
+  --jf-text-primary:        #0F172A;
+  --jf-text-secondary:      #475569;
+  --jf-text-muted:          #94A3B8;
+
+  --jf-shadow-sm:           0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --jf-shadow-md:           0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --jf-shadow-lg:           0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+  --jf-shadow-modal:        0 20px 60px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.10);
+
+  --jf-sidebar-w:           240px;
+  --jf-header-h:            64px;
+
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+/* ─── RESET ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font-body); font-size: 14px; color: var(--jf-text-primary); background: var(--jf-bg-page); -webkit-font-smoothing: antialiased; }
+button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
+a { text-decoration: none; }
+
+/* ─── PROTOTYPE NAV ──────────────────────────────────────────────────────── */
+.proto-nav {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px; align-items: center;
+  background: rgba(15,23,42,0.92); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 40px;
+  padding: 7px 10px; z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.proto-section {
+  display: flex; gap: 3px; align-items: center;
+  padding-right: 8px; border-right: 1px solid rgba(255,255,255,0.12);
+  margin-right: 4px;
+}
+.proto-section:last-child { padding-right: 0; border-right: none; margin-right: 0; }
+.proto-label {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+  color: rgba(255,255,255,0.3); letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0 4px;
+}
+.proto-btn {
+  font-family: var(--font-mono); font-size: 11px;
+  color: rgba(255,255,255,0.5); background: transparent;
+  border: 1px solid transparent; border-radius: 16px;
+  padding: 4px 10px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.proto-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.proto-btn.active { color: #fff; background: var(--jf-interactive); border-color: var(--jf-interactive); }
+
+/* ─── SCREEN ─────────────────────────────────────────────────────────────── */
+.screen { display: none; height: 100vh; overflow: hidden; }
+.screen.active { display: flex; }
+
+/* ─── ANNOTATION BADGE ───────────────────────────────────────────────────── */
+.badge-current {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px;
+  background: #FEF3C7; border: 1px solid #FDE68A; color: #92400E;
+  position: fixed; top: 12px; right: 12px; z-index: 100;
+}
+.badge-proposed {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px;
+  background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.25); color: var(--jf-interactive);
+  position: fixed; top: 12px; right: 12px; z-index: 100;
+}
+
+/* ─── SHELL LAYOUT ───────────────────────────────────────────────────────── */
+.shell { display: flex; width: 100%; height: 100%; }
+
+/* ─── SIDEBAR (exact replica) ────────────────────────────────────────────── */
+.sidebar {
+  width: var(--jf-sidebar-w); height: 100%; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  background: var(--jf-bg-card); border-right: 1px solid var(--jf-border);
+}
+.sidebar-logo {
+  height: var(--jf-header-h); display: flex; align-items: center;
+  padding: 0 20px; border-bottom: 1px solid var(--jf-border);
+  text-decoration: none;
+}
+.sidebar-logo .logo-job  { font-size: 15px; font-weight: 700; color: var(--jf-interactive); }
+.sidebar-logo .logo-rest { font-size: 15px; font-weight: 700; color: var(--jf-text-primary); }
+
+.sidebar-nav { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.nav-item {
+  position: relative; display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 13.5px; font-weight: 500;
+  color: var(--jf-text-secondary); cursor: pointer; transition: all 0.15s;
+}
+.nav-item:hover { color: var(--jf-text-primary); }
+.nav-item.active {
+  color: var(--jf-interactive); background: var(--jf-interactive-subtle);
+}
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-item.active svg { color: var(--jf-interactive); }
+.nav-item:not(.active) svg { color: var(--jf-text-muted); }
+
+.sidebar-bottom { padding: 0 12px 12px; border-top: 1px solid var(--jf-border); padding-top: 8px; }
+.sidebar-signout {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  border-radius: 10px; font-size: 13px; font-weight: 500;
+  color: var(--jf-text-muted); cursor: pointer; transition: background 0.15s; width: 100%;
+}
+.sidebar-signout:hover { background: var(--jf-bg-subtle); color: var(--jf-text-secondary); }
+.sidebar-signout svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ─── MAIN AREA ──────────────────────────────────────────────────────────── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* ─── HEADER (exact replica) ─────────────────────────────────────────────── */
+.page-header {
+  height: var(--jf-header-h); display: flex; align-items: center; gap: 12px;
+  padding: 0 24px; flex-shrink: 0;
+  background: var(--jf-bg-card); border-bottom: 1px solid var(--jf-border);
+}
+.header-title { font-size: 17px; font-weight: 600; flex: 1; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.btn-primary-header {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px; border-radius: 8px;
+  font-size: 13.5px; font-weight: 600; color: white;
+  background: var(--jf-interactive); cursor: pointer; transition: opacity 0.15s;
+  min-height: 36px;
+}
+.btn-primary-header:hover { opacity: 0.9; }
+.btn-primary-header svg { width: 14px; height: 14px; }
+.user-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #F97316, #EF4444);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+}
+
+/* ─── PAGE CONTENT ───────────────────────────────────────────────────────── */
+.page-content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* ─── BUTTONS ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 10px; border-radius: 10px; font-size: 11px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; border: 1px solid var(--jf-border);
+  color: var(--jf-text-secondary); background: transparent; min-height: 32px;
+  font-family: var(--font-body);
+}
+.btn:hover { background: var(--jf-bg-subtle); }
+.btn-pdf {
+  background: var(--jf-interactive); color: white;
+  border-color: var(--jf-interactive);
+}
+.btn-pdf:hover { opacity: 0.9; background: var(--jf-interactive); }
+.btn svg { width: 12px; height: 12px; }
+
+/* ─── CARD ───────────────────────────────────────────────────────────────── */
+.cv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+
+.cv-card {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 20px; border-radius: 16px;
+  background: var(--jf-bg-card); border: 1px solid var(--jf-border);
+  box-shadow: var(--jf-shadow-sm); transition: box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+}
+.cv-card:hover { box-shadow: var(--jf-shadow-md); border-color: var(--jf-border-strong); }
+
+/* Card header row */
+.cv-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.cv-card-header-left { min-width: 0; }
+.cv-version-eyebrow {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--jf-text-muted); margin-bottom: 5px;
+}
+.cv-card-name {
+  font-size: 14px; font-weight: 700; color: var(--jf-text-primary);
+  display: flex; align-items: center; gap: 6px;
+}
+.cv-card-name svg { width: 14px; height: 14px; color: var(--jf-text-muted); flex-shrink: 0; }
+.cv-card-header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+/* Default badge */
+.badge-default {
+  font-family: var(--font-mono); font-size: 10px; padding: 2px 8px;
+  border-radius: 100px; background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.25); color: var(--jf-success);
+}
+
+/* More button */
+.more-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--jf-text-muted); transition: all 0.15s; cursor: pointer;
+}
+.more-btn:hover { background: var(--jf-bg-subtle); color: var(--jf-text-primary); }
+.more-btn svg { width: 16px; height: 16px; }
+
+/* Tags */
+.cv-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.cv-tag {
+  font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 100px;
+  background: var(--jf-bg-subtle); border: 1px solid var(--jf-border); color: var(--jf-text-secondary);
+}
+
+/* Stats row — current inline style */
+.cv-stats-inline {
+  font-family: var(--font-mono); font-size: 11px; color: var(--jf-text-muted);
+  padding: 10px 0; border-top: 1px solid var(--jf-border); border-bottom: 1px solid var(--jf-border);
+}
+.cv-stats-inline strong { color: var(--jf-text-secondary); }
+.cv-stats-inline .green { color: var(--jf-success); }
+.cv-stats-inline .amber { color: var(--jf-warning); }
+
+/* Stats grid — proposed 3-col style */
+.cv-stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  border-top: 1px solid var(--jf-border); border-bottom: 1px solid var(--jf-border);
+}
+.stat-cell { display: flex; flex-direction: column; gap: 3px; padding: 10px 0; }
+.stat-cell:not(:first-child) {
+  padding-left: 12px; border-left: 1px solid var(--jf-border);
+  margin-left: 0;
+}
+.stat-cell:first-child { padding-left: 0; }
+.stat-value {
+  font-family: var(--font-mono); font-size: 17px; font-weight: 500;
+  color: var(--jf-text-primary); line-height: 1;
+}
+.stat-value.green { color: var(--jf-success); }
+.stat-value.amber { color: var(--jf-warning); }
+.stat-value.muted { color: var(--jf-text-muted); }
+.stat-label {
+  font-family: var(--font-mono); font-size: 9.5px; color: var(--jf-text-muted);
+  line-height: 1; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* Updated date */
+.cv-updated {
+  font-family: var(--font-mono); font-size: 11px; color: var(--jf-text-muted);
+}
+
+/* Actions row */
+.cv-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Actions row — proposed footer layout */
+.cv-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* Dropdown */
+.dropdown {
+  position: absolute; right: 12px; top: 56px;
+  background: var(--jf-bg-card); border: 1px solid var(--jf-border);
+  border-radius: 12px; box-shadow: var(--jf-shadow-lg);
+  min-width: 175px; z-index: 100; overflow: hidden; display: none; padding: 4px;
+}
+.dropdown.open { display: block; }
+.dropdown-item {
+  display: flex; align-items: center; gap: 9px; padding: 9px 12px;
+  font-size: 13px; font-weight: 500; color: var(--jf-text-secondary);
+  cursor: pointer; border-radius: 8px; transition: background 0.1s;
+}
+.dropdown-item:hover { background: var(--jf-bg-subtle); color: var(--jf-text-primary); }
+.dropdown-item svg { width: 14px; height: 14px; opacity: 0.7; }
+.dropdown-item.danger { color: var(--jf-error); }
+.dropdown-item.danger:hover { background: #FEF2F2; }
+.dropdown-divider { height: 1px; background: var(--jf-border); margin: 4px 0; }
+
+/* ─── EMPTY STATE ────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 64px 24px; text-align: center;
+  border: 1px dashed var(--jf-border); border-radius: 12px;
+}
+.empty-icon {
+  width: 48px; height: 48px; background: var(--jf-bg-subtle);
+  border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+}
+.empty-icon svg { width: 24px; height: 24px; color: var(--jf-text-muted); }
+.empty-title { font-size: 15px; font-weight: 600; color: var(--jf-text-primary); margin-bottom: 6px; }
+.empty-desc { font-size: 13px; color: var(--jf-text-secondary); line-height: 1.6; max-width: 300px; margin-bottom: 20px; }
+
+/* ─── FILTER TABS ────────────────────────────────────────────────────────── */
+.filter-tabs {
+  display: flex; gap: 2px; padding: 4px; border-radius: 10px;
+  background: var(--jf-bg-subtle); width: fit-content; margin-bottom: 20px;
+}
+.tab-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; border: 1px solid transparent;
+  color: var(--jf-text-secondary); background: transparent; font-family: var(--font-body);
+}
+.tab-pill.active {
+  background: var(--jf-bg-card); color: var(--jf-text-primary);
+  border-color: var(--jf-border); box-shadow: var(--jf-shadow-sm);
+}
+.tab-count {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  padding: 1px 5px; border-radius: 4px;
+  background: var(--jf-border); color: var(--jf-text-secondary);
+}
+.tab-pill.active .tab-count { background: var(--jf-bg-subtle); }
+
+/* ─── MODAL ──────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: absolute; inset: 0; background: rgba(15,23,42,0.45);
+  backdrop-filter: blur(3px); display: flex; align-items: center;
+  justify-content: center; z-index: 50; padding: 20px;
+}
+.modal {
+  background: white; border-radius: 16px;
+  box-shadow: var(--jf-shadow-modal); width: 100%; max-width: 500px;
+  overflow: hidden; animation: modalIn 0.18s ease-out;
+}
+.modal-lg { max-width: 640px; }
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 20px 0;
+}
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center; color: var(--jf-text-muted);
+  transition: all 0.15s; cursor: pointer;
+}
+.modal-close:hover { background: var(--jf-bg-subtle); color: var(--jf-text-primary); }
+.modal-close svg { width: 16px; height: 16px; }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.modal-footer {
+  padding: 16px 20px; border-top: 1px solid var(--jf-border);
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+}
+.modal-footer-split { justify-content: space-between; }
+
+/* Path cards */
+.two-path { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.path-card {
+  border: 1.5px solid var(--jf-border); border-radius: 12px;
+  padding: 20px 16px; cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.path-card:hover { border-color: var(--jf-interactive); background: rgba(37,99,235,0.03); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.1); }
+.path-card.purple:hover { border-color: var(--jf-purple); background: rgba(139,92,246,0.03); box-shadow: 0 4px 12px rgba(139,92,246,0.1); }
+.path-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.path-icon.blue { background: rgba(37,99,235,0.1); }
+.path-icon.purple { background: rgba(139,92,246,0.1); }
+.path-icon svg { width: 20px; height: 20px; }
+.path-icon.blue svg { color: var(--jf-interactive); }
+.path-icon.purple svg { color: var(--jf-purple); }
+.path-title { font-size: 14px; font-weight: 700; }
+.path-desc { font-size: 12px; color: var(--jf-text-secondary); line-height: 1.5; flex: 1; }
+.path-cta { font-size: 12.5px; font-weight: 600; color: var(--jf-interactive); display: flex; align-items: center; gap: 4px; }
+.path-cta.purple { color: var(--jf-purple); }
+.path-cta svg { width: 12px; height: 12px; }
+
+/* Explain block */
+.modal-explain { padding-top: 14px; border-top: 1px solid var(--jf-border); }
+.modal-explain-label { font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--jf-text-muted); margin-bottom: 5px; }
+.modal-explain-text { font-size: 12.5px; color: var(--jf-text-secondary); line-height: 1.6; }
+
+/* Form fields */
+.form-field { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 12.5px; font-weight: 600; color: var(--jf-text-secondary); }
+.form-label .req { color: var(--jf-error); margin-left: 2px; }
+.form-input {
+  padding: 9px 12px; border: 1.5px solid var(--jf-border); border-radius: 8px;
+  font-size: 13.5px; color: var(--jf-text-primary); outline: none; font-family: var(--font-body);
+  transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--jf-interactive); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.form-input::placeholder { color: var(--jf-text-muted); }
+.form-hint { font-size: 11.5px; color: var(--jf-text-muted); }
+
+/* Dropzone */
+.dropzone {
+  border: 2px dashed var(--jf-border-strong); border-radius: 12px;
+  padding: 36px 20px; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 10px; cursor: pointer; transition: all 0.2s;
+  background: var(--jf-bg-subtle); text-align: center;
+}
+.dropzone:hover { border-color: var(--jf-interactive); background: rgba(37,99,235,0.03); }
+.dropzone.filled { border-style: solid; border-color: var(--jf-success); background: rgba(16,185,129,0.04); }
+.dropzone-icon {
+  width: 44px; height: 44px; background: white; border: 1px solid var(--jf-border);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--jf-shadow-sm);
+}
+.dropzone-icon svg { width: 22px; height: 22px; color: var(--jf-text-muted); }
+.dropzone.filled .dropzone-icon { border-color: var(--jf-success); }
+.dropzone.filled .dropzone-icon svg { color: var(--jf-success); }
+.dropzone-title { font-size: 13.5px; font-weight: 600; }
+.dropzone-sub { font-size: 12px; color: var(--jf-text-muted); }
+.dropzone-types { font-family: var(--font-mono); font-size: 10.5px; color: var(--jf-text-muted); background: white; border: 1px solid var(--jf-border); border-radius: 5px; padding: 3px 8px; }
+
+/* Buttons in modals */
+.btn-md {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; min-height: 38px; font-family: var(--font-body);
+  border: 1px solid transparent;
+}
+.btn-primary { background: var(--jf-interactive); color: white; }
+.btn-primary:hover { background: var(--jf-interactive-hover); }
+.btn-secondary-md { background: white; color: var(--jf-text-primary); border-color: var(--jf-border-strong); box-shadow: var(--jf-shadow-sm); }
+.btn-secondary-md:hover { background: var(--jf-bg-subtle); }
+.btn-ghost-md { color: var(--jf-text-secondary); }
+.btn-ghost-md:hover { background: var(--jf-bg-subtle); }
+
+/* Tags input */
+.tags-wrap { display: flex; flex-wrap: wrap; gap: 5px; padding: 7px 10px; border: 1.5px solid var(--jf-border); border-radius: 8px; min-height: 42px; align-items: center; cursor: text; transition: border-color 0.15s; }
+.tags-wrap:focus-within { border-color: var(--jf-interactive); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.tag-chip { font-size: 11.5px; font-weight: 500; padding: 3px 8px; border-radius: 5px; background: rgba(37,99,235,0.08); color: var(--jf-interactive); border: 1px solid rgba(37,99,235,0.15); display: flex; align-items: center; gap: 4px; }
+.tag-remove { width: 12px; height: 12px; background: rgba(37,99,235,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 8px; color: var(--jf-interactive); }
+.tag-ghost { border: none; outline: none; font-size: 12.5px; color: var(--jf-text-primary); background: transparent; min-width: 60px; font-family: var(--font-body); }
+.tag-ghost::placeholder { color: var(--jf-text-muted); }
+
+/* Toggle */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; }
+.toggle-switch { width: 36px; height: 20px; background: var(--jf-border-strong); border-radius: 10px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+.toggle-switch.on { background: var(--jf-interactive); }
+.toggle-knob { width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.toggle-switch.on .toggle-knob { transform: translateX(16px); }
+
+/* ─── STAGE BADGES ───────────────────────────────────────────────────────── */
+.stage-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+  border: 1px solid;
+}
+.stage-applied   { background: rgba(37,99,235,0.1);   border-color: rgba(37,99,235,0.2);   color: #2563EB; }
+.stage-screening { background: rgba(139,92,246,0.1);  border-color: rgba(139,92,246,0.2);  color: #8B5CF6; }
+.stage-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.8; }
+
+/* CV picker components */
+.cv-picker-label { font-size: 12.5px; font-weight: 600; color: var(--jf-text-secondary); margin-bottom: 5px; }
+.cv-picker-select { display: flex; align-items: center; gap: 9px; padding: 9px 12px; background: white; border: 1.5px solid var(--jf-border); border-radius: 9px; cursor: pointer; transition: border-color 0.15s; }
+.cv-picker-select:hover { border-color: var(--jf-interactive); }
+.cv-picker-select-icon { width: 14px; height: 14px; color: var(--jf-interactive); flex-shrink: 0; }
+.cv-picker-locked { display: flex; align-items: center; gap: 9px; padding: 9px 12px; background: var(--jf-bg-subtle); border: 1.5px solid var(--jf-border); border-radius: 9px; opacity: 0.75; cursor: not-allowed; }
+.cv-lock-tag { font-family: var(--font-mono); font-size: 10px; padding: 2px 6px; border-radius: 4px; background: white; border: 1px solid var(--jf-border); color: var(--jf-text-muted); }
+.cv-picker-hint { font-size: 11.5px; color: var(--jf-text-muted); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+.cv-picker-hint svg { width: 11px; height: 11px; }
+
+/* Kanban */
+.kanban-wrap { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 80px; }
+.kanban-col { flex-shrink: 0; width: 284px; }
+.kanban-col-header { display: flex; align-items: center; gap: 7px; padding: 10px 2px; margin-bottom: 8px; }
+.kanban-col-name { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 7px; flex: 1; }
+.stage-dot-lg { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.kanban-count { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; padding: 2px 7px; border-radius: 5px; background: var(--jf-bg-subtle); color: var(--jf-text-muted); border: 1px solid var(--jf-border); }
+
+.app-card { background: white; border: 1px solid var(--jf-border); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.15s; box-shadow: var(--jf-shadow-sm); margin-bottom: 8px; }
+.app-card:hover { box-shadow: var(--jf-shadow-md); border-color: var(--jf-border-strong); transform: translateY(-1px); }
+.app-card-row1 { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.company-avatar { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: white; flex-shrink: 0; }
+.app-card-info { flex: 1; min-width: 0; }
+.app-company { font-size: 13px; font-weight: 700; }
+.app-title { font-size: 11.5px; color: var(--jf-text-secondary); }
+.priority-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.app-meta { font-size: 11px; color: var(--jf-text-muted); margin-bottom: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.app-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.cv-badge { font-family: var(--font-mono); font-size: 10px; font-weight: 500; padding: 3px 7px; border-radius: 5px; background: rgba(37,99,235,0.07); border: 1px solid rgba(37,99,235,0.18); color: var(--jf-interactive); display: flex; align-items: center; gap: 4px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv-badge svg { width: 10px; height: 10px; flex-shrink: 0; }
+.cv-badge.no-cv { background: var(--jf-bg-subtle); border-color: var(--jf-border); color: var(--jf-text-muted); }
+.cv-badge.purple { background: rgba(139,92,246,0.07); border-color: rgba(139,92,246,0.18); color: var(--jf-purple); }
+.app-footer { display: flex; align-items: center; justify-content: space-between; }
+.time-in-stage { font-family: var(--font-mono); font-size: 10px; color: var(--jf-text-muted); }
+
+/* Dashboard */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: white; border: 1px solid var(--jf-border); border-radius: 12px; padding: 16px; box-shadow: var(--jf-shadow-sm); }
+.stat-card-val { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+.stat-card-lbl { font-size: 11.5px; color: var(--jf-text-muted); font-weight: 500; }
+.dash-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+
+/* Getting started */
+.gs-card { background: white; border: 1px solid var(--jf-border); border-radius: 14px; overflow: hidden; box-shadow: var(--jf-shadow-sm); }
+.gs-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 14px; border-bottom: 1px solid var(--jf-border); }
+.gs-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+.gs-title svg { width: 15px; height: 15px; color: var(--jf-interactive); }
+.gs-progress-track { height: 3px; background: var(--jf-border); }
+.gs-progress-fill { height: 100%; background: linear-gradient(90deg, var(--jf-interactive), var(--jf-purple)); transition: width 0.4s ease; }
+.gs-step { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--jf-border); cursor: pointer; transition: background 0.1s; }
+.gs-step:last-child { border-bottom: none; }
+.gs-step:hover { background: var(--jf-bg-subtle); }
+.gs-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--jf-border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.gs-check.done { background: var(--jf-success); border-color: var(--jf-success); }
+.gs-check.done svg { display: block; }
+.gs-check svg { width: 12px; height: 12px; color: white; display: none; }
+.gs-check.new { border-color: var(--jf-interactive); }
+.gs-check.new::after { content: ''; width: 6px; height: 6px; background: var(--jf-interactive); border-radius: 50%; }
+.gs-step-title { font-size: 13px; font-weight: 600; margin-bottom: 1px; }
+.gs-step-title.done { color: var(--jf-text-muted); text-decoration: line-through; }
+.gs-step-sub { font-size: 11.5px; color: var(--jf-text-muted); }
+.gs-step-cta { font-size: 12px; font-weight: 600; color: var(--jf-interactive); display: flex; align-items: center; gap: 3px; flex-shrink: 0; padding: 5px 10px; border-radius: 7px; margin-left: auto; transition: background 0.15s; }
+.gs-step-cta:hover { background: var(--jf-interactive-subtle); }
+.gs-step-cta svg { width: 11px; height: 11px; }
+.new-badge { font-family: var(--font-mono); font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.2); color: var(--jf-interactive); text-transform: uppercase; letter-spacing: 0.05em; }
+.gs-step.locked { opacity: 0.45; cursor: default; }
+.gs-step.locked:hover { background: transparent; }
+
+/* App modal */
+.app-modal-hero { padding: 20px; background: var(--jf-bg-subtle); border-bottom: 1px solid var(--jf-border); display: flex; align-items: flex-start; gap: 14px; }
+.app-modal-avatar { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: white; flex-shrink: 0; }
+.app-modal-company { font-size: 11px; font-weight: 600; color: var(--jf-text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.app-modal-title { font-size: 19px; font-weight: 800; margin: 2px 0 8px; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.lock-callout { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 14px; }
+.lock-callout-label { font-family: var(--font-mono); font-size: 10px; color: #92400E; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+
+/* Utility */
+.dimmed { opacity: 0.3; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1 — Current state (/cv-versions)
+══════════════════════════════════════ -->
+<div class="screen active" id="screen-1">
+  <div class="badge-current">Current state</div>
+  <div class="shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="#">
+        <span class="logo-job">Job</span><span class="logo-rest">&nbsp;Funnel</span>
+      </a>
+      <nav class="sidebar-nav">
+        <div class="nav-item">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Home
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>Pipeline
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>Analytics
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>Story Library
+        </div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9zM3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>Resume Builder
+        </div>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="sidebar-signout">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Sign out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <header class="page-header">
+        <h1 class="header-title">Resume Builder</h1>
+        <div class="header-actions">
+          <button class="btn-primary-header" onclick="document.getElementById('modal-new-cv').style.display='flex'">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a1 1 0 011 1v4h4a1 1 0 010 2H9v4a1 1 0 01-2 0V9H3a1 1 0 010-2h4V3a1 1 0 011-1z"/></svg>
+            + New Version
+          </button>
+          <div class="user-avatar">VB</div>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="cv-grid">
+
+          <!-- Card 1 — no stats yet -->
+          <div class="cv-card">
+            <div class="cv-card-header">
+              <div class="cv-card-header-left">
+                <div class="cv-version-eyebrow">VERSION 01</div>
+                <div class="cv-card-name">Victoria_CV_Consumer-Insights-b2b</div>
+              </div>
+              <div class="cv-card-header-right">
+                <div class="more-btn" onclick="toggleDd('dd1')">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="cv-stats-inline">
+              <strong>0</strong> applications · <strong>—</strong> screening rate
+            </div>
+            <div class="cv-updated">Updated 26 Mar 2026</div>
+            <div class="cv-actions">
+              <button class="btn btn-pdf"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>PDF</button>
+              <button class="btn"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2a2 2 0 00-2 2v8a2 2 0 002 2h4.5a.5.5 0 000-1H4a1 1 0 01-1-1V4a1 1 0 011-1h5v2.5A1.5 1.5 0 0010.5 7H13v1.5a.5.5 0 001 0V6.621a1.5 1.5 0 00-.44-1.06l-2.12-2.122A1.5 1.5 0 0010.378 3H10V2H4z"/></svg>Duplicate</button>
+              <button class="btn">Set Default</button>
+              <button class="btn"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h10a1 1 0 110 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V4a1 1 0 01-1-1z"/></svg>Archive</button>
+            </div>
+            <div class="dropdown" id="dd1">
+              <div class="dropdown-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-2.207 2.207L3.414 13.757A1 1 0 013 14.464V16h1.536a1 1 0 00.707-.293l7.965-7.965-2.829-2.829z"/></svg>Open editor</div>
+              <div class="dropdown-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793z"/></svg>Rename</div>
+              <div class="dropdown-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>Duplicate</div>
+              <div class="dropdown-item">Set as default</div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item danger">Archive</div>
+            </div>
+          </div>
+
+          <!-- Card 2 — with screening stat -->
+          <div class="cv-card">
+            <div class="cv-card-header">
+              <div class="cv-card-header-left">
+                <div class="cv-version-eyebrow">VERSION 02</div>
+                <div class="cv-card-name">CV_Vinicius_Barbosa_2026_Billing</div>
+              </div>
+              <div class="cv-card-header-right">
+                <div class="more-btn"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></div>
+              </div>
+            </div>
+            <div class="cv-stats-inline">
+              <strong>1</strong> applications · <strong class="green">0%</strong> screening rate · <strong>—</strong> interview rate
+            </div>
+            <div class="cv-updated">Updated 26 Mar 2026</div>
+            <div class="cv-actions">
+              <button class="btn btn-pdf"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>PDF</button>
+              <button class="btn">Duplicate</button>
+              <button class="btn">Set Default</button>
+              <button class="btn">Archive</button>
+            </div>
+          </div>
+
+          <!-- Card 3 — default, with real stats -->
+          <div class="cv-card">
+            <div class="cv-card-header">
+              <div class="cv-card-header-left">
+                <div class="cv-version-eyebrow">VERSION 03</div>
+                <div class="cv-card-name">
+                  <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px;color:var(--jf-text-muted)"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+                  v4
+                </div>
+              </div>
+              <div class="cv-card-header-right">
+                <span class="badge-default">Default</span>
+                <div class="more-btn"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></div>
+              </div>
+            </div>
+            <div class="cv-stats-inline">
+              <strong>2</strong> applications · <strong class="green">50%</strong> screening rate · <strong class="amber">0%</strong> interview rate
+            </div>
+            <div class="cv-updated">Updated 25 Mar 2026</div>
+            <div class="cv-actions">
+              <button class="btn btn-pdf">PDF</button>
+              <button class="btn">Duplicate</button>
+              <button class="btn">Set Default</button>
+              <button class="btn">Archive</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- New CV modal -->
+      <div class="modal-overlay" id="modal-new-cv" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">Create a CV version</h2>
+            <button class="modal-close" onclick="document.getElementById('modal-new-cv').style.display='none'"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"/></svg></button>
+          </div>
+          <div class="modal-body">
+            <div class="two-path">
+              <div class="path-card" onclick="setFlow(false);document.getElementById('modal-new-cv').style.display='none';switchToScreen(4)">
+                <div class="path-icon blue"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.255 0 2.443.29 3.5.804V4.804zm1 0v10.392a7.968 7.968 0 013.5-.804c1.255 0 2.443.29 3.5.804v-10A7.969 7.969 0 0014.5 4c-1.255 0-2.443.29-3.5.804z"/></svg></div>
+                <div class="path-title">Build from template</div>
+                <div class="path-desc">5 EU-optimised templates with built-in ATS validation.</div>
+                <div class="path-cta">Choose template <svg viewBox="0 0 12 12" fill="currentColor"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+              </div>
+              <div class="path-card purple" onclick="setFlow(true);document.getElementById('modal-new-cv').style.display='none';switchToScreen(3)">
+                <div class="path-icon purple"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></div>
+                <div class="path-title">Upload existing CV</div>
+                <div class="path-desc">PDF or DOCX, max 10MB. We'll track its performance.</div>
+                <div class="path-cta purple">Upload file <svg viewBox="0 0 12 12" fill="currentColor"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+              </div>
+            </div>
+            <div class="modal-explain">
+              <div class="modal-explain-label">What's a CV version?</div>
+              <div class="modal-explain-text">Each version gets its own screening and interview rate. After a few weeks you'll see which one is working — and can archive the rest.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 2 — Proposed: filter tabs + 3-col stats + clean actions
+══════════════════════════════════════ -->
+<div class="screen" id="screen-2">
+  <div class="badge-proposed">Proposed — Sprint 1</div>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="#"><span class="logo-job">Job</span><span class="logo-rest">&nbsp;Funnel</span></a>
+      <nav class="sidebar-nav">
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Home</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>Pipeline</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>Analytics</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>Story Library</div>
+        <div class="nav-item active"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9zM3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>My CVs</div>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="sidebar-signout"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Sign out</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="page-header">
+        <h1 class="header-title">My CVs</h1><!-- ① title fix -->
+        <div class="header-actions">
+          <button class="btn-primary-header" onclick="document.getElementById('modal-s2-new').style.display='flex'">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a1 1 0 011 1v4h4a1 1 0 010 2H9v4a1 1 0 01-2 0V9H3a1 1 0 010-2h4V3a1 1 0 011-1z"/></svg>
+            New CV version
+          </button>
+          <div class="user-avatar">VB</div>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <!-- ③ Filter tabs rendered -->
+        <div class="filter-tabs">
+          <button class="tab-pill active">Active <span class="tab-count">3</span></button>
+          <button class="tab-pill">All <span class="tab-count">3</span></button>
+          <button class="tab-pill">Archived <span class="tab-count">0</span></button>
+        </div>
+
+        <div class="cv-grid">
+
+          <!-- Card 1 — 0 apps -->
+          <div class="cv-card">
+            <div class="cv-card-header">
+              <div class="cv-card-header-left">
+                <div class="cv-version-eyebrow">VERSION 01</div>
+                <div class="cv-card-name">Victoria_CV_Consumer-Insights-b2b</div>
+              </div>
+              <div class="cv-card-header-right">
+                <div class="more-btn"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></div>
+              </div>
+            </div>
+            <!-- ④ 3-col stats grid -->
+            <div class="cv-stats-grid">
+              <div class="stat-cell"><div class="stat-value muted">0</div><div class="stat-label">applications</div></div>
+              <div class="stat-cell"><div class="stat-value muted">—</div><div class="stat-label">screening</div></div>
+              <div class="stat-cell"><div class="stat-value muted">—</div><div class="stat-label">interviews</div></div>
+            </div>
+            <!-- ⑤ footer: date left + buttons right -->
+            <div class="cv-footer">
+              <div class="cv-updated">Updated 26 Mar 2026</div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-pdf">PDF</button>
+                <button class="btn">Duplicate</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 — 1 app -->
+          <div class="cv-card">
+            <div class="cv-card-header">
+              <div class="cv-card-header-left">
+                <div class="cv-version-eyebrow">VERSION 02</div>
+                <div class="cv-card-name">CV_Vinicius_Barbosa_2026_Billing</div>
+              </div>
+              <div class="cv-card-header-right">
+                <div class="more-btn"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></div>
+              </div>
+            </div>
+            <div class="cv-stats-grid">
+              <div class="stat-cell"><div class="stat-value">1</div><div class="stat-label">applications</div></div>
+              <div class="stat-cell"><div class="stat-value muted">0%</div><div class="stat-label">screening</div></div>
+              <div class="stat-cell"><div class="stat-value muted">—</div><div class="stat-label">interviews</div></div>
+            </div>
+            <div class="cv-footer">
+              <div class="cv-updated">Updated 26 Mar 2026</div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-pdf">PDF</button>
+                <button class="btn">Duplicate</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 — default, good stats -->
+          <div class="cv-card">
+            <div class="cv-card-header">
+              <div class="cv-card-header-left">
+                <div class="cv-version-eyebrow">VERSION 03</div>
+                <div class="cv-card-name">
+                  <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px;color:var(--jf-text-muted)"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+                  v4
+                </div>
+              </div>
+              <div class="cv-card-header-right">
+                <span class="badge-default">Default</span>
+                <div class="more-btn"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></div>
+              </div>
+            </div>
+            <div class="cv-stats-grid">
+              <div class="stat-cell"><div class="stat-value">2</div><div class="stat-label">applications</div></div>
+              <div class="stat-cell"><div class="stat-value green">50%</div><div class="stat-label">screening</div></div>
+              <div class="stat-cell"><div class="stat-value amber">0%</div><div class="stat-label">interviews</div></div>
+            </div>
+            <div class="cv-footer">
+              <div class="cv-updated">Updated 25 Mar 2026</div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-pdf">PDF</button>
+                <button class="btn">Duplicate</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Choice modal for Screen 2 -->
+      <div class="modal-overlay" id="modal-s2-new" style="display:none;position:absolute;inset:0" onclick="if(event.target===this)this.style.display='none'">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">Create a CV version</h2>
+            <button class="modal-close" onclick="document.getElementById('modal-s2-new').style.display='none'"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"/></svg></button>
+          </div>
+          <div class="modal-body">
+            <div class="two-path">
+              <div class="path-card" onclick="setFlow(false);document.getElementById('modal-s2-new').style.display='none';switchToScreen(4)">
+                <div class="path-icon blue"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.255 0 2.443.29 3.5.804V4.804zm1 0v10.392a7.968 7.968 0 013.5-.804c1.255 0 2.443.29 3.5.804v-10A7.969 7.969 0 0014.5 4c-1.255 0-2.443.29-3.5.804z"/></svg></div>
+                <div class="path-title">Build from template</div>
+                <div class="path-desc">5 EU-optimised templates with built-in ATS validation.</div>
+                <div class="path-cta">Choose template <svg viewBox="0 0 12 12" fill="currentColor"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+              </div>
+              <div class="path-card purple" onclick="setFlow(true);document.getElementById('modal-s2-new').style.display='none';switchToScreen(3)">
+                <div class="path-icon purple"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></div>
+                <div class="path-title">Upload existing CV</div>
+                <div class="path-desc">PDF or DOCX. We'll populate a template with your content.</div>
+                <div class="path-cta purple">Upload file <svg viewBox="0 0 12 12" fill="currentColor"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+              </div>
+            </div>
+            <div class="modal-explain">
+              <div class="modal-explain-label">What's a CV version?</div>
+              <div class="modal-explain-text">Each version gets its own screening and interview rate. After a few weeks you'll see which one is working — and can archive the rest.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 3 — Upload CV modal
+══════════════════════════════════════ -->
+<div class="screen" id="screen-3">
+  <div class="badge-proposed">Proposed — Sprint 1</div>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="#"><span class="logo-job">Job</span><span class="logo-rest">&nbsp;Funnel</span></a>
+      <nav class="sidebar-nav">
+        <div class="nav-item active"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9zM3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>My CVs</div>
+      </nav>
+      <div class="sidebar-bottom"><button class="sidebar-signout"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Sign out</button></div>
+    </aside>
+    <div class="main" style="background:var(--jf-bg-subtle)">
+      <header class="page-header dimmed"><h1 class="header-title">My CVs</h1></header>
+      <div class="page-content dimmed" style="height:200px"></div>
+      <div class="modal-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px">
+        <div class="modal">
+          <div class="modal-header" style="padding:20px 20px 16px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="switchToScreen(2)" style="width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;border:1px solid var(--jf-border);background:white;cursor:pointer;color:var(--jf-text-muted)"><svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px"><path d="M9.78 4.22a.75.75 0 010 1.06L7.06 8l2.72 2.72a.75.75 0 11-1.06 1.06L5.47 8.53a.75.75 0 010-1.06l3.25-3.25a.75.75 0 011.06 0z"/></svg></button>
+              <h2 class="modal-title">Upload your CV</h2>
+            </div>
+            <button class="modal-close" onclick="switchToScreen(2)"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"/></svg></button>
+          </div>
+          <div class="modal-body">
+            <div class="dropzone filled">
+              <div class="dropzone-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></div>
+              <div style="font-size:13px;font-weight:600">CV_ViniciusBarbosa_2026.pdf</div>
+              <div style="font-family:var(--font-mono);font-size:11px;color:var(--jf-text-muted)">142 KB</div>
+              <div style="font-size:11.5px;color:var(--jf-success);font-weight:600">File ready · <span style="color:var(--jf-text-muted);font-weight:400;text-decoration:underline;cursor:pointer">Change</span></div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Name this version<span class="req">*</span></label>
+              <input class="form-input" type="text" value="Backend — NL Market" placeholder="e.g. Backend — NL Market">
+              <span class="form-hint">Appears on Kanban cards (max ~15 chars shown)</span>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div style="font-size:13px;font-weight:600">Set as default</div>
+                <div style="font-size:11.5px;color:var(--jf-text-muted);margin-top:1px">Used in new applications unless changed</div>
+              </div>
+              <div class="toggle-switch" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-md btn-secondary-md" onclick="switchToScreen(2)">Cancel</button>
+            <button class="btn-md btn-primary" onclick="setFlow(true);switchToScreen(4)">
+              <svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px"><path d="M9.78 4.22a.75.75 0 010 1.06L7.06 8l2.72 2.72a.75.75 0 11-1.06 1.06L5.47 8.53a.75.75 0 010-1.06l3.25-3.25a.75.75 0 011.06 0z" transform="rotate(180 8 8)"/></svg>
+              Save &amp; choose template
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 4 — /cv-versions/new (Template Gallery)
+══════════════════════════════════════ -->
+<div class="screen" id="screen-4">
+  <div class="badge-proposed">Proposed — Sprint 1</div>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="#"><span class="logo-job">Job</span><span class="logo-rest">&nbsp;Funnel</span></a>
+      <nav class="sidebar-nav">
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Home</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>Pipeline</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>Analytics</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>Story Library</div>
+        <div class="nav-item active"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9zM3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>My CVs</div>
+      </nav>
+      <div class="sidebar-bottom"><button class="sidebar-signout"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Sign out</button></div>
+    </aside>
+    <div class="main">
+      <header class="page-header">
+        <button onclick="switchToScreen(fromUpload ? 3 : 2)" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--jf-border);background:white;cursor:pointer;color:var(--jf-text-muted);flex-shrink:0" onmouseover="this.style.background='var(--jf-bg-subtle)'" onmouseout="this.style.background='white'"><svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px"><path d="M9.78 4.22a.75.75 0 010 1.06L7.06 8l2.72 2.72a.75.75 0 11-1.06 1.06L5.47 8.53a.75.75 0 010-1.06l3.25-3.25a.75.75 0 011.06 0z"/></svg></button>
+        <h1 class="header-title" style="margin-left:8px">Choose a template</h1>
+        <div class="header-actions"><div class="user-avatar">VB</div></div>
+      </header>
+      <div class="page-content">
+
+        <!-- Upload import banner (only shown when coming from upload flow) -->
+        <div id="upload-import-banner" style="background:rgba(37,99,235,0.05);border:1px solid rgba(37,99,235,0.2);border-radius:10px;padding:12px 16px;display:none;align-items:center;gap:10px;margin-bottom:24px">
+          <svg viewBox="0 0 20 20" fill="currentColor" style="width:16px;height:16px;color:var(--jf-interactive);flex-shrink:0"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <div style="flex:1;font-size:13px;color:var(--jf-text-secondary)"><span style="font-weight:600;color:var(--jf-interactive)">CV_ViniciusBarbosa_2026.pdf</span> imported · your content will be applied to the chosen template.</div>
+          <button onclick="this.parentElement.style.display='none'" style="color:var(--jf-text-muted);cursor:pointer;padding:2px;border-radius:4px;flex-shrink:0"><svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px"><path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"/></svg></button>
+        </div>
+
+        <div style="font-size:13px;color:var(--jf-text-muted);margin-bottom:20px;font-family:var(--font-mono)">5 EU-optimised templates · ATS-validated</div>
+
+        <!-- Template grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:28px">
+
+          <!-- Template 1: Classic (selected) -->
+          <div style="border:2px solid var(--jf-interactive);border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 0 0 3px rgba(37,99,235,0.1);position:relative">
+            <div style="position:absolute;top:8px;right:8px;background:var(--jf-interactive);color:white;font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;text-transform:uppercase;z-index:1">Selected</div>
+            <div style="background:#F8FAFC;padding:12px;height:170px">
+              <div style="background:#1E293B;height:38px;margin:-12px -12px 10px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between">
+                <div><div style="width:65px;height:5px;background:white;border-radius:3px;opacity:0.9;margin-bottom:4px"></div><div style="width:45px;height:3.5px;background:white;border-radius:2px;opacity:0.5"></div></div>
+                <div style="display:flex;gap:6px"><div style="width:28px;height:3px;background:white;border-radius:2px;opacity:0.35"></div><div style="width:28px;height:3px;background:white;border-radius:2px;opacity:0.35"></div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="width:48%;height:3px;background:var(--jf-border-strong);border-radius:2px"></div>
+                <div style="width:90%;height:2.5px;background:var(--jf-border);border-radius:1px"></div>
+                <div style="width:78%;height:2.5px;background:var(--jf-border);border-radius:1px"></div>
+                <div style="width:48%;height:3px;background:var(--jf-border-strong);border-radius:2px;margin-top:6px"></div>
+                <div style="width:88%;height:2.5px;background:var(--jf-border);border-radius:1px"></div>
+                <div style="width:72%;height:2.5px;background:var(--jf-border);border-radius:1px"></div>
+              </div>
+            </div>
+            <div style="padding:10px 12px 12px;background:white;border-top:1.5px solid var(--jf-interactive)">
+              <div style="font-size:13px;font-weight:700;margin-bottom:2px">Classic</div>
+              <div style="font-size:11px;color:var(--jf-text-muted)">Clean header · great for DACH</div>
+            </div>
+          </div>
+
+          <!-- Template 2: Minimal -->
+          <div style="border:1.5px solid var(--jf-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--jf-interactive)';this.style.boxShadow='0 4px 12px rgba(37,99,235,0.1)'" onmouseout="this.style.borderColor='var(--jf-border)';this.style.boxShadow='none'">
+            <div style="background:#F8FAFC;padding:12px;height:170px">
+              <div style="margin-bottom:8px"><div style="width:76px;height:7px;background:var(--jf-text-primary);border-radius:3px;margin-bottom:4px"></div><div style="width:52px;height:3.5px;background:var(--jf-text-muted);border-radius:2px;margin-bottom:3px"></div><div style="height:1.5px;background:var(--jf-interactive);width:100%;margin:6px 0"></div></div>
+              <div style="display:flex;gap:8px">
+                <div style="width:36%;display:flex;flex-direction:column;gap:4px"><div style="width:100%;height:3px;background:var(--jf-border-strong);border-radius:2px"></div><div style="width:88%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:76%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:100%;height:3px;background:var(--jf-border-strong);border-radius:2px;margin-top:8px"></div><div style="width:82%;height:2.5px;background:var(--jf-border);border-radius:1px"></div></div>
+                <div style="width:1px;background:var(--jf-border)"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px"><div style="width:90%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:80%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:70%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:85%;height:2.5px;background:var(--jf-border);border-radius:1px;margin-top:3px"></div></div>
+              </div>
+            </div>
+            <div style="padding:10px 12px 12px;background:white;border-top:1px solid var(--jf-border)"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Minimal</div><div style="font-size:11px;color:var(--jf-text-muted)">Two-column · popular in NL</div></div>
+          </div>
+
+          <!-- Template 3: Modern -->
+          <div style="border:1.5px solid var(--jf-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--jf-interactive)';this.style.boxShadow='0 4px 12px rgba(37,99,235,0.1)'" onmouseout="this.style.borderColor='var(--jf-border)';this.style.boxShadow='none'">
+            <div style="background:#F8FAFC;padding:12px;height:170px">
+              <div style="background:#2563EB;height:46px;margin:-12px -12px 10px;padding:10px 12px;display:flex;align-items:flex-end"><div><div style="width:72px;height:6px;background:white;border-radius:3px;opacity:0.95;margin-bottom:3px"></div><div style="width:48px;height:3.5px;background:white;border-radius:2px;opacity:0.6"></div></div></div>
+              <div style="display:flex;flex-direction:column;gap:4px"><div style="width:46%;height:3px;background:var(--jf-interactive);border-radius:2px;opacity:0.4"></div><div style="width:90%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:78%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:46%;height:3px;background:var(--jf-interactive);border-radius:2px;opacity:0.4;margin-top:6px"></div><div style="width:84%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:68%;height:2.5px;background:var(--jf-border);border-radius:1px"></div></div>
+            </div>
+            <div style="padding:10px 12px 12px;background:white;border-top:1px solid var(--jf-border)"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Modern</div><div style="font-size:11px;color:var(--jf-text-muted)">Bold header · tech roles</div></div>
+          </div>
+
+          <!-- Template 4: Executive -->
+          <div style="border:1.5px solid var(--jf-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--jf-interactive)';this.style.boxShadow='0 4px 12px rgba(37,99,235,0.1)'" onmouseout="this.style.borderColor='var(--jf-border)';this.style.boxShadow='none'">
+            <div style="background:#F8FAFC;padding:12px;height:170px">
+              <div style="border-bottom:2px solid #0F172A;padding-bottom:8px;margin-bottom:8px"><div style="width:82px;height:7px;background:#0F172A;border-radius:3px;margin-bottom:4px"></div><div style="width:56px;height:3.5px;background:var(--jf-text-muted);border-radius:2px;margin-bottom:3px"></div><div style="display:flex;gap:5px"><div style="width:38px;height:3px;background:var(--jf-border-strong);border-radius:1px"></div><div style="width:32px;height:3px;background:var(--jf-border-strong);border-radius:1px"></div></div></div>
+              <div style="display:flex;flex-direction:column;gap:4px"><div style="width:43%;height:3px;background:#0F172A;border-radius:2px;opacity:0.25"></div><div style="width:90%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:74%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:84%;height:2.5px;background:var(--jf-border);border-radius:1px"></div></div>
+            </div>
+            <div style="padding:10px 12px 12px;background:white;border-top:1px solid var(--jf-border)"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Executive</div><div style="font-size:11px;color:var(--jf-text-muted)">Senior roles · leadership</div></div>
+          </div>
+
+          <!-- Template 5: Creative -->
+          <div style="border:1.5px solid var(--jf-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--jf-purple)';this.style.boxShadow='0 4px 12px rgba(139,92,246,0.1)'" onmouseout="this.style.borderColor='var(--jf-border)';this.style.boxShadow='none'">
+            <div style="background:#F8FAFC;padding:12px;height:170px">
+              <div style="display:flex;gap:9px;margin-bottom:8px"><div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--jf-purple),#6D28D9);flex-shrink:0"></div><div style="flex:1;padding-top:2px"><div style="width:68px;height:6px;background:var(--jf-text-primary);border-radius:3px;margin-bottom:4px"></div><div style="width:48px;height:3.5px;background:var(--jf-text-muted);border-radius:2px"></div></div></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><div style="width:88%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:78%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:38%;height:3px;background:rgba(139,92,246,0.3);border-radius:2px;margin-top:6px"></div><div style="width:84%;height:2.5px;background:var(--jf-border);border-radius:1px"></div><div style="width:70%;height:2.5px;background:var(--jf-border);border-radius:1px"></div></div>
+            </div>
+            <div style="padding:10px 12px 12px;background:white;border-top:1px solid var(--jf-border)"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Creative</div><div style="font-size:11px;color:var(--jf-text-muted)">Design &amp; product roles</div></div>
+          </div>
+
+        </div>
+
+        <!-- Action row -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-top:20px;border-top:1px solid var(--jf-border)">
+          <button onclick="switchToScreen(fromUpload ? 3 : 2)" class="btn-md btn-secondary-md" style="background:white">
+            <svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px"><path d="M9.78 4.22a.75.75 0 010 1.06L7.06 8l2.72 2.72a.75.75 0 11-1.06 1.06L5.47 8.53a.75.75 0 010-1.06l3.25-3.25a.75.75 0 011.06 0z"/></svg>
+            Back
+          </button>
+          <button onclick="switchToScreen(8)" class="btn-md btn-primary">
+            Use Classic template
+            <svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px"><path d="M6.22 4.22a.75.75 0 010 1.06L8.94 8l-2.72 2.72a.75.75 0 001.06 1.06l3.25-3.25a.75.75 0 000-1.06L7.28 4.22a.75.75 0 00-1.06 0z"/></svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 5 — Pipeline: CV badge on cards
+══════════════════════════════════════ -->
+<div class="screen" id="screen-5">
+  <div class="badge-proposed">Proposed — Sprint 1</div>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="#"><span class="logo-job">Job</span><span class="logo-rest">&nbsp;Funnel</span></a>
+      <nav class="sidebar-nav">
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Home</div>
+        <div class="nav-item active"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>Pipeline</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>Analytics</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>Story Library</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9zM3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>My CVs</div>
+      </nav>
+      <div class="sidebar-bottom"><button class="sidebar-signout"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Sign out</button></div>
+    </aside>
+    <div class="main">
+      <header class="page-header">
+        <h1 class="header-title">Pipeline</h1>
+        <div class="header-actions">
+          <button class="btn-primary-header"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a1 1 0 011 1v4h4a1 1 0 010 2H9v4a1 1 0 01-2 0V9H3a1 1 0 010-2h4V3a1 1 0 011-1z"/></svg>Add application</button>
+          <div class="user-avatar">VB</div>
+        </div>
+      </header>
+      <div class="page-content" style="overflow-x:auto">
+        <div class="kanban-wrap">
+
+          <!-- Applied -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="kanban-col-name"><div class="stage-dot-lg" style="background:#2563EB"></div>Applied</div>
+              <div class="kanban-count">3</div>
+            </div>
+            <!-- highlighted card — with CV badge -->
+            <div class="app-card" style="border-color:var(--jf-interactive);box-shadow:0 0 0 2px rgba(37,99,235,0.15),var(--jf-shadow-md)" onclick="switchToScreen(6)">
+              <div class="app-card-row1">
+                <div class="company-avatar" style="background:linear-gradient(135deg,#0ea5e9,#2563EB)">S</div>
+                <div class="app-card-info"><div class="app-company">Stripe</div><div class="app-title">Senior Product Manager</div></div>
+                <div class="priority-dot" style="background:#EF4444"></div>
+              </div>
+              <div class="app-meta">Amsterdam · €90–110k</div>
+              <div class="app-badges">
+                <div class="cv-badge"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M2 1a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V4.5L7.5 1H2z" opacity="0.3"/><path d="M2 1a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V4.5L7.5 1H2zm0 1h5l2.5 2.5V10H2V2z"/></svg>v4</div>
+              </div>
+              <div class="app-footer"><div class="time-in-stage">3d in stage</div><div class="more-btn" style="width:24px;height:24px;border-radius:6px"><svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></div></div>
+            </div>
+            <div class="app-card">
+              <div class="app-card-row1">
+                <div class="company-avatar" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9)">B</div>
+                <div class="app-card-info"><div class="app-company">Booking.com</div><div class="app-title">Product Manager</div></div>
+                <div class="priority-dot" style="background:#F59E0B"></div>
+              </div>
+              <div class="app-meta">Amsterdam · €80–95k</div>
+              <div class="app-badges">
+                <div class="cv-badge purple"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M2 1a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V4.5L7.5 1H2z" opacity="0.3"/><path d="M2 2h5l2.5 2.5V10H2V2z"/></svg>Billing 2026</div>
+              </div>
+              <div class="app-footer"><div class="time-in-stage">1d in stage</div><div class="more-btn" style="width:24px;height:24px;border-radius:6px"><svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></div></div>
+            </div>
+            <div class="app-card">
+              <div class="app-card-row1">
+                <div class="company-avatar" style="background:linear-gradient(135deg,#64748B,#475569)">N</div>
+                <div class="app-card-info"><div class="app-company">NEAR Protocol</div><div class="app-title">Senior PM, Dev Tools</div></div>
+                <div class="priority-dot" style="background:#94A3B8"></div>
+              </div>
+              <div class="app-meta">Remote EU</div>
+              <div class="app-badges"><div class="cv-badge no-cv">No CV</div></div>
+              <div class="app-footer"><div class="time-in-stage">5d in stage</div><div class="more-btn" style="width:24px;height:24px;border-radius:6px"><svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px"><path d="M3 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm4.5 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></div></div>
+            </div>
+          </div>
+
+          <!-- Screening -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="kanban-col-name"><div class="stage-dot-lg" style="background:#8B5CF6"></div>Screening</div>
+              <div class="kanban-count">1</div>
+            </div>
+            <div class="app-card">
+              <div class="app-card-row1">
+                <div class="company-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">A</div>
+                <div class="app-card-info"><div class="app-company">Adyen</div><div class="app-title">Group Product Manager</div></div>
+                <div class="priority-dot" style="background:#EF4444"></div>
+              </div>
+              <div class="app-meta">Amsterdam · €95–120k</div>
+              <div class="app-badges">
+                <div class="cv-badge" style="opacity:0.65"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M5 5h2a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1zm.5-1V3a.5.5 0 011 0v1"/></svg>v4</div>
+                <div style="font-family:var(--font-mono);font-size:9px;color:var(--jf-text-muted);padding:3px 6px;border-radius:4px;background:var(--jf-bg-subtle);border:1px solid var(--jf-border);display:flex;align-items:center;gap:3px"><svg viewBox="0 0 10 12" fill="currentColor" style="width:9px;height:9px"><path d="M2 5V3.5a3 3 0 016 0V5h.5A1.5 1.5 0 0110 6.5v4A1.5 1.5 0 018.5 12h-7A1.5 1.5 0 010 10.5v-4A1.5 1.5 0 011.5 5H2zm1.5 0V3.5a1.5 1.5 0 013 0V5H3.5z"/></svg>Locked</div>
+              </div>
+              <div class="app-footer"><div class="time-in-stage">8d in stage</div></div>
+            </div>
+          </div>
+
+          <!-- Interviewing -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="kanban-col-name"><div class="stage-dot-lg" style="background:#F59E0B"></div>Interviewing</div>
+              <div class="kanban-count">0</div>
+            </div>
+            <div style="border:1px dashed var(--jf-border);border-radius:10px;padding:20px;text-align:center;font-size:12px;color:var(--jf-text-muted)">No applications yet</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 6 — Application modal: CV picker (unlocked + locked)
+══════════════════════════════════════ -->
+<div class="screen" id="screen-6">
+  <div class="badge-proposed">Proposed — Sprint 1</div>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="#"><span class="logo-job">Job</span><span class="logo-rest">&nbsp;Funnel</span></a>
+      <nav class="sidebar-nav">
+        <div class="nav-item active"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>Pipeline</div>
+      </nav>
+      <div class="sidebar-bottom"><button class="sidebar-signout"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Sign out</button></div>
+    </aside>
+    <div class="main" style="background:var(--jf-bg-subtle)">
+      <header class="page-header dimmed"><h1 class="header-title">Pipeline</h1></header>
+      <div class="page-content dimmed" style="height:200px"></div>
+      <div class="modal-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px">
+        <div class="modal modal-lg">
+          <!-- Hero -->
+          <div class="app-modal-hero">
+            <div class="app-modal-avatar" style="background:linear-gradient(135deg,#0ea5e9,#2563EB)">S</div>
+            <div style="flex:1">
+              <div class="app-modal-company">Stripe</div>
+              <div class="app-modal-title">Senior Product Manager</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <div class="stage-badge stage-applied"><div class="stage-dot"></div>Applied</div>
+                <div style="font-size:11px;color:var(--jf-text-muted);padding:4px 10px;background:white;border:1px solid var(--jf-border);border-radius:20px">Amsterdam · €90–110k</div>
+              </div>
+            </div>
+            <button onclick="switchToScreen(5)" style="cursor:pointer;color:var(--jf-text-muted);padding:4px;border-radius:6px;transition:background 0.15s" onmouseover="this.style.background='var(--jf-bg-subtle)'" onmouseout="this.style.background='transparent'">
+              <svg viewBox="0 0 16 16" fill="currentColor" style="width:16px;height:16px"><path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"/></svg>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="modal-body">
+            <div class="field-grid">
+              <!-- Unlocked CV picker (Applied stage) -->
+              <div>
+                <div class="cv-picker-label">CV version</div>
+                <div class="cv-picker-select">
+                  <svg viewBox="0 0 14 14" fill="currentColor" class="cv-picker-select-icon"><path d="M2 1a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V4.5L9.5 1H2zm0 1h7l2.5 2.5V12H2V2z"/></svg>
+                  <span style="font-size:13px;font-weight:600;flex:1">v4</span>
+                  <svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;color:var(--jf-text-muted)"><path d="M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z"/></svg>
+                </div>
+                <div class="cv-picker-hint"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 1a5 5 0 100 10A5 5 0 006 1zM5.25 7.5a.75.75 0 001.5 0V6a.75.75 0 00-1.5 0v1.5zM6 5a.75.75 0 100-1.5A.75.75 0 006 5z"/></svg>Editable until Screening</div>
+              </div>
+              <div>
+                <div class="cv-picker-label">Applied on</div>
+                <input class="form-input" type="text" value="26 Mar 2026">
+              </div>
+            </div>
+
+            <!-- Locked state preview -->
+            <div class="lock-callout">
+              <div class="lock-callout-label">Locked state — once stage reaches Screening</div>
+              <div class="cv-picker-label" style="margin-bottom:6px">CV version</div>
+              <div class="cv-picker-locked">
+                <svg viewBox="0 0 14 14" fill="currentColor" style="width:14px;height:14px;color:var(--jf-text-muted);flex-shrink:0"><path d="M3.5 5V3.5a3.5 3.5 0 117 0V5H11a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1h.5zm1.5 0V3.5a2 2 0 014 0V5H5z"/></svg>
+                <span style="font-size:13px;font-weight:600;flex:1">v4</span>
+                <span class="cv-lock-tag">locked</span>
+              </div>
+              <div class="cv-picker-hint" style="margin-top:6px"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 1a5 5 0 100 10A5 5 0 006 1zM5.25 7.5a.75.75 0 001.5 0V6a.75.75 0 00-1.5 0v1.5zM6 5a.75.75 0 100-1.5A.75.75 0 006 5z"/></svg>CV locked after screening — preserves A/B experiment integrity</div>
+            </div>
+
+            <div>
+              <div class="cv-picker-label">Notes</div>
+              <textarea class="form-input" style="resize:vertical;min-height:72px;line-height:1.6">Recruiter: Sarah · Role closes Apr 15. Focus on payments platform experience.</textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer modal-footer-split">
+            <button class="btn-md btn-ghost-md" style="color:var(--jf-error)">Delete</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn-md btn-secondary-md" onclick="switchToScreen(5)">Cancel</button>
+              <button class="btn-md btn-primary" onclick="switchToScreen(5)">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 7 — Dashboard: Getting Started block
+══════════════════════════════════════ -->
+<div class="screen" id="screen-7">
+  <div class="badge-proposed">Proposed — Sprint 1</div>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="#"><span class="logo-job">Job</span><span class="logo-rest">&nbsp;Funnel</span></a>
+      <nav class="sidebar-nav">
+        <div class="nav-item active"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Home</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>Pipeline</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>Analytics</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>Story Library</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9zM3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>My CVs</div>
+      </nav>
+      <div class="sidebar-bottom"><button class="sidebar-signout"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Sign out</button></div>
+    </aside>
+
+    <div class="main">
+      <header class="page-header">
+        <h1 class="header-title">Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn-primary-header"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a1 1 0 011 1v4h4a1 1 0 010 2H9v4a1 1 0 01-2 0V9H3a1 1 0 010-2h4V3a1 1 0 011-1z"/></svg>Add application</button>
+          <div class="user-avatar">VB</div>
+        </div>
+      </header>
+      <div class="page-content">
+        <!-- Stats -->
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-card-val">12</div><div class="stat-card-lbl">Total applications</div></div>
+          <div class="stat-card"><div class="stat-card-val" style="color:var(--jf-purple)">2</div><div class="stat-card-lbl">In screening</div></div>
+          <div class="stat-card"><div class="stat-card-val" style="color:var(--jf-text-muted)">3</div><div class="stat-card-lbl">Stories written</div></div>
+          <div class="stat-card"><div class="stat-card-val" style="color:var(--jf-interactive)">3</div><div class="stat-card-lbl">CV versions</div></div>
+        </div>
+
+        <div class="dash-layout">
+          <!-- Getting Started card -->
+          <div class="gs-card">
+            <div class="gs-header">
+              <div class="gs-title">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                Getting started
+              </div>
+              <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--jf-text-muted)">2 / 5 complete</div>
+            </div>
+            <div class="gs-progress-track"><div class="gs-progress-fill" style="width:40%"></div></div>
+
+            <div>
+              <!-- Step 1: Done -->
+              <div class="gs-step">
+                <div class="gs-check done"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M10.28 2.28a.75.75 0 00-1.06 0L4.5 7 2.78 5.28a.75.75 0 10-1.06 1.06l2.25 2.25a.75.75 0 001.06 0l5.25-5.25a.75.75 0 000-1.06z"/></svg></div>
+                <div style="flex:1">
+                  <div class="gs-step-title done">Add your first application</div>
+                  <div class="gs-step-sub">12 applications tracked</div>
+                </div>
+              </div>
+
+              <!-- Step 2: Done -->
+              <div class="gs-step">
+                <div class="gs-check done"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M10.28 2.28a.75.75 0 00-1.06 0L4.5 7 2.78 5.28a.75.75 0 10-1.06 1.06l2.25 2.25a.75.75 0 001.06 0l5.25-5.25a.75.75 0 000-1.06z"/></svg></div>
+                <div style="flex:1">
+                  <div class="gs-step-title done">Write 2 interview stories</div>
+                  <div class="gs-step-sub">3 stories written</div>
+                </div>
+              </div>
+
+              <!-- Step 3: NEW — this sprint -->
+              <div class="gs-step" onclick="switchToScreen(2)">
+                <div class="gs-check new"></div>
+                <div style="flex:1">
+                  <div class="gs-step-title" style="display:flex;align-items:center;gap:7px">
+                    Create your first CV version
+                    <span class="new-badge">NEW</span>
+                  </div>
+                  <div class="gs-step-sub">Upload or build from template</div>
+                </div>
+                <div class="gs-step-cta">My CVs <svg viewBox="0 0 12 12" fill="currentColor"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+              </div>
+
+              <!-- Step 4: Locked -->
+              <div class="gs-step locked">
+                <div class="gs-check"><svg viewBox="0 0 10 12" fill="currentColor" style="width:10px;height:12px;color:var(--jf-text-muted)"><path d="M2 5V3.5a3 3 0 016 0V5h.5A1.5 1.5 0 0110 6.5v4A1.5 1.5 0 018.5 12h-7A1.5 1.5 0 010 10.5v-4A1.5 1.5 0 011.5 5H2zm1.5 0V3.5a1.5 1.5 0 013 0V5H3.5z"/></svg></div>
+                <div style="flex:1">
+                  <div class="gs-step-title">Assign a CV to an application</div>
+                  <div class="gs-step-sub">Unlocks after creating a CV version</div>
+                </div>
+              </div>
+
+              <!-- Step 5: Locked -->
+              <div class="gs-step locked">
+                <div class="gs-check"><svg viewBox="0 0 10 12" fill="currentColor" style="width:10px;height:12px;color:var(--jf-text-muted)"><path d="M2 5V3.5a3 3 0 016 0V5h.5A1.5 1.5 0 0110 6.5v4A1.5 1.5 0 018.5 12h-7A1.5 1.5 0 010 10.5v-4A1.5 1.5 0 011.5 5H2zm1.5 0V3.5a1.5 1.5 0 013 0V5H3.5z"/></svg></div>
+                <div style="flex:1">
+                  <div class="gs-step-title">See your first conversion insight</div>
+                  <div class="gs-step-sub">Requires 5+ apps with 2 CV versions</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right side placeholder -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="background:white;border:1px solid var(--jf-border);border-radius:14px;padding:16px;box-shadow:var(--jf-shadow-sm)">
+              <div style="font-size:13px;font-weight:700;margin-bottom:12px">This week</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--jf-text-muted)"><span>Applications sent</span><span style="font-family:var(--font-mono);font-weight:500;color:var(--jf-text-primary)">3</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--jf-text-muted)"><span>Screening rate</span><span style="font-family:var(--font-mono);font-weight:500;color:var(--jf-success)">17%</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--jf-text-muted)"><span>CV versions active</span><span style="font-family:var(--font-mono);font-weight:500;color:var(--jf-text-primary)">3</span></div>
+              </div>
+            </div>
+            <div style="background:white;border:1px solid var(--jf-border);border-radius:14px;padding:16px;box-shadow:var(--jf-shadow-sm)">
+              <div style="font-size:13px;font-weight:700;margin-bottom:4px">Next action</div>
+              <div style="font-size:12px;color:var(--jf-text-secondary);line-height:1.6;margin-bottom:12px">Assign your CV versions to applications to start comparing screening rates.</div>
+              <button class="btn-primary-header" style="font-size:12.5px;padding:6px 12px;min-height:32px" onclick="switchToScreen(5)">Go to Pipeline →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PROTOTYPE NAV
+══════════════════════════════════════ -->
+<div class="proto-nav">
+  <div class="proto-section">
+    <span class="proto-label">Now</span>
+    <button class="proto-btn active" onclick="switchToScreen(1)">My CVs page</button>
+  </div>
+  <div class="proto-section">
+    <span class="proto-label">Flow 01 — Template</span>
+    <button class="proto-btn" onclick="switchToScreen(2)">My CVs</button>
+    <button class="proto-btn" onclick="setFlow(false);switchToScreen(4)">Template Gallery</button>
+    <button class="proto-btn" onclick="switchToScreen(8)">Editor</button>
+  </div>
+  <div class="proto-section">
+    <span class="proto-label">Flow 02 — Upload</span>
+    <button class="proto-btn" onclick="switchToScreen(3)">Upload modal</button>
+    <button class="proto-btn" onclick="setFlow(true);switchToScreen(4)">Template Gallery</button>
+    <button class="proto-btn" onclick="switchToScreen(8)">Editor</button>
+  </div>
+  <div class="proto-section">
+    <span class="proto-label">Surfaces</span>
+    <button class="proto-btn" onclick="switchToScreen(5)">Pipeline</button>
+    <button class="proto-btn" onclick="switchToScreen(6)">App modal</button>
+    <button class="proto-btn" onclick="switchToScreen(7)">Dashboard</button>
+  </div>
+</div>
+
+<script>
+var fromUpload = false;
+
+function setFlow(isUpload) {
+  fromUpload = isUpload;
+  var banner = document.getElementById('upload-import-banner');
+  if (banner) banner.style.display = isUpload ? 'flex' : 'none';
+  // Update editor context banner too
+  var editorCtx = document.getElementById('editor-import-ctx');
+  if (editorCtx) editorCtx.style.display = isUpload ? 'flex' : 'none';
+  var srcInfo = document.getElementById('editor-source-info');
+  if (srcInfo) srcInfo.style.display = isUpload ? 'block' : 'none';
+}
+
+function switchToScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.proto-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === n - 1)
+  })
+  document.getElementById('screen-' + n).classList.add('active')
+  document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'))
+}
+function toggleDd(id) {
+  const dd = document.getElementById(id)
+  const wasOpen = dd.classList.contains('open')
+  document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'))
+  if (!wasOpen) dd.classList.add('open')
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.more-btn') && !e.target.closest('.dropdown'))
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'))
+})
+</script>
+<!-- ══════════════════════════════════════
+     SCREEN 8 — Resume Editor
+══════════════════════════════════════ -->
+<div class="screen" id="screen-8">
+  <div class="badge-proposed">Proposed — Sprint 1</div>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="#"><span class="logo-job">Job</span><span class="logo-rest">&nbsp;Funnel</span></a>
+      <nav class="sidebar-nav">
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Home</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 9a1 1 0 000 2h14a1 1 0 100-2H3zM3 14a1 1 0 000 2h10a1 1 0 100-2H3z"/></svg>Pipeline</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>Analytics</div>
+        <div class="nav-item"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>Story Library</div>
+        <div class="nav-item active"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9zM3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>My CVs</div>
+      </nav>
+      <div class="sidebar-bottom"><button class="sidebar-signout"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>Sign out</button></div>
+    </aside>
+    <div class="main" style="flex-direction:row;overflow:hidden">
+
+      <!-- Editor canvas (left) -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+        <header class="page-header" style="border-right:1px solid var(--jf-border)">
+          <button onclick="switchToScreen(4)" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--jf-border);background:white;cursor:pointer;color:var(--jf-text-muted);flex-shrink:0" onmouseover="this.style.background='var(--jf-bg-subtle)'" onmouseout="this.style.background='white'"><svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px"><path d="M9.78 4.22a.75.75 0 010 1.06L7.06 8l2.72 2.72a.75.75 0 11-1.06 1.06L5.47 8.53a.75.75 0 010-1.06l3.25-3.25a.75.75 0 011.06 0z"/></svg></button>
+          <div style="margin-left:8px;min-width:0">
+            <h1 class="header-title" style="font-size:15px">Backend — NL Market</h1>
+            <div style="font-size:11px;color:var(--jf-text-muted);font-family:var(--font-mono)">Classic template · /cv-versions/editor</div>
+          </div>
+          <div class="header-actions" style="margin-left:auto">
+            <button class="btn" style="font-size:12px;gap:5px">
+              <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px"><path d="M8 12l-4.5-4.5 1.06-1.06L8 9.88l3.44-3.44 1.06 1.06z"/></svg>
+              ATS Score
+              <span style="font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--jf-success)">87</span>
+            </button>
+            <button class="btn btn-pdf" style="font-size:12px">
+              <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px"><path d="M4.5 10.5v2h7v-2h1.5v2.5a1 1 0 01-1 1h-8a1 1 0 01-1-1V10.5h1.5zm3.5-8l3.5 4h-2.5v4h-2V6.5H4.5L8 2.5z"/></svg>
+              Export PDF
+            </button>
+            <button class="btn-primary-header" style="font-size:12.5px;padding:7px 13px">Save</button>
+            <div class="user-avatar">VB</div>
+          </div>
+        </header>
+
+        <!-- Import context banner -->
+        <div id="editor-import-ctx" style="background:rgba(16,185,129,0.06);border-bottom:1px solid rgba(16,185,129,0.2);padding:10px 24px;display:none;align-items:center;gap:10px;flex-shrink:0">
+          <svg viewBox="0 0 20 20" fill="currentColor" style="width:15px;height:15px;color:var(--jf-success);flex-shrink:0"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <span style="font-size:12.5px;color:var(--jf-text-secondary)">Content imported from <strong style="color:var(--jf-text-primary)">CV_ViniciusBarbosa_2026.pdf</strong> · Review and edit below before saving.</span>
+        </div>
+
+        <!-- CV preview -->
+        <div style="flex:1;overflow-y:auto;padding:32px;background:#E2E8F0;display:flex;justify-content:center">
+          <div style="width:100%;max-width:600px;background:white;border-radius:4px;box-shadow:0 4px 24px rgba(0,0,0,0.12);min-height:800px;overflow:hidden">
+
+            <!-- Classic template header -->
+            <div style="background:#1E293B;padding:28px 32px 24px;color:white">
+              <div style="font-size:22px;font-weight:700;margin-bottom:4px;letter-spacing:-0.01em">Vinicius Barbosa</div>
+              <div style="font-size:13px;opacity:0.7;margin-bottom:14px">Senior Product Manager · Amsterdam, NL</div>
+              <div style="display:flex;gap:16px;font-size:11px;opacity:0.6">
+                <span>vinicius@email.com</span>
+                <span>linkedin.com/in/vbarbosa</span>
+                <span>+31 6 12 34 56 78</span>
+              </div>
+            </div>
+
+            <!-- Body -->
+            <div style="padding:24px 32px;display:flex;flex-direction:column;gap:20px">
+
+              <!-- Summary -->
+              <div>
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--jf-text-muted);border-bottom:1.5px solid var(--jf-border);padding-bottom:5px;margin-bottom:10px">Summary</div>
+                <div style="font-size:12.5px;color:var(--jf-text-secondary);line-height:1.7;background:rgba(37,99,235,0.04);border-left:2.5px solid var(--jf-interactive);padding:8px 12px;border-radius:0 4px 4px 0">
+                  Product Manager with 6 years experience building B2C SaaS products in Europe. Background in growth, analytics, and cross-functional leadership across DACH and Benelux markets.
+                </div>
+              </div>
+
+              <!-- Experience -->
+              <div>
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--jf-text-muted);border-bottom:1.5px solid var(--jf-border);padding-bottom:5px;margin-bottom:12px">Experience</div>
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+                      <div style="font-size:13px;font-weight:700">Senior Product Manager</div>
+                      <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--jf-text-muted)">2023 – Present</div>
+                    </div>
+                    <div style="font-size:12px;color:var(--jf-interactive);font-weight:600;margin-bottom:6px">Acme Corp · Amsterdam</div>
+                    <div style="height:2.5px;width:82%;background:var(--jf-border);border-radius:2px;margin-bottom:4px"></div>
+                    <div style="height:2.5px;width:71%;background:var(--jf-border);border-radius:2px;margin-bottom:4px"></div>
+                    <div style="height:2.5px;width:76%;background:var(--jf-border);border-radius:2px"></div>
+                  </div>
+                  <div>
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+                      <div style="font-size:13px;font-weight:700">Product Manager</div>
+                      <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--jf-text-muted)">2021 – 2023</div>
+                    </div>
+                    <div style="font-size:12px;color:var(--jf-interactive);font-weight:600;margin-bottom:6px">Startup B · Berlin</div>
+                    <div style="height:2.5px;width:78%;background:var(--jf-border);border-radius:2px;margin-bottom:4px"></div>
+                    <div style="height:2.5px;width:65%;background:var(--jf-border);border-radius:2px"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Skills -->
+              <div>
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--jf-text-muted);border-bottom:1.5px solid var(--jf-border);padding-bottom:5px;margin-bottom:10px">Skills</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                  <span style="font-size:11.5px;padding:4px 10px;border-radius:6px;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.15);color:var(--jf-interactive)">Product Strategy</span>
+                  <span style="font-size:11.5px;padding:4px 10px;border-radius:6px;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.15);color:var(--jf-interactive)">Data Analysis</span>
+                  <span style="font-size:11.5px;padding:4px 10px;border-radius:6px;background:var(--jf-bg-subtle);border:1px solid var(--jf-border);color:var(--jf-text-secondary)">SQL</span>
+                  <span style="font-size:11.5px;padding:4px 10px;border-radius:6px;background:var(--jf-bg-subtle);border:1px solid var(--jf-border);color:var(--jf-text-secondary)">Figma</span>
+                  <span style="font-size:11.5px;padding:4px 10px;border-radius:6px;background:var(--jf-bg-subtle);border:1px solid var(--jf-border);color:var(--jf-text-secondary)">Agile / Scrum</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right panel: ATS + version info -->
+      <div style="width:260px;flex-shrink:0;border-left:1px solid var(--jf-border);background:var(--jf-bg-card);display:flex;flex-direction:column;overflow-y:auto">
+        <div style="padding:16px;border-bottom:1px solid var(--jf-border)">
+          <div style="font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--jf-text-muted);margin-bottom:12px">ATS Score</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:48px;height:48px;border-radius:50%;background:rgba(16,185,129,0.1);border:2.5px solid var(--jf-success);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <span style="font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--jf-success)">87</span>
+            </div>
+            <div>
+              <div style="font-size:12.5px;font-weight:600;color:var(--jf-success)">Strong</div>
+              <div style="font-size:11px;color:var(--jf-text-muted)">Well optimised for ATS</div>
+            </div>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--jf-text-muted);margin-bottom:6px">Improvement suggestions</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--jf-text-secondary)">
+              <span style="color:var(--jf-warning);flex-shrink:0;margin-top:1px">▲</span>Add quantified achievements to experience bullets
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--jf-text-secondary)">
+              <span style="color:var(--jf-success);flex-shrink:0;margin-top:1px">✓</span>Contact info complete
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--jf-text-secondary)">
+              <span style="color:var(--jf-success);flex-shrink:0;margin-top:1px">✓</span>No photos or graphics (ATS-safe)
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:16px">
+          <div style="font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--jf-text-muted);margin-bottom:12px">Version details</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div style="font-size:11px;color:var(--jf-text-muted);margin-bottom:3px">Name</div>
+              <div style="font-size:13px;font-weight:600">Backend — NL Market</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--jf-text-muted);margin-bottom:3px">Template</div>
+              <div style="font-size:13px;font-weight:500">Classic</div>
+            </div>
+            <div id="editor-source-info" style="display:none">
+              <div style="font-size:11px;color:var(--jf-text-muted);margin-bottom:3px">Source file</div>
+              <div style="font-size:12px;font-weight:500;color:var(--jf-text-secondary);display:flex;align-items:center;gap:5px">
+                <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;color:var(--jf-error)"><path d="M4 2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V5.414A2 2 0 0013.414 4L11 1.586A2 2 0 009.586 1H4z"/></svg>
+                CV_ViniciusBarbosa_2026.pdf
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--jf-text-muted);margin-bottom:3px">Default</div>
+              <div class="toggle-switch on" onclick="this.classList.toggle('on')" style="margin-top:2px"><div class="toggle-knob"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:16px;margin-top:auto;border-top:1px solid var(--jf-border)">
+          <button class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px 16px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;border:none" onclick="switchToScreen(2)">
+            <svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Save CV version
+          </button>
+          <div style="font-size:11px;color:var(--jf-text-muted);text-align:center;margin-top:8px">Redirects to My CVs</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

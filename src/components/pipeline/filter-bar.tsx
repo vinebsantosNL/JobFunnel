@@ -89,7 +89,7 @@ export function FilterBar({
           }}
           onFocus={(e) => {
             e.currentTarget.style.borderColor = 'var(--jf-interactive)'
-            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)'
+            e.currentTarget.style.boxShadow = 'var(--jf-focus-ring)'
           }}
           onBlur={(e) => {
             e.currentTarget.style.borderColor = 'var(--jf-border)'

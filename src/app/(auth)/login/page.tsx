@@ -12,10 +12,7 @@ function LoginLeftContent() {
   return (
     <>
       {/* Headline */}
-      <h2
-        className="text-white font-black mb-4"
-        style={{ fontSize: 'clamp(32px, 3vw, 46px)', letterSpacing: '-0.03em', lineHeight: 1.05 }}
-      >
+      <h2 className="jf-display-lg text-white mb-4">
         Your funnel waits.<br />
         <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 300 }}>
           Right where you left it.
@@ -100,7 +97,7 @@ function LoginLeftContent() {
           >
             <span
               className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{ background: '#10B981', opacity: 0.7 }}
+              style={{ background: 'var(--jf-success)', opacity: 0.7 }}
             />
             {badge}
           </span>

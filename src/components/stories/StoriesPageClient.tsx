@@ -37,11 +37,11 @@ const CATEGORY_MAP: Record<string, string> = {
 
 /* ── Tag color map per category ── */
 const COMPETENCY_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  leadership:    { bg: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: 'rgba(139,92,246,0.2)' },
-  technical:     { bg: 'rgba(37,99,235,0.08)',  color: '#2563EB', border: 'rgba(37,99,235,0.2)' },
-  collaboration: { bg: 'rgba(16,185,129,0.08)', color: '#10B981', border: 'rgba(16,185,129,0.2)' },
-  execution:     { bg: 'rgba(37,99,235,0.08)',  color: '#2563EB', border: 'rgba(37,99,235,0.2)' },
-  growth:        { bg: 'rgba(245,158,11,0.08)', color: '#F59E0B', border: 'rgba(245,158,11,0.2)' },
+  leadership:    { bg: 'var(--jf-purple-tint)',       color: 'var(--jf-purple)',      border: 'var(--jf-purple-border)'        },
+  technical:     { bg: 'var(--jf-interactive-tint)',  color: 'var(--jf-interactive)', border: 'var(--jf-interactive-tint-border)' },
+  collaboration: { bg: 'var(--jf-success-tint)',      color: 'var(--jf-success)',     border: 'var(--jf-success-border)'       },
+  execution:     { bg: 'var(--jf-interactive-tint)',  color: 'var(--jf-interactive)', border: 'var(--jf-interactive-tint-border)' },
+  growth:        { bg: 'var(--jf-warning-tint)',      color: 'var(--jf-warning)',     border: 'var(--jf-warning-border)'       },
 }
 
 function getCompetencyCategory(competency: string): string {
@@ -94,7 +94,7 @@ function StoryCard({
   return (
     <div
       onClick={onClick}
-      className="group flex flex-col gap-3 p-[18px] rounded-2xl border border-[var(--jf-border)] bg-[var(--jf-bg-card)] cursor-pointer transition-shadow duration-150 hover:shadow-md hover:border-[#CBD5E1]"
+      className="group flex flex-col gap-3 p-[18px] rounded-2xl border border-[var(--jf-border)] bg-[var(--jf-bg-card)] cursor-pointer transition-shadow duration-150 hover:shadow-md hover:border-[var(--jf-border-hover)]"
       style={{ boxShadow: 'var(--jf-shadow-sm)' }}
     >
       {/* 1. Title */}
@@ -130,7 +130,7 @@ function StoryCard({
               className={cn(
                 'w-[22px] h-[22px] rounded-[6px] flex items-center justify-center text-[10px] font-medium font-[var(--font-dm-mono,monospace)]',
                 filled
-                  ? 'bg-[var(--jf-interactive-subtle)] text-[var(--jf-interactive)] border border-[#BFDBFE]'
+                  ? 'bg-[var(--jf-interactive-subtle)] text-[var(--jf-interactive)] border border-[var(--jf-interactive-border)]'
                   : 'bg-[var(--jf-bg-subtle,#F8FAFC)] text-[var(--jf-text-muted)] border border-[var(--jf-border)]'
               )}
             >
@@ -160,7 +160,7 @@ function StoryCard({
               className="w-7 h-7 rounded-[6px] flex items-center justify-center bg-transparent hover:bg-[var(--jf-bg-subtle)] transition-[background] duration-[120ms] cursor-pointer"
               title="Remove from favorites"
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="#F59E0B">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="var(--jf-warning)">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             </button>
@@ -201,8 +201,8 @@ function EmptyStateCard({ onClick }: { onClick: () => void }) {
       className="flex flex-col items-center justify-center text-center gap-[10px] min-h-[160px] p-[18px] rounded-2xl bg-[var(--jf-bg-subtle,#F8FAFC)] cursor-pointer"
       style={{ border: '2px dashed var(--jf-border)' }}
     >
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(37,99,235,0.08)' }}>
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="#2563EB">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--jf-interactive-tint)' }}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="var(--jf-interactive)">
           <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
         </svg>
       </div>
@@ -328,7 +328,7 @@ export function StoriesPageClient() {
                 padding: '5px 12px',
                 fontSize: '12px',
                 fontWeight: 500,
-                border: isActive ? '1px solid #BFDBFE' : '1px solid var(--jf-border)',
+                border: isActive ? '1px solid var(--jf-interactive-border)' : '1px solid var(--jf-border)',
                 background: isActive ? 'var(--jf-interactive-subtle)' : 'var(--jf-bg-card)',
                 borderRadius: '100px',
               }}
@@ -350,9 +350,9 @@ export function StoriesPageClient() {
             padding: '5px 12px',
             fontSize: '12px',
             fontWeight: 500,
-            border: favoritesOnly ? '1px solid #FCD34D' : '1px solid var(--jf-border)',
-            background: favoritesOnly ? '#FFFBEB' : 'var(--jf-bg-card)',
-            color: favoritesOnly ? '#F59E0B' : 'var(--jf-text-secondary)',
+            border: favoritesOnly ? '1px solid var(--jf-priority-medium-border)' : '1px solid var(--jf-border)',
+            background: favoritesOnly ? 'var(--jf-priority-medium-bg)' : 'var(--jf-bg-card)',
+            color: favoritesOnly ? 'var(--jf-warning)' : 'var(--jf-text-secondary)',
             borderRadius: '100px',
           }}
         >
@@ -373,9 +373,9 @@ export function StoriesPageClient() {
                 padding: '5px 12px',
                 fontSize: '12px',
                 fontWeight: 500,
-                border: isActive ? '1px solid rgba(16,185,129,0.3)' : '1px solid var(--jf-border)',
-                background: isActive ? 'rgba(16,185,129,0.08)' : 'var(--jf-bg-card)',
-                color: isActive ? '#10B981' : 'var(--jf-text-secondary)',
+                border: isActive ? '1px solid var(--jf-success-border)' : '1px solid var(--jf-border)',
+                background: isActive ? 'var(--jf-success-tint)' : 'var(--jf-bg-card)',
+                color: isActive ? 'var(--jf-success)' : 'var(--jf-text-secondary)',
                 borderRadius: '100px',
               }}
             >
