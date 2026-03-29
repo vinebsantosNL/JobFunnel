@@ -20,13 +20,13 @@ export function UpgradeBanner({ activeCount, limit }: UpgradeBannerProps) {
         fontSize: 13,
         ...(isBlocked
           ? {
-              background: 'rgba(239,68,68,0.08)',
-              border: '1px solid rgba(239,68,68,0.25)',
+              background: 'var(--jf-error-tint)',
+              border: '1px solid var(--jf-error-border)',
               color: 'var(--jf-error)',
             }
           : {
-              background: 'rgba(245,158,11,0.08)',
-              border: '1px solid rgba(245,158,11,0.25)',
+              background: 'var(--jf-warning-tint)',
+              border: '1px solid var(--jf-warning-border)',
               color: 'var(--jf-warning)',
             }),
       }}

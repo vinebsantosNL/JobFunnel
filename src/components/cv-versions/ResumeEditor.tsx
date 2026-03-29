@@ -80,26 +80,26 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
+    <div className="border border-[var(--jf-border)] rounded-xl overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-gray-50 transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 py-3.5 bg-[var(--jf-bg-card)] hover:bg-[var(--jf-bg-subtle)] transition-colors text-left"
       >
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-800">{title}</span>
+          <span className="text-sm font-semibold text-[var(--jf-text-primary)]">{title}</span>
           {optional && (
-            <span className="text-xs text-gray-400 font-normal">Optional</span>
+            <span className="text-xs text-[var(--jf-text-muted)] font-normal">Optional</span>
           )}
         </div>
         {open ? (
-          <ChevronUp className="w-4 h-4 text-gray-400" />
+          <ChevronUp className="w-4 h-4 text-[var(--jf-text-muted)]" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-gray-400" />
+          <ChevronDown className="w-4 h-4 text-[var(--jf-text-muted)]" />
         )}
       </button>
       {open && (
-        <div className="px-4 pb-5 pt-1 bg-white border-t border-gray-100 space-y-4">
+        <div className="px-4 pb-5 pt-1 bg-[var(--jf-bg-card)] border-t border-[var(--jf-border)] space-y-4">
           {children}
         </div>
       )}
@@ -120,9 +120,9 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-gray-600">
+      <label className="text-xs font-medium text-[var(--jf-text-secondary)]">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-[var(--jf-error)] ml-0.5">*</span>}
       </label>
       {children}
     </div>
@@ -130,10 +130,10 @@ function Field({
 }
 
 const inputCls =
-  'w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400'
+  'w-full rounded-md border border-[var(--jf-border)] bg-[var(--jf-bg-card)] text-[var(--jf-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--jf-interactive)] disabled:bg-[var(--jf-bg-subtle)] disabled:text-[var(--jf-text-muted)]'
 
 const textareaCls =
-  'w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400 resize-none min-h-[80px]'
+  'w-full rounded-md border border-[var(--jf-border)] bg-[var(--jf-bg-card)] text-[var(--jf-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--jf-interactive)] disabled:bg-[var(--jf-bg-subtle)] disabled:text-[var(--jf-text-muted)] resize-none min-h-[80px]'
 
 // ─── Contact section ──────────────────────────────────────────────────────────
 
@@ -253,7 +253,7 @@ function SummarySection({
         rows={4}
       />
       {words > 150 && (
-        <p className="text-xs text-amber-600">
+        <p className="text-xs text-[var(--jf-warning)]">
           {words} words — most ATS systems prefer summaries under 150 words.
         </p>
       )}
@@ -320,16 +320,16 @@ function ExperienceSection({
   return (
     <div className="space-y-6">
       {entries.map((entry, i) => (
-        <div key={entry.id} className="space-y-3 p-4 bg-gray-50 rounded-lg">
+        <div key={entry.id} className="space-y-3 p-4 bg-[var(--jf-bg-subtle)] rounded-lg">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-semibold text-[var(--jf-text-muted)] uppercase tracking-wide">
               Experience {i + 1}
             </span>
             {!locked && (
               <button
                 type="button"
                 onClick={() => removeEntry(entry.id)}
-                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                className="text-[var(--jf-text-muted)] hover:text-[var(--jf-error)] transition-colors p-1"
                 aria-label="Remove"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -389,12 +389,12 @@ function ExperienceSection({
 
           {/* Bullets */}
           <div className="space-y-2">
-            <label className="text-xs font-medium text-gray-600">
-              Bullet points <span className="text-gray-400 font-normal">(start with an action verb)</span>
+            <label className="text-xs font-medium text-[var(--jf-text-secondary)]">
+              Bullet points <span className="text-[var(--jf-text-muted)] font-normal">(start with an action verb)</span>
             </label>
             {entry.bullets.map((bullet) => (
               <div key={bullet.id} className="flex items-start gap-2">
-                <span className="mt-2.5 w-1 h-1 rounded-full bg-gray-400 flex-shrink-0" />
+                <span className="mt-2.5 w-1 h-1 rounded-full bg-[var(--jf-text-muted)] flex-shrink-0" />
                 <input
                   className={cn(inputCls, 'flex-1')}
                   value={bullet.text}
@@ -406,7 +406,7 @@ function ExperienceSection({
                   <button
                     type="button"
                     onClick={() => removeBullet(entry.id, bullet.id)}
-                    className="mt-2 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0"
+                    className="mt-2 text-[var(--jf-text-muted)] hover:text-[var(--jf-error)] transition-colors flex-shrink-0"
                     aria-label="Remove bullet"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -418,7 +418,7 @@ function ExperienceSection({
               <button
                 type="button"
                 onClick={() => addBullet(entry.id)}
-                className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium mt-1"
+                className="flex items-center gap-1.5 text-xs text-[var(--jf-interactive)] hover:text-[var(--jf-interactive-hover)] font-medium mt-1"
               >
                 <Plus className="w-3.5 h-3.5" /> Add bullet
               </button>
@@ -431,14 +431,14 @@ function ExperienceSection({
         <button
           type="button"
           onClick={addEntry}
-          className="w-full rounded-lg border-2 border-dashed border-gray-200 py-3 text-sm text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors flex items-center justify-center gap-1.5"
+          className="w-full rounded-lg border-2 border-dashed border-[var(--jf-border)] py-3 text-sm text-[var(--jf-text-muted)] hover:border-[var(--jf-interactive)] hover:text-[var(--jf-interactive)] transition-colors flex items-center justify-center gap-1.5"
         >
           <Plus className="w-4 h-4" /> Add work experience
         </button>
       )}
 
       {entries.length === 0 && locked && (
-        <p className="text-sm text-gray-400 text-center py-4">No work experience added.</p>
+        <p className="text-sm text-[var(--jf-text-muted)] text-center py-4">No work experience added.</p>
       )}
     </div>
   )
@@ -490,14 +490,14 @@ function SkillsSection({
         {skills.map((skill) => (
           <span
             key={skill}
-            className="inline-flex items-center gap-1 text-sm text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full"
+            className="inline-flex items-center gap-1 text-sm text-[var(--jf-interactive)] bg-[var(--jf-interactive-subtle)] border border-[var(--jf-interactive-border)] px-2.5 py-1 rounded-full"
           >
             {skill}
             {!locked && (
               <button
                 type="button"
                 onClick={() => removeSkill(skill)}
-                className="text-blue-400 hover:text-blue-700 leading-none ml-0.5"
+                className="text-[var(--jf-interactive)] hover:text-[var(--jf-interactive-hover)] leading-none ml-0.5"
                 aria-label={`Remove ${skill}`}
               >
                 ×
@@ -506,7 +506,7 @@ function SkillsSection({
           </span>
         ))}
         {skills.length === 0 && (
-          <p className="text-sm text-gray-400">No skills added yet.</p>
+          <p className="text-sm text-[var(--jf-text-muted)]">No skills added yet.</p>
         )}
       </div>
     </div>
@@ -563,7 +563,7 @@ function LanguagesSection({
             <button
               type="button"
               onClick={() => removeLanguage(lang.id)}
-              className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 p-1"
+              className="text-[var(--jf-text-muted)] hover:text-[var(--jf-error)] transition-colors flex-shrink-0 p-1"
               aria-label="Remove"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -575,7 +575,7 @@ function LanguagesSection({
         <button
           type="button"
           onClick={addLanguage}
-          className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium"
+          className="flex items-center gap-1.5 text-sm text-[var(--jf-interactive)] hover:text-[var(--jf-interactive-hover)] font-medium"
         >
           <Plus className="w-4 h-4" /> Add language
         </button>
@@ -610,16 +610,16 @@ function EducationSection({
   return (
     <div className="space-y-4">
       {entries.map((entry, i) => (
-        <div key={entry.id} className="space-y-3 p-4 bg-gray-50 rounded-lg">
+        <div key={entry.id} className="space-y-3 p-4 bg-[var(--jf-bg-subtle)] rounded-lg">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-semibold text-[var(--jf-text-muted)] uppercase tracking-wide">
               Education {i + 1}
             </span>
             {!locked && (
               <button
                 type="button"
                 onClick={() => removeEntry(entry.id)}
-                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                className="text-[var(--jf-text-muted)] hover:text-[var(--jf-error)] transition-colors p-1"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -689,7 +689,7 @@ function EducationSection({
         <button
           type="button"
           onClick={addEntry}
-          className="w-full rounded-lg border-2 border-dashed border-gray-200 py-3 text-sm text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors flex items-center justify-center gap-1.5"
+          className="w-full rounded-lg border-2 border-dashed border-[var(--jf-border)] py-3 text-sm text-[var(--jf-text-muted)] hover:border-[var(--jf-interactive)] hover:text-[var(--jf-interactive)] transition-colors flex items-center justify-center gap-1.5"
         >
           <Plus className="w-4 h-4" /> Add education
         </button>
@@ -702,10 +702,10 @@ function EducationSection({
 
 function PreviewLoading() {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-50">
+    <div className="w-full h-full flex items-center justify-center bg-[var(--jf-bg-subtle)]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-        <p className="text-xs text-gray-400">Rendering preview…</p>
+        <div className="w-8 h-8 border-2 border-[var(--jf-interactive-border)] border-t-[var(--jf-interactive)] rounded-full animate-spin" />
+        <p className="text-xs text-[var(--jf-text-muted)]">Rendering preview…</p>
       </div>
     </div>
   )
@@ -714,8 +714,8 @@ function PreviewLoading() {
 // ─── ATS Score tab ────────────────────────────────────────────────────────────
 
 function AtsScoreGauge({ score }: { score: number }) {
-  const color = score >= 80 ? 'text-green-600' : score >= 60 ? 'text-amber-500' : 'text-red-500'
-  const bg    = score >= 80 ? 'bg-green-50 border-green-200' : score >= 60 ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'
+  const color = score >= 80 ? 'text-[var(--jf-success)]' : score >= 60 ? 'text-[var(--jf-warning)]' : 'text-[var(--jf-error)]'
+  const bg    = score >= 80 ? 'bg-[var(--jf-success-tint)] border-[var(--jf-success-border)]' : score >= 60 ? 'bg-[var(--jf-warning-tint)] border-[var(--jf-warning-border)]' : 'bg-[var(--jf-error-tint)] border-[var(--jf-error-border)]'
   const label = score >= 80 ? 'Strong' : score >= 60 ? 'Needs work' : 'Critical issues'
 
   return (
@@ -723,7 +723,7 @@ function AtsScoreGauge({ score }: { score: number }) {
       <div className={cn('text-5xl font-black tabular-nums', color)}>{score}</div>
       <div>
         <p className={cn('text-sm font-bold', color)}>{label}</p>
-        <p className="text-xs text-gray-500 mt-0.5">out of 100 · deterministic ATS rule engine</p>
+        <p className="text-xs text-[var(--jf-text-secondary)] mt-0.5">out of 100 · deterministic ATS rule engine</p>
       </div>
     </div>
   )
@@ -731,19 +731,19 @@ function AtsScoreGauge({ score }: { score: number }) {
 
 function AtsRuleRow({ rule }: { rule: AtsRuleResult }) {
   const icon = rule.severity === 'pass'
-    ? <span className="w-4 h-4 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">✓</span>
+    ? <span className="w-4 h-4 rounded-full bg-[var(--jf-success)] flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">✓</span>
     : rule.severity === 'error'
-    ? <span className="w-4 h-4 rounded-full bg-red-500 flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">✕</span>
-    : <span className="w-4 h-4 rounded-full bg-amber-400 flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">!</span>
+    ? <span className="w-4 h-4 rounded-full bg-[var(--jf-error)] flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">✕</span>
+    : <span className="w-4 h-4 rounded-full bg-[var(--jf-warning)] flex-shrink-0 flex items-center justify-center text-white text-[9px] font-bold">!</span>
 
   return (
-    <div className="flex gap-3 py-3 border-b border-gray-100 last:border-0">
+    <div className="flex gap-3 py-3 border-b border-[var(--jf-border)] last:border-0">
       <div className="mt-0.5">{icon}</div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800">{rule.title}</p>
-        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{rule.detail}</p>
+        <p className="text-sm font-medium text-[var(--jf-text-primary)]">{rule.title}</p>
+        <p className="text-xs text-[var(--jf-text-secondary)] mt-0.5 leading-relaxed">{rule.detail}</p>
         {rule.penalty > 0 && (
-          <span className="text-xs text-red-500 font-medium">−{rule.penalty} pts</span>
+          <span className="text-xs text-[var(--jf-error)] font-medium">−{rule.penalty} pts</span>
         )}
       </div>
     </div>
@@ -758,24 +758,24 @@ function AtsScoreTab({ data, templateId }: { data: ResumeData; templateId: Templ
       <AtsScoreGauge score={result.score} />
 
       <div className="flex gap-4 text-center">
-        <div className="flex-1 rounded-lg bg-red-50 border border-red-100 py-3">
-          <p className="text-xl font-bold text-red-600">{result.errors.length}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Errors</p>
+        <div className="flex-1 rounded-lg bg-[var(--jf-error-tint)] border border-[var(--jf-error-border)] py-3 text-center">
+          <p className="text-xl font-bold text-[var(--jf-error)]">{result.errors.length}</p>
+          <p className="text-xs text-[var(--jf-text-secondary)] mt-0.5">Errors</p>
         </div>
-        <div className="flex-1 rounded-lg bg-amber-50 border border-amber-100 py-3">
-          <p className="text-xl font-bold text-amber-500">{result.warnings.length}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Warnings</p>
+        <div className="flex-1 rounded-lg bg-[var(--jf-warning-tint)] border border-[var(--jf-warning-border)] py-3 text-center">
+          <p className="text-xl font-bold text-[var(--jf-warning)]">{result.warnings.length}</p>
+          <p className="text-xs text-[var(--jf-text-secondary)] mt-0.5">Warnings</p>
         </div>
-        <div className="flex-1 rounded-lg bg-green-50 border border-green-100 py-3">
-          <p className="text-xl font-bold text-green-600">{result.passes.length}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Passing</p>
+        <div className="flex-1 rounded-lg bg-[var(--jf-success-tint)] border border-[var(--jf-success-border)] py-3 text-center">
+          <p className="text-xl font-bold text-[var(--jf-success)]">{result.passes.length}</p>
+          <p className="text-xs text-[var(--jf-text-secondary)] mt-0.5">Passing</p>
         </div>
       </div>
 
       {result.errors.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">Errors — fix these first</p>
-          <div className="rounded-xl border border-red-100 px-4 divide-y divide-gray-100">
+          <p className="text-xs font-semibold text-[var(--jf-error)] uppercase tracking-wide mb-1">Errors — fix these first</p>
+          <div className="rounded-xl border border-[var(--jf-error-border)] px-4 divide-y divide-[var(--jf-border)]">
             {result.errors.map((r) => <AtsRuleRow key={r.id} rule={r} />)}
           </div>
         </div>
@@ -783,8 +783,8 @@ function AtsScoreTab({ data, templateId }: { data: ResumeData; templateId: Templ
 
       {result.warnings.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-1">Warnings — recommended fixes</p>
-          <div className="rounded-xl border border-amber-100 px-4 divide-y divide-gray-100">
+          <p className="text-xs font-semibold text-[var(--jf-warning)] uppercase tracking-wide mb-1">Warnings — recommended fixes</p>
+          <div className="rounded-xl border border-[var(--jf-warning-border)] px-4 divide-y divide-[var(--jf-border)]">
             {result.warnings.map((r) => <AtsRuleRow key={r.id} rule={r} />)}
           </div>
         </div>
@@ -792,8 +792,8 @@ function AtsScoreTab({ data, templateId }: { data: ResumeData; templateId: Templ
 
       {result.passes.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Passing checks</p>
-          <div className="rounded-xl border border-green-100 px-4 divide-y divide-gray-100">
+          <p className="text-xs font-semibold text-[var(--jf-success)] uppercase tracking-wide mb-1">Passing checks</p>
+          <div className="rounded-xl border border-[var(--jf-success-border)] px-4 divide-y divide-[var(--jf-border)]">
             {result.passes.map((r) => <AtsRuleRow key={r.id} rule={r} />)}
           </div>
         </div>
@@ -837,7 +837,7 @@ function PipelineKeywordsTab({ data }: { data: ResumeData }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[var(--jf-interactive-tint-border)] border-t-[var(--jf-interactive)] rounded-full animate-spin" />
       </div>
     )
   }
@@ -849,11 +849,11 @@ function PipelineKeywordsTab({ data }: { data: ResumeData }) {
   if (activeJobs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-        <p className="text-sm font-medium text-gray-500">No active pipeline jobs</p>
-        <p className="text-xs text-gray-400 max-w-xs">
+        <p className="text-sm font-medium text-[var(--jf-text-secondary)]">No active pipeline jobs</p>
+        <p className="text-xs text-[var(--jf-text-muted)] max-w-xs">
           Add jobs to your pipeline first. Keyword gaps will appear here once you have active applications.
         </p>
-        <Link href="/pipeline" className="text-xs text-blue-600 underline">Go to Pipeline →</Link>
+        <Link href="/pipeline" className="text-xs text-[var(--jf-interactive)] underline">Go to Pipeline →</Link>
       </div>
     )
   }
@@ -885,22 +885,22 @@ function PipelineKeywordsTab({ data }: { data: ResumeData }) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-        <p className="text-sm font-semibold text-blue-800">Based on {activeJobs.length} active pipeline jobs</p>
-        <p className="text-xs text-blue-600 mt-0.5">Keywords ranked by frequency across your saved job titles and notes.</p>
+      <div className="rounded-xl border border-[var(--jf-interactive-border)] bg-[var(--jf-interactive-subtle)] px-4 py-3">
+        <p className="text-sm font-semibold text-[var(--jf-interactive)]">Based on {activeJobs.length} active pipeline jobs</p>
+        <p className="text-xs text-[var(--jf-interactive)] mt-0.5 opacity-80">Keywords ranked by frequency across your saved job titles and notes.</p>
       </div>
 
       {missing.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Missing from your CV</p>
+          <p className="text-xs font-semibold text-[var(--jf-error)] uppercase tracking-wide mb-2">Missing from your CV</p>
           <div className="flex flex-wrap gap-2">
             {missing.map(([kw, count]) => (
               <span
                 key={kw}
-                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 font-medium"
+                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-[var(--jf-error-tint)] border border-[var(--jf-error-border)] text-[var(--jf-error)] font-medium"
               >
                 {kw}
-                <span className="text-red-400 text-[10px]">×{count}</span>
+                <span className="text-[var(--jf-error)] opacity-60 text-[10px]">×{count}</span>
               </span>
             ))}
           </div>
@@ -909,15 +909,15 @@ function PipelineKeywordsTab({ data }: { data: ResumeData }) {
 
       {present.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-2">Already in your CV</p>
+          <p className="text-xs font-semibold text-[var(--jf-success)] uppercase tracking-wide mb-2">Already in your CV</p>
           <div className="flex flex-wrap gap-2">
             {present.map(([kw, count]) => (
               <span
                 key={kw}
-                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 font-medium"
+                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-[var(--jf-success-tint)] border border-[var(--jf-success-border)] text-[var(--jf-success)] font-medium"
               >
                 {kw}
-                <span className="text-green-400 text-[10px]">×{count}</span>
+                <span className="text-[var(--jf-success)] opacity-60 text-[10px]">×{count}</span>
               </span>
             ))}
           </div>
@@ -925,9 +925,9 @@ function PipelineKeywordsTab({ data }: { data: ResumeData }) {
       )}
 
       {missing.length === 0 && (
-        <div className="rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-center">
-          <p className="text-sm font-semibold text-green-700">Great keyword coverage!</p>
-          <p className="text-xs text-green-600 mt-0.5">Your CV already contains the most frequent keywords from your pipeline.</p>
+        <div className="rounded-xl border border-[var(--jf-success-border)] bg-[var(--jf-success-tint)] px-4 py-3 text-center">
+          <p className="text-sm font-semibold text-[var(--jf-success)]">Great keyword coverage!</p>
+          <p className="text-xs text-[var(--jf-success)] mt-0.5 opacity-80">Your CV already contains the most frequent keywords from your pipeline.</p>
         </div>
       )}
     </div>
@@ -1076,10 +1076,10 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* ── Top bar ─────────────────────────────────────────────────────────── */}
-      <div className="flex-shrink-0 flex items-center gap-3 px-4 sm:px-6 h-14 border-b border-gray-200 bg-white">
+      <div className="flex-shrink-0 flex items-center gap-3 px-4 sm:px-6 h-14 border-b border-[var(--jf-border)] bg-[var(--jf-bg-card)]">
         <button
           onClick={() => router.push('/cv-versions')}
-          className="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors flex-shrink-0"
+          className="p-1.5 rounded-lg text-[var(--jf-text-secondary)] hover:text-[var(--jf-text-primary)] hover:bg-[var(--jf-bg-subtle)] transition-colors flex-shrink-0"
           aria-label="Back to library"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -1087,8 +1087,8 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
 
         {locked ? (
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <Lock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-            <span className="text-sm font-semibold text-gray-700 truncate">{cvName}</span>
+            <Lock className="w-3.5 h-3.5 text-[var(--jf-text-muted)] flex-shrink-0" />
+            <span className="text-sm font-semibold text-[var(--jf-text-secondary)] truncate">{cvName}</span>
           </div>
         ) : (
           <input
@@ -1096,13 +1096,13 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
             value={cvName}
             onChange={(e) => handleNameChange(e.target.value)}
             onBlur={handleBlurSave}
-            className="flex-1 min-w-0 text-sm font-semibold text-gray-800 bg-transparent border-none outline-none focus:bg-gray-50 focus:px-2 rounded-md transition-all truncate"
+            className="flex-1 min-w-0 text-sm font-semibold text-[var(--jf-text-primary)] bg-transparent border-none outline-none focus:bg-[var(--jf-bg-subtle)] focus:px-2 rounded-md transition-all truncate"
             aria-label="Resume name"
           />
         )}
 
         {saveIndicator && (
-          <span className="hidden sm:block text-xs text-gray-400 flex-shrink-0">{saveIndicator}</span>
+          <span className="hidden sm:block text-xs text-[var(--jf-text-muted)] flex-shrink-0">{saveIndicator}</span>
         )}
 
         {!locked && (
@@ -1145,13 +1145,13 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
 
       {/* ── Download error banner ─────────────────────────────────────────────── */}
       {downloadError && (
-        <div className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-red-50 border-b border-red-200">
-          <p className="text-sm text-red-700">
+        <div className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-[var(--jf-error-tint)] border-b border-[var(--jf-error-border)]">
+          <p className="text-sm text-[var(--jf-error)]">
             {downloadError.toUpperCase()} generation failed — please try again.
           </p>
           <button
             onClick={() => handleDownload(downloadError as 'pdf' | 'docx')}
-            className="text-sm font-semibold text-red-700 underline flex-shrink-0 min-h-[44px] px-2"
+            className="text-sm font-semibold text-[var(--jf-error)] underline flex-shrink-0 min-h-[44px] px-2"
           >
             Retry
           </button>
@@ -1159,11 +1159,11 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
       )}
 
       {/* ── Mobile download strip ─────────────────────────────────────────────── */}
-      <div className="sm:hidden flex-shrink-0 flex gap-2 px-4 py-2 border-b border-gray-100 bg-white">
+      <div className="sm:hidden flex-shrink-0 flex gap-2 px-4 py-2 border-b border-[var(--jf-border)] bg-[var(--jf-bg-card)]">
         <button
           onClick={() => handleDownload('pdf')}
           disabled={downloading !== null}
-          className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg py-2 min-h-[44px] hover:bg-gray-50 disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium text-[var(--jf-text-secondary)] border border-[var(--jf-border)] rounded-lg py-2 min-h-[44px] hover:bg-[var(--jf-bg-subtle)] disabled:opacity-50"
         >
           <Download className="w-4 h-4" />
           {downloading === 'pdf' ? 'Generating…' : 'Download PDF'}
@@ -1171,7 +1171,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
         <button
           onClick={() => handleDownload('docx')}
           disabled={downloading !== null}
-          className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg py-2 min-h-[44px] hover:bg-gray-50 disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium text-[var(--jf-text-secondary)] border border-[var(--jf-border)] rounded-lg py-2 min-h-[44px] hover:bg-[var(--jf-bg-subtle)] disabled:opacity-50"
         >
           <Download className="w-4 h-4" />
           {downloading === 'docx' ? 'Generating…' : 'Download DOCX'}
@@ -1180,10 +1180,10 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
 
       {/* ── Lock banner ─────────────────────────────────────────────────────── */}
       {locked && (
-        <div className="flex-shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3 px-4 sm:px-6 py-3 bg-amber-50 border-b border-amber-200">
+        <div className="flex-shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3 px-4 sm:px-6 py-3 bg-[var(--jf-warning-tint)] border-b border-[var(--jf-warning-border)]">
           <div className="flex items-start gap-2 flex-1">
-            <Lock className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-amber-800">
+            <Lock className="w-4 h-4 text-[var(--jf-warning)] mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-[var(--jf-text-primary)]">
               <span className="font-semibold">This resume is locked.</span>{' '}
               An application linked to it has reached Screening — editing would break your performance data.
             </p>
@@ -1191,7 +1191,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-shrink-0 border-amber-300 text-amber-800 hover:bg-amber-100"
+            className="flex-shrink-0 border-[var(--jf-warning-border)] text-[var(--jf-text-primary)] hover:bg-[var(--jf-warning-tint)]"
             onClick={async () => {
               const copy = await duplicateMutation.mutateAsync({
                 id: version.id,
@@ -1207,7 +1207,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
       )}
 
       {/* ── Mobile preview toggle ────────────────────────────────────────────── */}
-      <div className="sm:hidden flex-shrink-0 flex border-b border-gray-200 bg-white">
+      <div className="sm:hidden flex-shrink-0 flex border-b border-[var(--jf-border)] bg-[var(--jf-bg-card)]">
         {(['edit', 'preview'] as const).map((t) => (
           <button
             key={t}
@@ -1215,8 +1215,8 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
             className={cn(
               'flex-1 py-2.5 text-sm font-medium transition-colors',
               mobileTab === t
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-[var(--jf-interactive)] border-b-2 border-[var(--jf-interactive)]'
+                : 'text-[var(--jf-text-muted)] hover:text-[var(--jf-text-secondary)]'
             )}
           >
             {t === 'edit' ? 'Edit' : 'Preview'}
@@ -1235,7 +1235,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
           )}
         >
           {/* Tab bar */}
-          <div className="flex-shrink-0 flex border-b border-gray-200 bg-white px-4 overflow-x-auto">
+          <div className="flex-shrink-0 flex border-b border-[var(--jf-border)] bg-[var(--jf-bg-card)] px-4 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -1243,8 +1243,8 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
                 className={cn(
                   'flex-shrink-0 px-3 py-3 text-sm font-medium transition-colors border-b-2 -mb-px',
                   activeTab === tab.id
-                    ? 'text-blue-600 border-blue-600'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                    ? 'text-[var(--jf-interactive)] border-[var(--jf-interactive)]'
+                    : 'text-[var(--jf-text-muted)] border-transparent hover:text-[var(--jf-text-secondary)]'
                 )}
               >
                 {tab.label}
@@ -1341,7 +1341,7 @@ export function ResumeEditor({ version }: ResumeEditorProps) {
         {/* Preview side — desktop + mobile preview tab */}
         <div
           className={cn(
-            'hidden sm:flex flex-1 flex-col bg-gray-200 border-l border-gray-200 overflow-hidden',
+            'hidden sm:flex flex-1 flex-col bg-[var(--jf-bg-subtle)] border-l border-[var(--jf-border)] overflow-hidden',
             mobileTab === 'preview' && '!flex w-full sm:w-auto'
           )}
         >

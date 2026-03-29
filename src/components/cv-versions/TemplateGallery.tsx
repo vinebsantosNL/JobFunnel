@@ -257,8 +257,8 @@ function TemplateCard({
   return (
     <div
       className={cn(
-        'group relative rounded-xl border bg-white flex flex-col cursor-pointer transition-all hover:shadow-md',
-        selected ? 'border-2 border-blue-500 shadow-md' : 'border border-gray-200 hover:border-gray-300'
+        'group relative rounded-xl border bg-[var(--jf-bg-card)] flex flex-col cursor-pointer transition-all hover:shadow-md',
+        selected ? 'border-2 border-[var(--jf-interactive)] shadow-md' : 'border border-[var(--jf-border)] hover:border-[var(--jf-border-hover)]'
       )}
       onClick={() => onSelect(template.id)}
     >
@@ -269,8 +269,8 @@ function TemplateCard({
             className={cn(
               'text-xs px-2 py-0.5 rounded-full font-semibold',
               template.badge === 'popular'
-                ? 'bg-blue-600 text-white'
-                : 'bg-green-600 text-white'
+                ? 'bg-[var(--jf-interactive)] text-white'
+                : 'bg-[var(--jf-success)] text-white'
             )}
           >
             {template.badge === 'popular' ? 'Popular' : 'EU recommended'}
@@ -286,8 +286,8 @@ function TemplateCard({
       {/* Info */}
       <div className="p-4 flex flex-col gap-3 flex-1">
         <div>
-          <h3 className="font-semibold text-gray-900 text-sm">{template.name}</h3>
-          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{template.description}</p>
+          <h3 className="font-semibold text-[var(--jf-text-primary)] text-sm">{template.name}</h3>
+          <p className="text-xs text-[var(--jf-text-secondary)] mt-0.5 leading-relaxed">{template.description}</p>
         </div>
 
         {/* ATS compatibility chips */}
@@ -295,7 +295,7 @@ function TemplateCard({
           {passes.map((sys) => (
             <span
               key={sys}
-              className="inline-flex items-center gap-0.5 text-xs text-green-700 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded-full"
+              className="inline-flex items-center gap-0.5 text-xs text-[var(--jf-success)] bg-[var(--jf-success-tint)] border border-[var(--jf-success-border)] px-1.5 py-0.5 rounded-full"
             >
               <CheckCircle className="w-3 h-3" />
               {sys}
@@ -304,7 +304,7 @@ function TemplateCard({
           {warns.map((sys) => (
             <span
               key={sys}
-              className="inline-flex items-center gap-0.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full"
+              className="inline-flex items-center gap-0.5 text-xs text-[var(--jf-warning)] bg-[var(--jf-warning-tint)] border border-[var(--jf-warning-border)] px-1.5 py-0.5 rounded-full"
             >
               <AlertCircle className="w-3 h-3" />
               {sys}
@@ -398,11 +398,11 @@ export function TemplateGallery() {
             onChange={(e) => setResumeName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !createMutation.isPending && handleCreate()}
             placeholder={`e.g. Precision – ${monthYear}`}
-            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-md border border-[var(--jf-border)] bg-[var(--jf-bg-card)] text-[var(--jf-text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--jf-interactive)]"
             autoFocus
           />
           {(createMutation.error ?? updateMutation.error) && (
-            <p className="text-xs text-red-500">{(createMutation.error ?? updateMutation.error)?.message}</p>
+            <p className="text-xs text-[var(--jf-error)]">{(createMutation.error ?? updateMutation.error)?.message}</p>
           )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setNamingOpen(false)}>

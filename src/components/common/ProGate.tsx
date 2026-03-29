@@ -34,7 +34,7 @@ export function ProGate({ children, preview, feature, description }: ProGateProp
       </div>
 
       {/* Upgrade overlay */}
-      <div className="absolute inset-0 backdrop-blur-sm bg-white/50 z-10 flex items-center justify-center px-4">
+      <div className="absolute inset-0 backdrop-blur-sm bg-[var(--jf-bg-card)]/80 z-10 flex items-center justify-center px-4">
         <UpgradeCTA feature={feature} description={description} />
       </div>
     </div>

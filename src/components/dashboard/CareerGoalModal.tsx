@@ -133,7 +133,7 @@ function RoleSelector({ value, onChange }: { value: string | undefined; onChange
           gap: 8,
           cursor: 'pointer',
           transition: 'border-color 0.12s, box-shadow 0.12s',
-          boxShadow: open ? '0 0 0 3px rgba(37,99,235,0.08)' : 'none',
+          boxShadow: open ? '0 0 0 3px var(--jf-interactive-tint)' : 'none',
           textAlign: 'left',
           minHeight: 44,
         }}
@@ -212,7 +212,7 @@ function RoleSelector({ value, onChange }: { value: string | undefined; onChange
                         transition: 'background 0.1s, color 0.1s',
                       }}
                       onMouseEnter={(e) => {
-                        if (!selected) (e.currentTarget as HTMLDivElement).style.background = '#F8FAFC'
+                        if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'var(--jf-bg-subtle)'
                       }}
                       onMouseLeave={(e) => {
                         if (!selected) (e.currentTarget as HTMLDivElement).style.background = 'transparent'
@@ -317,7 +317,7 @@ function SalaryPills({ value, onChange }: { value: string | undefined; onChange:
             style={{
               padding: '5px 12px',
               borderRadius: 100,
-              border: `1px solid ${active ? '#BFDBFE' : 'var(--jf-border)'}`,
+              border: `1px solid ${active ? 'var(--jf-interactive-border)' : 'var(--jf-border)'}`,
               background: active ? 'var(--jf-interactive-subtle)' : 'var(--jf-bg-card)',
               color: active ? 'var(--jf-interactive)' : 'var(--jf-text-secondary)',
               fontSize: 11,
@@ -438,7 +438,7 @@ export function CareerGoalModal({ open, onOpenChange, initialValues }: CareerGoa
                 marginRight: -4,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#F1F5F9'
+                e.currentTarget.style.background = 'var(--jf-bg-subtle)'
                 e.currentTarget.style.color = 'var(--jf-text-secondary)'
               }}
               onMouseLeave={(e) => {

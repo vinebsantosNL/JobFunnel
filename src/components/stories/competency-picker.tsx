@@ -29,7 +29,7 @@ export function CompetencyPicker({ selected, onChange }: CompetencyPickerProps) 
                 onClick={() => toggle(competency)}
                 className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
                   selected.includes(competency)
-                    ? 'bg-blue-600 text-white border-blue-600'
+                    ? 'bg-[var(--jf-interactive)] text-white border-[var(--jf-interactive)]'
                     : 'bg-card text-muted-foreground border-border hover:border-primary/50'
                 }`}
               >

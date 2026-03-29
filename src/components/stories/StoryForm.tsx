@@ -27,28 +27,28 @@ const STAR_CONFIG = [
     letter: 'S',
     label: 'Situation',
     placeholder: 'Describe the context and background...',
-    colors: 'bg-blue-50 text-blue-600',
+    colors: 'bg-[var(--jf-interactive-subtle)] text-[var(--jf-interactive)]',
   },
   {
     id: 'task' as const,
     letter: 'T',
     label: 'Task',
     placeholder: 'What was your responsibility?',
-    colors: 'bg-purple-50 text-purple-600',
+    colors: 'bg-[var(--jf-purple-tint)] text-[var(--jf-purple)]',
   },
   {
     id: 'action' as const,
     letter: 'A',
     label: 'Action',
     placeholder: 'What specific steps did you take?',
-    colors: 'bg-amber-50 text-amber-600',
+    colors: 'bg-[var(--jf-warning-tint)] text-[var(--jf-warning)]',
   },
   {
     id: 'result' as const,
     letter: 'R',
     label: 'Result',
     placeholder: 'What was the outcome? Use metrics where possible.',
-    colors: 'bg-green-50 text-green-600',
+    colors: 'bg-[var(--jf-success-tint)] text-[var(--jf-success)]',
   },
 ]
 
@@ -120,7 +120,7 @@ export function StoryForm({ mode, initialValues }: StoryFormProps) {
           {...register('title')}
         />
         {errors.title && (
-          <p className="text-xs text-red-500 mt-0.5">{errors.title.message}</p>
+          <p className="text-xs text-[var(--jf-error)] mt-0.5">{errors.title.message}</p>
         )}
       </div>
 

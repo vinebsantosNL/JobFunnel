@@ -90,7 +90,7 @@ export function AuthShell({ children, leftContent }: AuthShellProps) {
               </svg>
             </div>
             <span
-              className="text-[#0F172A] font-bold"
+              className="text-[var(--jf-text-primary)] font-bold"
               style={{ fontSize: '15px', letterSpacing: '-0.02em' }}
             >
               Job Funnel

@@ -92,7 +92,7 @@ export function UploadDropzone({ file, onFileChange, error, disabled }: UploadDr
           !isFilled && !dragging && 'hover:border-[var(--jf-interactive)] hover:bg-[rgba(37,99,235,0.025)]',
           dragging && 'border-[var(--jf-interactive)] bg-[rgba(37,99,235,0.04)]',
           isFilled && 'border-[var(--jf-success)] bg-[rgba(16,185,129,0.04)]',
-          !isFilled && !dragging && 'border-[var(--jf-border-strong)]',
+          !isFilled && !dragging && 'border-[var(--jf-border)]',
           (error && !isFilled) && '!border-[var(--jf-error)] !bg-[rgba(239,68,68,0.03)]',
           disabled && 'opacity-50 cursor-not-allowed',
         )}
