@@ -91,36 +91,36 @@ export function MagicLinkForm({
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
           style={{
-            background: 'rgba(16,185,129,0.08)',
-            border: '1px solid rgba(16,185,129,0.2)',
+            background: 'var(--jf-success-tint)',
+            border: '1px solid var(--jf-success-border)',
           }}
         >
           <svg
             width="28" height="28" viewBox="0 0 24 24" fill="none"
-            stroke="#10B981" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
+            style={{ stroke: 'var(--jf-success)' }} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
           >
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
             <polyline points="22,6 12,13 2,6" />
           </svg>
         </div>
 
-        <h1 className="jf-display-sm text-[#0F172A] mb-3">
+        <h1 className="jf-display-sm text-[var(--jf-text-primary)] mb-3">
           Check your inbox.
         </h1>
 
-        <p className="text-sm text-[#64748B] mb-2 leading-relaxed">
+        <p className="text-sm text-[var(--jf-text-muted)] mb-2 leading-relaxed">
           We sent a magic link to
         </p>
         <span
-          className="inline-block text-sm text-[#334155] bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-4 py-2 mb-6"
-          style={{ fontFamily: 'var(--font-dm-mono)' }}
+          className="inline-block text-sm text-[var(--jf-text-secondary)] bg-[var(--jf-bg-subtle)] border border-[var(--jf-border)] rounded-lg px-4 py-2 mb-6"
+          style={{ fontFamily: 'var(--font-dm-mono, monospace)' }}
         >
           {email}
         </span>
 
         <p
-          className="text-xs text-[#CBD5E1] mb-8"
-          style={{ fontFamily: 'var(--font-dm-mono)', letterSpacing: '0.02em' }}
+          className="text-xs text-[var(--jf-border-hover)] mb-8"
+          style={{ fontFamily: 'var(--font-dm-mono, monospace)', letterSpacing: '0.02em' }}
         >
           Link expires in 15 minutes · Check spam if needed
         </p>
@@ -129,7 +129,7 @@ export function MagicLinkForm({
           type="button"
           onClick={handleResend}
           disabled={resendStatus !== 'idle'}
-          className="w-full h-11 rounded-xl border border-[#E2E8F0] text-sm font-medium text-[#475569] bg-white hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-colors disabled:opacity-60 mb-4"
+          className="w-full h-11 rounded-xl border border-[var(--jf-border)] text-sm font-medium text-[var(--jf-text-secondary)] bg-[var(--jf-bg-card)] hover:bg-[var(--jf-bg-subtle)] hover:border-[var(--jf-border-hover)] transition-colors disabled:opacity-60 mb-4"
         >
           {resendStatus === 'sending' ? 'Sending…' : resendStatus === 'sent' ? 'Sent ✓' : 'Resend link'}
         </button>
@@ -137,7 +137,7 @@ export function MagicLinkForm({
         <button
           type="button"
           onClick={() => setSent(false)}
-          className="text-sm text-[#94A3B8] hover:text-[#64748B] transition-colors"
+          className="text-sm text-[var(--jf-text-muted)] hover:text-[var(--jf-text-secondary)] transition-colors"
         >
           ← Use a different email
         </button>
@@ -148,16 +148,16 @@ export function MagicLinkForm({
   /* ── Form state ─────────────────────────────────────────── */
   return (
     <div>
-      <h1 className="jf-display-sm text-[#0F172A] mb-2">
+      <h1 className="jf-display-sm text-[var(--jf-text-primary)] mb-2">
         {headline}
       </h1>
-      <p className="text-sm text-[#64748B] leading-relaxed mb-8">{sub}</p>
+      <p className="text-sm text-[var(--jf-text-muted)] leading-relaxed mb-8">{sub}</p>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="mb-4">
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-[#334155] mb-1.5"
+            className="block text-sm font-medium text-[var(--jf-text-secondary)] mb-1.5"
             style={{ letterSpacing: '-0.01em' }}
           >
             {mode === 'login' ? 'Your email' : 'Work or personal email'}
@@ -174,7 +174,7 @@ export function MagicLinkForm({
               setEmail(e.target.value)
               if (error) setError(null)
             }}
-            className="w-full h-12 px-4 rounded-xl border border-[#E2E8F0] text-[15px] text-[#0F172A] placeholder-[#CBD5E1] outline-none transition-all"
+            className="w-full h-12 px-4 rounded-xl border border-[var(--jf-border)] text-[15px] text-[var(--jf-text-primary)] placeholder-[var(--jf-border-hover)] outline-none transition-all bg-[var(--jf-bg-card)]"
             style={{
               boxShadow: error ? 'var(--jf-focus-ring)' : undefined,
               borderColor: error ? 'var(--jf-error)' : undefined,
@@ -199,7 +199,7 @@ export function MagicLinkForm({
           className="w-full h-[50px] rounded-xl text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
             background: 'var(--jf-interactive)',
-            boxShadow: '0 4px 14px rgba(37,99,235,0.28)',
+            boxShadow: 'var(--jf-cta-shadow)',
             letterSpacing: '-0.01em',
           }}
           onMouseEnter={(e) => { if (!loading) (e.target as HTMLButtonElement).style.background = 'var(--jf-interactive-hover)' }}
@@ -226,28 +226,28 @@ export function MagicLinkForm({
 
       {/* Divider */}
       <div className="flex items-center gap-3 my-6">
-        <div className="flex-1 h-px bg-[#F1F5F9]" />
-        <span className="text-xs text-[#CBD5E1]">or</span>
-        <div className="flex-1 h-px bg-[#F1F5F9]" />
+        <div className="flex-1 h-px bg-[var(--jf-bg-subtle)]" />
+        <span className="text-xs text-[var(--jf-border-hover)]">or</span>
+        <div className="flex-1 h-px bg-[var(--jf-bg-subtle)]" />
       </div>
 
       {/* Switch link */}
-      <p className="text-center text-sm text-[#64748B]">
+      <p className="text-center text-sm text-[var(--jf-text-muted)]">
         {bottomText}{' '}
-        <Link href={bottomHref} className="text-[#2563EB] font-semibold hover:underline">
+        <Link href={bottomHref} className="text-[var(--jf-interactive)] font-semibold hover:underline">
           {bottomLinkText}
         </Link>
       </p>
 
       {/* Trust line */}
       <div
-        className="flex items-center justify-center gap-2 mt-7 text-[#CBD5E1] flex-wrap"
-        style={{ fontFamily: 'var(--font-dm-mono)', fontSize: '10px', letterSpacing: '0.06em' }}
+        className="flex items-center justify-center gap-2 mt-7 text-[var(--jf-border-hover)] flex-wrap"
+        style={{ fontFamily: 'var(--font-dm-mono, monospace)', fontSize: '10px', letterSpacing: '0.06em' }}
       >
         <span>GDPR-compliant</span>
-        <span className="w-[3px] h-[3px] rounded-full bg-[#E2E8F0]" />
+        <span className="w-[3px] h-[3px] rounded-full bg-[var(--jf-border)]" />
         <span>No password, ever</span>
-        <span className="w-[3px] h-[3px] rounded-full bg-[#E2E8F0]" />
+        <span className="w-[3px] h-[3px] rounded-full bg-[var(--jf-border)]" />
         <span>Data stays in the EU</span>
       </div>
     </div>

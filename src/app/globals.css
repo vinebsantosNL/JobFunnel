@@ -165,6 +165,22 @@
   --jf-error-tint:          rgba(239,68,68,0.08);
   --jf-error-border:        rgba(239,68,68,0.2);
   --jf-interactive-border:  #BFDBFE;
+  /* Interactive tints — badge bg/border for blue/interactive elements */
+  --jf-interactive-tint:        rgba(37,99,235,0.08);
+  --jf-interactive-tint-border: rgba(37,99,235,0.2);
+  /* Warning tints — light bg / border for warning chips */
+  --jf-warning-tint:   rgba(245,158,11,0.08);
+  --jf-warning-bg:     rgba(245,158,11,0.05);
+  --jf-warning-border: rgba(245,158,11,0.25);
+  /* Error bg — slightly lighter than error-tint, for error message areas */
+  --jf-error-bg: rgba(239,68,68,0.05);
+  /* Purple tints — CV version tags, story competency chips */
+  --jf-purple-tint:   rgba(139,92,246,0.08);
+  --jf-purple-border: rgba(139,92,246,0.2);
+  /* CTA button glow */
+  --jf-cta-shadow: 0 4px 14px rgba(37,99,235,0.28);
+  /* Avatar gradient */
+  --jf-avatar-gradient: linear-gradient(135deg, #F97316, #EC4899);
   /* Priority chip backgrounds */
   --jf-priority-high-bg:        #FEF2F2;
   --jf-priority-high-border:    #FCA5A5;
@@ -229,6 +245,14 @@
   --jf-priority-medium-bg:     rgba(245,158,11,0.12);
   --jf-priority-medium-border: rgba(245,158,11,0.4);
   --jf-priority-low-border:    rgba(37,99,235,0.4);
+  --jf-interactive-tint:        rgba(37,99,235,0.12);
+  --jf-interactive-tint-border: rgba(37,99,235,0.35);
+  --jf-warning-tint:   rgba(245,158,11,0.12);
+  --jf-warning-bg:     rgba(245,158,11,0.08);
+  --jf-warning-border: rgba(245,158,11,0.35);
+  --jf-error-bg:       rgba(239,68,68,0.08);
+  --jf-purple-tint:   rgba(139,92,246,0.12);
+  --jf-purple-border: rgba(139,92,246,0.35);
 }
 
 @layer base {

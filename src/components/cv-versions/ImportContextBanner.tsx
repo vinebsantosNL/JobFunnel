@@ -14,13 +14,13 @@ export function ImportContextBanner() {
     <div
       className="flex items-center gap-3 rounded-xl border px-4 py-3"
       style={{
-        borderColor: 'rgba(16,185,129,0.25)',
-        background: 'rgba(16,185,129,0.05)',
+        borderColor: 'var(--jf-success-border)',
+        background: 'var(--jf-success-tint)',
       }}
     >
       <div
         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border"
-        style={{ borderColor: 'rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.08)' }}
+        style={{ borderColor: 'var(--jf-success-border)', background: 'var(--jf-success-tint)' }}
       >
         <FileCheck className="h-4 w-4" style={{ color: 'var(--jf-success)' }} />
       </div>

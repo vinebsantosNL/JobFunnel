@@ -140,7 +140,7 @@ export function UploadDropzone({ file, onFileChange, error, disabled }: UploadDr
         ) : (
           <>
             <div
-              className="flex h-11 w-11 items-center justify-center rounded-xl border bg-white"
+              className="flex h-11 w-11 items-center justify-center rounded-xl border bg-[var(--jf-bg-card)]"
               style={{ borderColor: 'var(--jf-border)', boxShadow: 'var(--jf-shadow-sm)' }}
             >
               <UploadCloud className="h-5 w-5" style={{ color: 'var(--jf-text-muted)' }} />
@@ -155,7 +155,7 @@ export function UploadDropzone({ file, onFileChange, error, disabled }: UploadDr
             </div>
             <span
               className="rounded-md border px-2 py-0.5 font-mono text-[10.5px]"
-              style={{ borderColor: 'var(--jf-border)', color: 'var(--jf-text-muted)', background: 'white' }}
+              style={{ borderColor: 'var(--jf-border)', color: 'var(--jf-text-muted)', background: 'var(--jf-bg-card)' }}
             >
               PDF · DOCX · max 10 MB
             </span>

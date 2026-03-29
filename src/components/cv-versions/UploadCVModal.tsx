@@ -163,7 +163,7 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
               className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border transition-colors"
               style={{
                 borderColor: 'var(--jf-border)',
-                background: 'white',
+                background: 'var(--jf-bg-card)',
                 color: 'var(--jf-text-muted)',
               }}
               aria-label="Back"
@@ -237,9 +237,9 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
               <p
                 className="flex items-start gap-2 rounded-lg border px-3 py-2 text-[12.5px]"
                 style={{
-                  borderColor: 'rgba(245,158,11,0.25)',
-                  background: 'rgba(245,158,11,0.05)',
-                  color: 'var(--jf-warning, #b45309)',
+                  borderColor: 'var(--jf-warning-border)',
+                  background: 'var(--jf-warning-bg)',
+                  color: 'var(--jf-warning)',
                 }}
               >
                 <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-px" />
@@ -252,8 +252,8 @@ export function UploadCVModal({ open, onBack, onClose }: UploadCVModalProps) {
               <p
                 className="rounded-lg border px-3 py-2 text-[12.5px]"
                 style={{
-                  borderColor: 'rgba(239,68,68,0.2)',
-                  background: 'rgba(239,68,68,0.05)',
+                  borderColor: 'var(--jf-error-border)',
+                  background: 'var(--jf-error-bg)',
                   color: 'var(--jf-error)',
                 }}
               >

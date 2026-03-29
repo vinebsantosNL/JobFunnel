@@ -65,20 +65,20 @@ export function CreateCVVersionModal({ open, onOpenChange }: CreateCVVersionModa
             className="flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-sm"
             style={{
               borderColor: 'var(--jf-border)',
-              background: 'white',
+              background: 'var(--jf-bg-card)',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = 'var(--jf-interactive)'
-              e.currentTarget.style.background = 'rgba(37,99,235,0.02)'
+              e.currentTarget.style.background = 'var(--jf-interactive-subtle)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = 'var(--jf-border)'
-              e.currentTarget.style.background = 'white'
+              e.currentTarget.style.background = 'var(--jf-bg-card)'
             }}
           >
             <div
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border"
-              style={{ borderColor: 'var(--jf-border)', background: 'var(--jf-bg-subtle, #f8fafc)' }}
+              style={{ borderColor: 'var(--jf-border)', background: 'var(--jf-bg-subtle)' }}
             >
               <FileText className="h-5 w-5" style={{ color: 'var(--jf-interactive)' }} />
             </div>
@@ -99,20 +99,20 @@ export function CreateCVVersionModal({ open, onOpenChange }: CreateCVVersionModa
             className="flex items-start gap-4 rounded-xl border p-4 text-left transition-all hover:shadow-sm"
             style={{
               borderColor: 'var(--jf-border)',
-              background: 'white',
+              background: 'var(--jf-bg-card)',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = 'var(--jf-interactive)'
-              e.currentTarget.style.background = 'rgba(37,99,235,0.02)'
+              e.currentTarget.style.background = 'var(--jf-interactive-subtle)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = 'var(--jf-border)'
-              e.currentTarget.style.background = 'white'
+              e.currentTarget.style.background = 'var(--jf-bg-card)'
             }}
           >
             <div
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border"
-              style={{ borderColor: 'var(--jf-border)', background: 'var(--jf-bg-subtle, #f8fafc)' }}
+              style={{ borderColor: 'var(--jf-border)', background: 'var(--jf-bg-subtle)' }}
             >
               <Upload className="h-5 w-5" style={{ color: 'var(--jf-interactive)' }} />
             </div>

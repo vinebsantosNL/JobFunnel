@@ -338,7 +338,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
         </div>
 
         {updateMutation.error && (
-          <p className="text-xs text-red-500">{updateMutation.error.message}</p>
+          <p className="text-xs text-[var(--jf-error)]">{updateMutation.error.message}</p>
         )}
       </div>
 
@@ -371,7 +371,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
             placeholder="e.g. Precision – NL variant"
             className="w-full rounded-lg px-3 py-2 text-sm outline-none transition-shadow"
             style={{
-              border: '1.5px solid var(--jf-border)',
+              border: '1px solid var(--jf-border)',
               color: 'var(--jf-text-primary)',
               background: 'var(--jf-bg-card)',
             }}
@@ -380,7 +380,7 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
             autoFocus
           />
           {duplicateMutation.error && (
-            <p className="text-xs text-red-500">{duplicateMutation.error.message}</p>
+            <p className="text-xs text-[var(--jf-error)]">{duplicateMutation.error.message}</p>
           )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDuplicateOpen(false)}>Cancel</Button>

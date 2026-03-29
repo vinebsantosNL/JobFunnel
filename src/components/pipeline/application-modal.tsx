@@ -15,23 +15,11 @@ import { updateJobSchema, type UpdateJobInput } from '@/lib/validations/job'
 import { CVVersionPicker } from '@/components/cv-versions/CVVersionPicker'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { getCompanyColor, getInitials } from '@/lib/company'
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
 /* ------------------------------------------------------------------ */
-
-function getCompanyColor(name: string): string {
-  const colors = ['#1DB954','#003580','#E50914','#FF6B00','#0A0A0A','#00B8D9','#FF5722','#4A90D9','#607D8B','#4CAF50']
-  let hash = 0
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  return colors[Math.abs(hash) % colors.length]
-}
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-  return name.slice(0, 2).toUpperCase()
-}
 
 function getDaysInStage(stageUpdatedAt: string): number {
   const diff = Date.now() - new Date(stageUpdatedAt).getTime()

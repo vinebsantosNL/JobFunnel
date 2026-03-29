@@ -6,24 +6,12 @@ import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'framer-motion'
 import type { JobApplication } from '@/types/database.types'
 import { PRIORITY_CONFIG } from '@/lib/stages'
+import { getCompanyColor, getInitials } from '@/lib/company'
 
 interface ApplicationCardProps {
   job: JobApplication
   onClick: (job: JobApplication) => void
   isOverlay?: boolean
-}
-
-function getCompanyColor(name: string): string {
-  const colors = ['#1DB954','#003580','#E50914','#FF6B00','#0A0A0A','#00B8D9','#FF5722','#4A90D9','#607D8B','#4CAF50']
-  let hash = 0
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  return colors[Math.abs(hash) % colors.length]
-}
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-  return name.slice(0, 2).toUpperCase()
 }
 
 function getDaysInStage(stageUpdatedAt: string): number {
@@ -185,9 +173,9 @@ export function ApplicationCard({ job, onClick, isOverlay = false }: Application
                   fontSize: 10,
                   padding: '2px 7px',
                   borderRadius: 100,
-                  background: 'rgba(139,92,246,0.08)',
-                  border: '1px solid rgba(139,92,246,0.2)',
-                  color: 'var(--jf-purple, #8B5CF6)',
+                  background: 'var(--jf-purple-tint)',
+                  border: '1px solid var(--jf-purple-border)',
+                  color: 'var(--jf-purple)',
                   maxWidth: 120,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
