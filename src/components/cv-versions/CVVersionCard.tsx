@@ -282,90 +282,59 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
           </div>
         )}
 
-        {/* Section 3 — Stats row */}
+        {/* Section 3 — Stats grid */}
         <div
-          className="py-[10px]"
-          style={{
-            fontFamily: 'var(--font-dm-mono, monospace)',
-            fontSize: '11px',
-            color: 'var(--jf-text-muted)',
-            borderTop: '1px solid var(--jf-border)',
-            borderBottom: '1px solid var(--jf-border)',
-          }}
+          className="grid grid-cols-3"
+          style={{ borderTop: '1px solid var(--jf-border)', borderBottom: '1px solid var(--jf-border)' }}
         >
-          {totalApplied > 0 ? (
-            <span>
-              <strong style={{ color: 'var(--jf-text-secondary)' }}>{totalApplied}</strong> applications
-              {' · '}
-              <strong style={{ color: 'var(--jf-text-secondary)' }}>
-                {screeningRate !== null ? `${screeningRate}%` : '—'}
-              </strong> screening rate
-              {' · '}
-              <strong style={{ color: 'var(--jf-text-secondary)' }}>
-                {interviewRate !== null ? `${interviewRate}%` : '—'}
-              </strong> interview rate
-            </span>
-          ) : (
-            <span>
-              <strong style={{ color: 'var(--jf-text-secondary)' }}>0</strong> applications
-              {' · '}
-              <strong style={{ color: 'var(--jf-text-secondary)' }}>—</strong> screening rate
-            </span>
-          )}
+          <StatCell value={String(totalApplied)} label="applications" />
+          <StatCell
+            value={screeningRate !== null ? `${screeningRate}%` : '—'}
+            label="screening"
+            color={screeningRate !== null && screeningRate > 0 ? 'var(--jf-success)' : undefined}
+            bordered
+          />
+          <StatCell
+            value={interviewRate !== null ? `${interviewRate}%` : '—'}
+            label="interviews"
+            color={interviewRate !== null && interviewRate > 0 ? 'var(--jf-warning)' : undefined}
+            bordered
+          />
         </div>
 
-        {/* Section 4 — Updated date */}
-        <p
-          style={{
-            fontFamily: 'var(--font-dm-mono, monospace)',
-            fontSize: '11px',
-            color: 'var(--jf-text-muted)',
-          }}
-        >
-          Updated {updatedDateStr}
-        </p>
+        {/* Section 4 — Footer: date + actions */}
+        <div className="flex items-center justify-between gap-2">
+          <p
+            style={{
+              fontFamily: 'var(--font-dm-mono, monospace)',
+              fontSize: '10.5px',
+              color: 'var(--jf-text-muted)',
+            }}
+          >
+            Updated {updatedDateStr}
+          </p>
 
-        {/* Section 5 — Actions row */}
-        <div className="flex gap-[6px] flex-wrap">
-          {/* PDF button — primary */}
-          <CardActionButton
-            primary
-            disabled={isDownloading}
-            icon={
-              isDownloading
-                ? <Loader2 className="w-3 h-3 animate-spin" />
-                : <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-            }
-            label={isDownloading ? 'Exporting…' : 'PDF'}
-            onClick={handleDownloadPDF}
-          />
-
-          {/* Duplicate */}
-          <CardActionButton
-            icon={<Copy className="w-3 h-3" />}
-            label="Duplicate"
-            onClick={openDuplicate}
-          />
-
-          {/* Set Default — only if not already default */}
-          {!version.is_default && (
+          {/* Actions row */}
+          <div className="flex gap-[6px]">
             <CardActionButton
-              icon={null}
-              label="Set Default"
-              onClick={handleSetDefault}
-              disabled={updateMutation.isPending}
+              primary
+              disabled={isDownloading}
+              icon={
+                isDownloading
+                  ? <Loader2 className="w-3 h-3 animate-spin" />
+                  : <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+              }
+              label={isDownloading ? 'Exporting…' : 'PDF'}
+              onClick={handleDownloadPDF}
             />
-          )}
-
-          {/* Archive / Unarchive — always visible */}
-          <CardActionButton
-            icon={version.is_archived ? <ArchiveRestore className="w-3 h-3" /> : <Archive className="w-3 h-3" />}
-            label={version.is_archived ? 'Unarchive' : 'Archive'}
-            onClick={handleArchiveToggle}
-            disabled={updateMutation.isPending}
-          />
+            <CardActionButton
+              icon={<Copy className="w-3 h-3" />}
+              label="Duplicate"
+              onClick={openDuplicate}
+            />
+          </div>
         </div>
 
         {updateMutation.error && (
@@ -400,7 +369,14 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
             onChange={(e) => setDuplicateName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleDuplicateConfirm()}
             placeholder="e.g. Precision – NL variant"
-            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg px-3 py-2 text-sm outline-none transition-shadow"
+            style={{
+              border: '1.5px solid var(--jf-border)',
+              color: 'var(--jf-text-primary)',
+              background: 'var(--jf-bg-card)',
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--jf-interactive)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)' }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--jf-border)'; e.currentTarget.style.boxShadow = 'none' }}
             autoFocus
           />
           {duplicateMutation.error && (
@@ -418,6 +394,51 @@ export function CVVersionCard({ version, stats, index }: CVVersionCardProps) {
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+// ─── Stat cell ───────────────────────────────────────────────────────────────
+
+function StatCell({
+  value,
+  label,
+  color,
+  bordered,
+}: {
+  value: string
+  label: string
+  color?: string
+  bordered?: boolean
+}) {
+  return (
+    <div
+      className="flex flex-col gap-[3px] py-2.5 px-3"
+      style={bordered ? { borderLeft: '1px solid var(--jf-border)' } : undefined}
+    >
+      <span
+        style={{
+          fontFamily: 'var(--font-dm-mono, monospace)',
+          fontSize: '16px',
+          fontWeight: 500,
+          color: color ?? 'var(--jf-text-primary)',
+          lineHeight: 1,
+        }}
+      >
+        {value}
+      </span>
+      <span
+        style={{
+          fontFamily: 'var(--font-dm-mono, monospace)',
+          fontSize: '9.5px',
+          color: 'var(--jf-text-muted)',
+          lineHeight: 1,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}
+      >
+        {label}
+      </span>
+    </div>
   )
 }
 
