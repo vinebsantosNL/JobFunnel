@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Lock } from 'lucide-react'
+import { FileText, Lock, Plus } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useCVVersions } from '@/hooks/useCVVersions'
 import { CVVersionCard } from './CVVersionCard'
@@ -59,10 +59,13 @@ export function CVVersionList() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-5">
-        <div className="flex gap-1.5">
-          {TABS.map((t) => (
-            <div key={t.key} className="h-8 w-20 rounded-lg animate-pulse" style={{ background: 'var(--jf-bg-subtle)' }} />
-          ))}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex gap-1.5">
+            {TABS.map((t) => (
+              <div key={t.key} className="h-8 w-20 rounded-lg animate-pulse" style={{ background: 'var(--jf-bg-subtle)' }} />
+            ))}
+          </div>
+          <div className="h-9 w-36 rounded-lg animate-pulse" style={{ background: 'var(--jf-bg-subtle)' }} />
         </div>
         <div className="grid gap-[14px] grid-cols-1 sm:grid-cols-2">
           {[1, 2].map((n) => (
@@ -75,48 +78,55 @@ export function CVVersionList() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* ─── Filter Tabs ─────────────────────────────────────────────────── */}
-      <div
-        className="flex gap-1 w-fit rounded-lg p-1"
-        role="tablist"
-        aria-label="Filter CV versions"
-        style={{ background: 'var(--jf-bg-subtle)' }}
-      >
-        {TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            role="tab"
-            aria-selected={filter === key}
-            onClick={() => setFilter(key)}
-            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition-all"
-            style={
-              filter === key
-                ? {
-                    background: 'var(--jf-bg-card)',
-                    color: 'var(--jf-text-primary)',
-                    border: '1px solid var(--jf-border)',
-                    boxShadow: 'var(--jf-shadow-sm)',
-                  }
-                : {
-                    background: 'transparent',
-                    color: 'var(--jf-text-secondary)',
-                    border: '1px solid transparent',
-                  }
-            }
-          >
-            {label}
-            <span
-              className="rounded text-[10px] font-medium px-1 py-0"
+      {/* ─── Toolbar: filters + action ───────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-3">
+        <div
+          className="flex gap-1 w-fit rounded-lg p-1"
+          role="tablist"
+          aria-label="Filter CV versions"
+          style={{ background: 'var(--jf-bg-subtle)' }}
+        >
+          {TABS.map(({ key, label }) => (
+            <button
+              key={key}
+              role="tab"
+              aria-selected={filter === key}
+              onClick={() => setFilter(key)}
+              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition-all"
               style={
                 filter === key
-                  ? { background: 'var(--jf-bg-subtle)', color: 'var(--jf-text-secondary)', fontFamily: 'var(--font-dm-mono, monospace)' }
-                  : { background: 'var(--jf-border)', color: 'var(--jf-text-muted)', fontFamily: 'var(--font-dm-mono, monospace)' }
+                  ? {
+                      background: 'var(--jf-bg-card)',
+                      color: 'var(--jf-text-primary)',
+                      border: '1px solid var(--jf-border)',
+                      boxShadow: 'var(--jf-shadow-sm)',
+                    }
+                  : {
+                      background: 'transparent',
+                      color: 'var(--jf-text-secondary)',
+                      border: '1px solid transparent',
+                    }
               }
             >
-              {counts[key]}
-            </span>
-          </button>
-        ))}
+              {label}
+              <span
+                className="rounded text-[10px] font-medium px-1 py-0"
+                style={
+                  filter === key
+                    ? { background: 'var(--jf-bg-subtle)', color: 'var(--jf-text-secondary)', fontFamily: 'var(--font-dm-mono, monospace)' }
+                    : { background: 'var(--jf-border)', color: 'var(--jf-text-muted)', fontFamily: 'var(--font-dm-mono, monospace)' }
+                }
+              >
+                {counts[key]}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <Button onClick={() => setCreateOpen(true)}>
+          <Plus className="mr-1.5 h-4 w-4" />
+          New CV version
+        </Button>
       </div>
 
       {/* ─── CV Cards Grid ───────────────────────────────────────────────── */}
