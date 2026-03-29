@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { getServerEnv } from '@/lib/env'
 
 // ── Zod schema for Claude's structured output ─────────────────────────────────
 
@@ -224,8 +225,10 @@ export async function POST(request: Request) {
   }
 
   // Parse with Claude
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) {
+  let apiKey: string
+  try {
+    apiKey = getServerEnv().ANTHROPIC_API_KEY
+  } catch {
     console.error('[cv-parse] ANTHROPIC_API_KEY is not set')
     return NextResponse.json({ error: 'CV parsing is not configured' }, { status: 503 })
   }
@@ -251,7 +254,19 @@ export async function POST(request: Request) {
 
     // Strip any accidental markdown code fences
     const json = block.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
-    const parsed = ResumeDataSchema.safeParse(JSON.parse(json))
+
+    let rawJson: unknown
+    try {
+      rawJson = JSON.parse(json)
+    } catch {
+      console.error('[cv-parse] Claude returned non-JSON')
+      return NextResponse.json(
+        { error: 'Failed to parse CV content. Please fill in the sections manually.' },
+        { status: 422 }
+      )
+    }
+
+    const parsed = ResumeDataSchema.safeParse(rawJson)
     if (!parsed.success) {
       console.error('[cv-parse] Claude response failed schema validation:', parsed.error.flatten())
       return NextResponse.json(
