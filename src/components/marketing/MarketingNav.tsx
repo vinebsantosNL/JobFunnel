@@ -45,7 +45,7 @@ export function MarketingNav() {
               scrolled ? 'text-[#0F172A]' : 'text-white',
             ].join(' ')}
           >
-            Job Funnel
+            JobFunnel
           </Link>
 
           {/* Desktop nav */}

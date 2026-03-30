@@ -13,13 +13,13 @@ import { FinalCTA } from '@/components/marketing/FinalCTA'
 import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 
 export const metadata: Metadata = {
-  title: 'Job Funnel — The job search platform for tech professionals who think in funnels',
+  title: 'JobFunnel — The job search platform for tech professionals who think in funnels',
   description:
     'Track applications with stage-by-stage conversion analytics, build an interview story vault, and A/B test your CV. Built for tech professionals in Europe.',
   openGraph: {
-    title: 'Job Funnel — Run your job search like a product funnel',
+    title: 'JobFunnel — Run your job search like a product funnel',
     description:
-      'Stop sending applications into a black hole. Job Funnel shows you exactly where your search breaks down — and what to do about it.',
+      'Stop sending applications into a black hole. JobFunnel shows you exactly where your search breaks down — and what to do about it.',
     type: 'website',
   },
 }

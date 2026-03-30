@@ -7,7 +7,7 @@ export function MarketingFooter() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8">
           {/* Brand */}
           <div className="max-w-xs">
-            <span className="text-base font-bold text-white">Job Funnel</span>
+            <span className="text-base font-bold text-white">JobFunnel</span>
             <p className="mt-2 text-sm text-white/40 leading-snug">
               The job search platform for tech professionals who think in funnels.
             </p>
@@ -38,7 +38,7 @@ export function MarketingFooter() {
             className="text-xs text-white/25"
             style={{ fontFamily: 'var(--font-dm-mono)' }}
           >
-            © 2025 Job Funnel. Built for Europe.
+            © 2025 JobFunnel. Built for Europe.
           </p>
           <span
             className="self-start sm:self-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs"

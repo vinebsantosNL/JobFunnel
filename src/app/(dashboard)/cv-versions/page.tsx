@@ -4,7 +4,7 @@ import { CVVersionList } from '@/components/cv-versions/CVVersionList'
 export default function CVVersionsPage() {
   return (
     <>
-      <Header title="My CVs" />
+      <Header title="CV Versions" />
       <main className="flex-1 p-6 overflow-auto">
         <CVVersionList />
       </main>

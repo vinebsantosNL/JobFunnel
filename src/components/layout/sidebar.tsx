@@ -61,11 +61,11 @@ function IconSignOut({ className, style }: IconProps) {
 }
 
 const PRIMARY_NAV_ITEMS = [
-  { href: '/dashboard',   label: 'Home',           Icon: IconHome },
-  { href: '/pipeline',    label: 'Pipeline',        Icon: IconPipeline },
-  { href: '/analytics',   label: 'Analytics',       Icon: IconAnalytics },
-  { href: '/stories',     label: 'Story Library',   Icon: IconStories },
-  { href: '/cv-versions', label: 'Resume Builder',  Icon: IconResume },
+  { href: '/dashboard',   label: 'Dashboard',        Icon: IconHome },
+  { href: '/pipeline',    label: 'Pipeline',          Icon: IconPipeline },
+  { href: '/analytics',   label: 'Funnel Analytics',  Icon: IconAnalytics },
+  { href: '/stories',     label: 'Interview Vault',   Icon: IconStories },
+  { href: '/cv-versions', label: 'CV Versions',       Icon: IconResume },
 ]
 
 const navBase =
@@ -107,8 +107,7 @@ export function Sidebar() {
         className="flex items-center h-16 px-5 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1"
         style={{ height: 'var(--jf-header-h)', borderBottom: '1px solid var(--jf-border)' }}
       >
-        <span className="text-base font-bold" style={{ color: 'var(--jf-interactive)' }}>Job</span>
-        <span className="text-base font-bold" style={{ color: 'var(--jf-text-primary)' }}>&nbsp;Funnel</span>
+        <span className="text-base font-bold" style={{ color: 'var(--jf-interactive)' }}>JobFunnel</span>
       </Link>
 
       {/* Primary nav */}

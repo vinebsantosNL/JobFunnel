@@ -117,27 +117,27 @@ export function GettingStartedBlock() {
 
   const items: ChecklistItem[] = [
     {
-      label: 'Add a job to my Pipeline',
-      subtitle: 'Start tracking your applications',
+      label: 'Add your first application',
+      subtitle: 'Your funnel starts when you track your first role',
       done: data?.hasFirstJob ?? false,
       href: '/pipeline',
     },
     {
-      label: 'Create a STAR Story',
-      subtitle: 'Recommended for interviews',
+      label: 'Build your first interview story',
+      subtitle: 'Write once in STAR format — reuse in every interview',
       done: (data?.storiesCreated ?? 0) > 0,
       href: '/stories',
       priority: 'high',
     },
     {
-      label: 'Set up CV Versions',
-      subtitle: 'Track which resume performs best',
+      label: 'Upload your CV',
+      subtitle: 'Track which version gets more callbacks',
       done: data?.hasCVVersion ?? false,
       href: '/cv-versions',
     },
     {
-      label: 'Get started with Resume Builder',
-      subtitle: 'AI-powered resume optimization',
+      label: 'Set your search goal',
+      subtitle: 'Define your target role, market, and salary',
       done: false,
       soon: true,
     },
@@ -160,7 +160,7 @@ export function GettingStartedBlock() {
       <div className="flex items-start justify-between mb-4">
         <div>
           <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--jf-text-primary)' }}>Getting Started</h2>
-          <p className="mt-0.5" style={{ fontSize: 12, color: 'var(--jf-text-muted)' }}>Complete these tasks to kickstart your job search.</p>
+          <p className="mt-0.5" style={{ fontSize: 12, color: 'var(--jf-text-muted)' }}>Three steps to start seeing real data from your search.</p>
         </div>
         <div className="text-right flex-shrink-0 ml-4">
           {isLoading ? (

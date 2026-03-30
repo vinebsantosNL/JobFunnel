@@ -91,20 +91,20 @@ export function AnalyticsDashboard() {
                   className="text-sm font-medium"
                   style={{ color: 'var(--jf-text-primary)' }}
                 >
-                  No funnel data yet
+                  Add 5+ applications to unlock your conversion rates
                 </p>
                 <p
                   className="text-xs"
                   style={{ color: 'var(--jf-text-muted)' }}
                 >
-                  Start tracking applications to see your conversion funnel.
+                  Most users see meaningful patterns after 10 applications.
                 </p>
                 <Link
                   href="/pipeline"
                   className="text-xs font-medium hover:opacity-80 transition-opacity mt-1"
                   style={{ color: 'var(--jf-interactive)' }}
                 >
-                  Add your first application &rarr;
+                  Go to pipeline &rarr;
                 </Link>
               </div>
             )}

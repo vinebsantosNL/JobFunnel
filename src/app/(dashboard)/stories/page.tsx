@@ -4,7 +4,7 @@ import { StoriesPageClient } from '@/components/stories/StoriesPageClient'
 export default function StoriesPage() {
   return (
     <>
-      <Header title="Story Library" />
+      <Header title="Interview Vault" />
       <StoriesPageClient />
     </>
   )
