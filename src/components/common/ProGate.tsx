@@ -3,16 +3,21 @@
 import { useUserStore } from '@/store/userStore'
 import { UpgradeCTA } from '@/components/common/UpgradeCTA'
 
+type ProFeatureKey = 'analytics' | 'cv-testing' | 'interview-vault' | 'default'
+
 interface ProGateProps {
   children: React.ReactNode
-  // Optional: override the blurred content shown behind the CTA.
-  // Defaults to rendering children at reduced opacity.
+  /** Optional: override the blurred content shown behind the CTA. Defaults to rendering children at reduced opacity. */
   preview?: React.ReactNode
+  /** Maps to predefined benefit copy. Preferred over feature/description. */
+  featureKey?: ProFeatureKey
+  /** Override headline copy */
   feature?: string
+  /** Override body copy */
   description?: string
 }
 
-export function ProGate({ children, preview, feature, description }: ProGateProps) {
+export function ProGate({ children, preview, featureKey = 'default', feature, description }: ProGateProps) {
   const profile = useUserStore((state) => state.profile)
 
   // While profile is not yet loaded, show blurred preview to prevent
@@ -35,7 +40,7 @@ export function ProGate({ children, preview, feature, description }: ProGateProp
 
       {/* Upgrade overlay */}
       <div className="absolute inset-0 backdrop-blur-sm bg-[var(--jf-bg-card)]/80 z-10 flex items-center justify-center px-4">
-        <UpgradeCTA feature={feature} description={description} />
+        <UpgradeCTA featureKey={featureKey} feature={feature} description={description} />
       </div>
     </div>
   )

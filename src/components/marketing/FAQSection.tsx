@@ -5,7 +5,7 @@ import { useState } from 'react'
 const faqs = [
   {
     q: 'Is this just another job tracker?',
-    a: "No. Most job trackers give you a Kanban board and a count of how many applications you've sent. Job Funnel gives you stage-by-stage conversion rates, time-in-stage analysis, and benchmarks against EU market data. There's also a dedicated interview story vault (STAR format, tagged by competency) and CV A/B testing — neither of which exist in any other tool. The difference is between knowing you sent 47 applications and knowing that your Applied-to-Screening rate is 9% when the benchmark is 18%.",
+    a: "No. Most job trackers give you a Kanban board and a count of how many applications you've sent. JobFunnel gives you stage-by-stage conversion rates, time-in-stage analysis, and benchmarks against EU market data. There's also a dedicated interview story vault (STAR format, tagged by competency) and CV A/B testing — neither of which exist in any other tool. The difference is between knowing you sent 47 applications and knowing that your Applied-to-Screening rate is 9% when the benchmark is 18%.",
   },
   {
     q: 'What kind of insights does it actually give me?',
@@ -25,7 +25,7 @@ Interview → Offer      22%  bench 28%  ⚠`,
   },
   {
     q: "I'm based in the EU — what about GDPR and my data?",
-    a: "Job Funnel is built in Europe and GDPR-compliant by design. Your data is stored in the EU, never sold, and never used to train AI models. You can export or delete your data at any time. We treat GDPR compliance as a trust signal, not a compliance checkbox.",
+    a: "JobFunnel is built in Europe and GDPR-compliant by design. Your data is stored in the EU, never sold, and never used to train AI models. You can export or delete your data at any time. We treat GDPR compliance as a trust signal, not a compliance checkbox.",
   },
   {
     q: 'What happens when I find a job? Do I keep paying?',

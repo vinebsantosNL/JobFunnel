@@ -55,7 +55,7 @@ export function AuthShell({ children, leftContent }: AuthShellProps) {
               className="text-white font-bold"
               style={{ fontSize: '15px', letterSpacing: '-0.02em' }}
             >
-              Job Funnel
+              JobFunnel
             </span>
           </Link>
 
@@ -70,7 +70,7 @@ export function AuthShell({ children, leftContent }: AuthShellProps) {
             letterSpacing: '0.06em',
           }}
         >
-          © 2025 Job Funnel · Built for Europe
+          © 2025 JobFunnel · Built for Europe
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export function AuthShell({ children, leftContent }: AuthShellProps) {
               className="text-[var(--jf-text-primary)] font-bold"
               style={{ fontSize: '15px', letterSpacing: '-0.02em' }}
             >
-              Job Funnel
+              JobFunnel
             </span>
           </Link>
 

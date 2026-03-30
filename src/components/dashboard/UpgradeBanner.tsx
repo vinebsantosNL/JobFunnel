@@ -33,7 +33,7 @@ export function UpgradeBanner({ isPro }: UpgradeBannerProps) {
           className="truncate"
           style={{ fontSize: 13, color: 'var(--jf-text-secondary)' }}
         >
-          Unlock full analytics and CV testing
+          Your funnel data is ready — upgrade to see it
         </span>
         <Link
           href="/settings?tab=billing"

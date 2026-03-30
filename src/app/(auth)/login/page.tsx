@@ -124,7 +124,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         headline="Welcome back."
         sub="Enter your email — we'll send you a secure link. No password needed."
         ctaText="Send magic link"
-        bottomText="New to Job Funnel?"
+        bottomText="New to JobFunnel?"
         bottomLinkText="Create a free account →"
         bottomHref="/signup"
         initialError={authError}
