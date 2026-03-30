@@ -34,7 +34,7 @@ export function QuickAddForm({ stage, onAdd }: QuickAddFormProps) {
   })
 
   async function onSubmit(data: QuickAddData) {
-    await onAdd({ company_name: data.company_name, job_title: data.job_title, stage, priority: 'medium' })
+    await onAdd({ company_name: data.company_name, job_title: data.job_title, stage, priority: 'medium', source: 'manual' })
     reset()
     setOpen(false)
   }
