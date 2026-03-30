@@ -37,7 +37,7 @@ export function UpgradeCTA({
   featureKey = 'default',
   feature,
   description,
-  href = '/settings/billing',
+  href = '/settings?tab=billing',
 }: UpgradeCTAProps) {
   const copy = FEATURE_COPY[featureKey]
   const headline = feature ?? copy.headline
