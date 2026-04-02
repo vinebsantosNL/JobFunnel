@@ -1,0 +1,104 @@
+{
+  "manifest_version": 3,
+  "name": "JobFunnel — Save Jobs to Pipeline",
+  "short_name": "JobFunnel",
+  "version": "0.1.0",
+  "description": "Save jobs from LinkedIn, Indeed, StepStone, Glassdoor and Xing to your JobFunnel pipeline in one click.",
+  "icons": {
+    "16":  "public/icons/icon16.png",
+    "48":  "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_icon": {
+      "16":  "public/icons/icon16.png",
+      "48":  "public/icons/icon48.png",
+      "128": "public/icons/icon128.png"
+    },
+    "default_title": "JobFunnel"
+  },
+  "background": {
+    "service_worker": "src/service-worker/index.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://job-funnel-lime.vercel.app/*",
+        "https://job-funnel-git-staging-vinebsantosnls-projects.vercel.app/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["src/content-scripts/app-bridge.ts"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.linkedin.com/jobs/view/*",
+        "https://linkedin.com/jobs/view/*",
+        "https://www.linkedin.com/jobs/search/*",
+        "https://linkedin.com/jobs/search/*",
+        "https://www.linkedin.com/jobs/collections/*",
+        "https://linkedin.com/jobs/collections/*"
+      ],
+      "js": ["src/content-scripts/linkedin.ts"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.indeed.com/viewjob*",
+        "https://*.indeed.com/jobs*"
+      ],
+      "js": ["src/content-scripts/indeed.ts"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.stepstone.de/stellenangebote/*",
+        "https://www.stepstone.de/work/*"
+      ],
+      "js": ["src/content-scripts/stepstone.ts"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.glassdoor.com/job-listing/*",
+        "https://www.glassdoor.co.uk/job-listing/*",
+        "https://www.glassdoor.de/Stellenangebote/*"
+      ],
+      "js": ["src/content-scripts/glassdoor.ts"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.xing.com/jobs/detail/*",
+        "https://www.xing.com/jobs/*"
+      ],
+      "js": ["src/content-scripts/xing.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage",
+    "identity"
+  ],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://linkedin.com/*",
+    "https://*.indeed.com/*",
+    "https://www.stepstone.de/*",
+    "https://www.glassdoor.com/*",
+    "https://www.glassdoor.co.uk/*",
+    "https://www.glassdoor.de/*",
+    "https://www.xing.com/jobs/*",
+    "https://job-funnel-lime.vercel.app/*",
+    "https://job-funnel-git-staging-vinebsantosnls-projects.vercel.app/*",
+    "http://localhost:3000/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

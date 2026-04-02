@@ -13,6 +13,8 @@ export const createJobSchema = z.object({
   notes: z.string().max(5000).optional(),
   applied_at: z.string().optional().nullable(),
   cv_version_id: z.string().uuid().optional().nullable(),
+  job_description: z.string().max(10000).optional().nullable(),
+  source: z.enum(['manual', 'extension']).default('manual'),
 })
 
 // updateJobSchema must NOT inherit the .default('saved') from createJobSchema —

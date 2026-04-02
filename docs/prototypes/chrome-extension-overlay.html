@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chrome Extension Overlay — JobFunnel Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 20px;
+      background: #F8FAFC;
+      color: #0F172A;
+      min-height: 100vh;
+    }
+
+    /* ── Design Tokens ── */
+    :root {
+      --blue:       #2563EB;
+      --blue-hover: #1D4ED8;
+      --blue-soft:  rgba(37,99,235,0.08);
+      --green:      #10B981;
+      --green-soft: rgba(16,185,129,0.08);
+      --amber:      #F59E0B;
+      --red:        #EF4444;
+      --purple:     #8B5CF6;
+      --neutral-900: #0F172A;
+      --neutral-800: #1E293B;
+      --neutral-600: #475569;
+      --neutral-400: #94A3B8;
+      --neutral-200: #E2E8F0;
+      --neutral-100: #F1F5F9;
+      --neutral-50:  #F8FAFC;
+      --white:       #FFFFFF;
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-full: 9999px;
+    }
+
+    /* ── Simulated LinkedIn Page ── */
+    .fake-page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .fake-page-header {
+      background: white;
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .board-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: var(--blue-soft);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      margin-bottom: 12px;
+    }
+
+    .fake-job-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--neutral-900);
+      margin-bottom: 4px;
+    }
+
+    .fake-company {
+      font-size: 16px;
+      color: var(--neutral-600);
+      margin-bottom: 8px;
+    }
+
+    .fake-meta {
+      font-size: 13px;
+      color: var(--neutral-400);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .fake-description {
+      background: white;
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+
+    .fake-description h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--neutral-800);
+    }
+
+    .fake-description p {
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--neutral-600);
+      margin-bottom: 10px;
+    }
+
+    .prototype-label {
+      background: var(--amber);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    /* ── Floating Trigger Button ── */
+    #jf-trigger {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: var(--radius-full);
+      padding: 0 20px;
+      height: 44px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
+      user-select: none;
+    }
+    #jf-trigger:hover {
+      background: var(--blue-hover);
+      box-shadow: var(--shadow-lg);
+      transform: scale(1.02);
+    }
+    #jf-trigger.saved {
+      background: var(--green);
+    }
+    #jf-trigger.saved:hover {
+      background: #0D9668;
+    }
+
+    .jf-logo-mark {
+      width: 22px;
+      height: 22px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    /* ── Overlay Panel ── */
+    #jf-overlay {
+      position: fixed;
+      bottom: 80px;
+      right: 24px;
+      width: 320px;
+      z-index: 10000;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--neutral-200);
+      overflow: hidden;
+      transform: translateY(20px) scale(0.96);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                  opacity 200ms ease-out;
+    }
+
+    #jf-overlay.open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* Panels */
+    .overlay-panel {
+      display: none;
+      flex-direction: column;
+    }
+    .overlay-panel.active {
+      display: flex;
+    }
+
+    /* Header */
+    .overlay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--neutral-100);
+    }
+
+    .overlay-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .overlay-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--neutral-900);
+    }
+
+    .overlay-board-tag {
+      font-size: 11px;
+      color: var(--neutral-400);
+    }
+
+    .overlay-close {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--neutral-100);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--neutral-600);
+      font-size: 16px;
+      transition: background 150ms ease-out;
+    }
+    .overlay-close:hover { background: var(--neutral-200); }
+
+    /* Form */
+    .overlay-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--neutral-400);
+    }
+
+    input, select {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--neutral-900);
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      width: 100%;
+      outline: none;
+      transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+    }
+    input:focus, select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+      background: white;
+    }
+
+    .desc-note {
+      font-size: 11px;
+      color: var(--neutral-400);
+      line-height: 16px;
+      padding: 8px 10px;
+      background: var(--neutral-50);
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--neutral-200);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .desc-note-icon {
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .overlay-footer {
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      height: 40px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 150ms ease-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary:hover { background: var(--blue-hover); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-primary.green { background: var(--green); }
+    .btn-primary.green:hover { background: #0D9668; }
+
+    .btn-secondary {
+      background: none;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--neutral-400);
+      cursor: pointer;
+      text-align: center;
+      padding: 4px;
+      transition: color 150ms ease-out;
+    }
+    .btn-secondary:hover { color: var(--neutral-600); }
+
+    /* Loading panel */
+    .loading-panel {
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--neutral-200);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-size: 14px;
+      color: var(--neutral-600);
+    }
+
+    /* Success panel */
+    .success-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--green-soft);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 8px;
+    }
+
+    .success-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--neutral-900);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .success-sub {
+      font-size: 13px;
+      color: var(--neutral-400);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .success-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--neutral-100);
+      border-radius: var(--radius-full);
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--neutral-600);
+      margin: 0 auto 16px;
+    }
+
+    .stage-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex-shrink: 0;
+    }
+
+    .success-actions {
+      display: flex;
+      gap: 8px;
+      padding: 0 16px 16px;
+    }
+
+    .btn-ghost {
+      flex: 1;
+      height: 36px;
+      background: var(--neutral-100);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--neutral-600);
+      cursor: pointer;
+      transition: background 150ms ease-out;
+    }
+    .btn-ghost:hover { background: var(--neutral-200); }
+
+    /* Upgrade panel */
+    .upgrade-icon {
+      font-size: 28px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .upgrade-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--neutral-900);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .upgrade-stat {
+      background: var(--blue-soft);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .upgrade-stat-label {
+      font-size: 12px;
+      color: var(--neutral-600);
+      flex: 1;
+    }
+
+    .upgrade-stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .upgrade-body-text {
+      font-size: 13px;
+      color: var(--neutral-600);
+      text-align: center;
+      line-height: 20px;
+      margin-bottom: 4px;
+    }
+
+    /* Connected badge */
+    .connected-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--green);
+      font-weight: 600;
+    }
+    .connected-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    /* Scenario switcher (prototype only) */
+    .scenario-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--neutral-900);
+      color: white;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 20000;
+      flex-wrap: wrap;
+    }
+
+    .scenario-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--neutral-400);
+      white-space: nowrap;
+    }
+
+    .scenario-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: white;
+      border-radius: var(--radius-full);
+      padding: 5px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 150ms ease-out;
+      white-space: nowrap;
+    }
+    .scenario-btn:hover { background: rgba(255,255,255,0.18); }
+    .scenario-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    /* Pipeline modal preview (application detail) */
+    #pipeline-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 15000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #pipeline-modal-overlay.open {
+      display: flex;
+    }
+
+    .pipeline-modal {
+      background: white;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--neutral-100);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-company-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #1DB954;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .modal-header-info { flex: 1; }
+
+    .modal-job-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--neutral-900);
+      margin-bottom: 2px;
+    }
+
+    .modal-company-name {
+      font-size: 14px;
+      color: var(--neutral-600);
+    }
+
+    .stage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .stage-badge.applied { background: rgba(37,99,235,0.10); color: var(--blue); }
+
+    .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+    .modal-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--neutral-400);
+      margin-bottom: 6px;
+    }
+
+    .modal-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .meta-label {
+      font-size: 11px;
+      color: var(--neutral-400);
+    }
+
+    .meta-value {
+      font-size: 13px;
+      color: var(--neutral-800);
+      font-weight: 500;
+    }
+
+    .meta-value a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .jd-section {
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .jd-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--neutral-50);
+      border-bottom: 1px solid var(--neutral-200);
+    }
+
+    .jd-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--neutral-700, #334155);
+    }
+
+    .jd-source-tag {
+      font-size: 10px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .jd-body {
+      padding: 14px;
+      font-size: 13px;
+      line-height: 22px;
+      color: var(--neutral-600);
+      max-height: 180px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .jd-body.expanded {
+      max-height: none;
+    }
+
+    .jd-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      background: linear-gradient(transparent, white);
+    }
+
+    .jd-toggle {
+      background: none;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--blue);
+      cursor: pointer;
+      padding: 8px 14px;
+      border-top: 1px solid var(--neutral-100);
+      width: 100%;
+      text-align: left;
+      transition: background 150ms ease-out;
+    }
+    .jd-toggle:hover { background: var(--neutral-50); }
+
+    .new-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(139,92,246,0.10);
+      color: var(--purple);
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+    }
+
+    body { padding-top: 50px; }
+  </style>
+</head>
+<body>
+
+<!-- Scenario switcher bar (prototype only) -->
+<div class="scenario-bar">
+  <span class="scenario-label">Scenario:</span>
+  <button class="scenario-btn active" onclick="setScenario('default')">1 — Save a job</button>
+  <button class="scenario-btn" onclick="setScenario('already-saved')">2 — Already saved</button>
+  <button class="scenario-btn" onclick="setScenario('free-limit')">3 — Free tier limit</button>
+  <button class="scenario-btn" onclick="setScenario('not-connected')">4 — Not connected</button>
+  <button class="scenario-btn" onclick="showPipelineModal()">5 — View in pipeline modal</button>
+</div>
+
+<!-- Simulated LinkedIn job page -->
+<div class="fake-page">
+  <div class="fake-page-header">
+    <div class="board-badge">🔗 LinkedIn</div>
+    <div class="fake-job-title">Senior Product Manager — Growth</div>
+    <div class="fake-company">Spotify · Amsterdam, Netherlands · Hybrid</div>
+    <div class="fake-meta">
+      <span>Posted 2 days ago</span>
+      <span>201–500 applicants</span>
+      <span>€90,000–€115,000/yr</span>
+    </div>
+  </div>
+
+  <div class="fake-description">
+    <h3>About the role</h3>
+    <p>We are looking for a Senior Product Manager to join our Growth team in Amsterdam. You will be responsible for driving user acquisition and activation across our freemium funnel, working closely with engineering, design, data science, and marketing.</p>
+    <p><strong>What you'll do:</strong></p>
+    <p>Define and execute the product strategy for growth initiatives. Lead cross-functional squads to deliver measurable improvements to our activation and monetisation funnels. Own the roadmap from ideation through to launch and iteration. Analyse user behaviour data to identify growth opportunities and surface insights.</p>
+    <p><strong>What we're looking for:</strong></p>
+    <p>5+ years of product management experience, with at least 2 years in growth or monetisation. Strong data analysis skills — comfortable with SQL, Amplitude, and experimentation frameworks. Experience working in a B2C subscription model. Excellent written and verbal communication skills. Fluent in English; Dutch or Swedish is a plus.</p>
+    <p><strong>What we offer:</strong></p>
+    <p>Competitive salary (€90k–€115k depending on experience). 30 days paid leave. Learning budget €2,000/year. Relocation support for candidates outside the Netherlands.</p>
+  </div>
+</div>
+
+<!-- Floating trigger button -->
+<button id="jf-trigger" onclick="toggleOverlay()">
+  <span class="jf-logo-mark">JF</span>
+  <span id="trigger-label">Save to Pipeline</span>
+</button>
+
+<!-- Overlay panel -->
+<div id="jf-overlay">
+
+  <!-- Panel 1: Form (default) -->
+  <div class="overlay-panel active" id="panel-form">
+    <div class="overlay-header">
+      <div class="overlay-header-left">
+        <span class="overlay-title">Save to JobFunnel</span>
+        <span class="overlay-board-tag">linkedin.com/jobs · <span class="connected-badge"><span class="connected-dot"></span> Connected</span></span>
+      </div>
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+    </div>
+    <div class="overlay-body">
+      <div class="field-group">
+        <label>Company *</label>
+        <input type="text" id="field-company" value="Spotify" />
+      </div>
+      <div class="field-group">
+        <label>Job Title *</label>
+        <input type="text" id="field-title" value="Senior Product Manager — Growth" />
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Location</label>
+          <input type="text" id="field-location" value="Amsterdam, NL" />
+        </div>
+        <div class="field-group">
+          <label>Stage</label>
+          <select id="field-stage">
+            <option value="saved">Saved</option>
+            <option value="applied" selected>Applied</option>
+            <option value="screening">Screening</option>
+            <option value="interviewing">Interviewing</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Salary (optional)</label>
+        <input type="text" id="field-salary" value="€90,000 – €115,000" />
+      </div>
+      <div class="desc-note">
+        <span class="desc-note-icon">📎</span>
+        <span>Job description will be saved automatically with this application.</span>
+      </div>
+    </div>
+    <div class="overlay-footer">
+      <button class="btn-primary" onclick="simulateSave()">Save to Pipeline</button>
+    </div>
+  </div>
+
+  <!-- Panel 2: Loading -->
+  <div class="overlay-panel" id="panel-loading">
+    <div class="loading-panel">
+      <div class="spinner"></div>
+      <span class="loading-text">Saving to your pipeline...</span>
+    </div>
+  </div>
+
+  <!-- Panel 3: Success -->
+  <div class="overlay-panel" id="panel-success">
+    <div class="overlay-header">
+      <div class="overlay-header-left">
+        <span class="overlay-title">Saved ✓</span>
+      </div>
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+    </div>
+    <div class="overlay-body" style="align-items: center; padding-top: 20px;">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Added to your Pipeline</div>
+      <div class="success-sub">Senior PM · Spotify</div>
+      <div class="success-chip">
+        <span class="stage-dot"></span>
+        Applied
+      </div>
+    </div>
+    <div class="success-actions">
+      <button class="btn-ghost" onclick="closeOverlay()">Close</button>
+      <button class="btn-primary green" onclick="showPipelineModal(); closeOverlay();">View in Pipeline →</button>
+    </div>
+  </div>
+
+  <!-- Panel 4: Already saved -->
+  <div class="overlay-panel" id="panel-already-saved">
+    <div class="overlay-header">
+      <div class="overlay-header-left">
+        <span class="overlay-title">Already in your Pipeline</span>
+      </div>
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+    </div>
+    <div class="overlay-body" style="align-items: center; padding-top: 20px;">
+      <div class="success-icon" style="background: var(--blue-soft);">📌</div>
+      <div class="success-title">You already saved this job</div>
+      <div class="success-sub">Added 2 days ago · Stage: Applied</div>
+      <div class="success-chip">
+        <span class="stage-dot"></span>
+        Senior PM · Spotify
+      </div>
+    </div>
+    <div class="success-actions">
+      <button class="btn-ghost" onclick="closeOverlay()">Close</button>
+      <button class="btn-primary" onclick="showPipelineModal(); closeOverlay();">View Application →</button>
+    </div>
+  </div>
+
+  <!-- Panel 5: Free tier limit -->
+  <div class="overlay-panel" id="panel-free-limit">
+    <div class="overlay-header">
+      <div class="overlay-header-left">
+        <span class="overlay-title">You've hit your limit</span>
+      </div>
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+    </div>
+    <div class="overlay-body">
+      <div class="upgrade-icon">🚀</div>
+      <div class="upgrade-title">You're tracking 5 applications</div>
+      <div class="upgrade-stat">
+        <span class="upgrade-stat-label">Your Applied → Screening rate</span>
+        <span class="upgrade-stat-value">12%</span>
+      </div>
+      <div class="upgrade-body-text">Upgrade to Pro to save unlimited jobs from any job board and unlock full funnel analytics.</div>
+    </div>
+    <div class="overlay-footer">
+      <button class="btn-primary" onclick="closeOverlay()">Start Pro — €15/month</button>
+      <button class="btn-secondary" onclick="closeOverlay()">Not now</button>
+    </div>
+  </div>
+
+  <!-- Panel 6: Not connected -->
+  <div class="overlay-panel" id="panel-not-connected">
+    <div class="overlay-header">
+      <div class="overlay-header-left">
+        <span class="overlay-title">Connect JobFunnel</span>
+      </div>
+      <button class="overlay-close" onclick="closeOverlay()">✕</button>
+    </div>
+    <div class="overlay-body" style="align-items: center; text-align: center; padding-top: 20px;">
+      <div style="font-size: 36px; margin-bottom: 8px;">🔗</div>
+      <div class="success-title">Sign in to start saving jobs</div>
+      <div class="success-sub" style="max-width: 220px; line-height: 20px;">Save jobs from any supported board directly to your JobFunnel pipeline.</div>
+    </div>
+    <div class="overlay-footer">
+      <button class="btn-primary" onclick="closeOverlay()">Open JobFunnel →</button>
+      <p style="font-size: 11px; color: var(--neutral-400); text-align: center; margin-top: 4px;">Opens jobfunnel.io/login in a new tab</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Pipeline Application Modal (to show job_description section) -->
+<div id="pipeline-modal-overlay" onclick="hidePipelineModal(event)">
+  <div class="pipeline-modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-company-logo">S</div>
+      <div class="modal-header-info">
+        <div class="modal-job-title">Senior Product Manager — Growth</div>
+        <div class="modal-company-name">Spotify · Amsterdam, NL</div>
+        <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+          <span class="stage-badge applied">● Applied</span>
+          <span style="font-size: 12px; color: var(--neutral-400);">2 days in stage</span>
+        </div>
+      </div>
+      <button class="overlay-close" onclick="hidePipelineModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Meta -->
+      <div>
+        <div class="modal-section-title">Details</div>
+        <div class="modal-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Salary</span>
+            <span class="meta-value">€90k – €115k</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Location</span>
+            <span class="meta-value">Amsterdam, NL</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Job URL</span>
+            <span class="meta-value"><a href="#">linkedin.com/jobs/…</a></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Source</span>
+            <span class="meta-value">Chrome Extension</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <div class="modal-section-title">Notes</div>
+        <div style="font-size: 13px; color: var(--neutral-400); font-style: italic;">No notes yet.</div>
+      </div>
+
+      <!-- Job Description — NEW SECTION -->
+      <div>
+        <div class="modal-section-title" style="display: flex; align-items: center; gap: 6px;">
+          Job Description
+          <span class="new-badge">Saved by extension</span>
+        </div>
+        <div class="jd-section">
+          <div class="jd-header">
+            <div class="jd-header-left">
+              📄 Original posting
+            </div>
+            <span class="jd-source-tag">LinkedIn</span>
+          </div>
+          <div class="jd-body" id="jd-body">
+            <p>We are looking for a Senior Product Manager to join our Growth team in Amsterdam. You will be responsible for driving user acquisition and activation across our freemium funnel, working closely with engineering, design, data science, and marketing.</p>
+            <p style="margin-top: 10px;"><strong>What you'll do:</strong></p>
+            <p>Define and execute the product strategy for growth initiatives. Lead cross-functional squads to deliver measurable improvements to our activation and monetisation funnels. Own the roadmap from ideation through to launch and iteration. Analyse user behaviour data to identify growth opportunities.</p>
+            <p style="margin-top: 10px;"><strong>What we're looking for:</strong></p>
+            <p>5+ years of product management experience, with at least 2 years in growth or monetisation. Strong data analysis skills — comfortable with SQL, Amplitude, and experimentation frameworks.</p>
+            <div class="jd-fade" id="jd-fade"></div>
+          </div>
+          <button class="jd-toggle" id="jd-toggle" onclick="toggleJobDescription()">Show full description ↓</button>
+        </div>
+      </div>
+
+      <!-- Stage history -->
+      <div>
+        <div class="modal-section-title">Stage History</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--neutral-600);">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0;"></span>
+            <span><strong>Applied</strong> — 28 Mar 2026</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--neutral-400);">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--neutral-300, #CBD5E1); flex-shrink: 0;"></span>
+            <span>Saved — 28 Mar 2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentScenario = 'default';
+  let overlayOpen = false;
+  let jdExpanded = false;
+
+  function setScenario(scenario) {
+    currentScenario = scenario;
+    document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    const trigger = document.getElementById('jf-trigger');
+    const label = document.getElementById('trigger-label');
+
+    if (scenario === 'already-saved') {
+      trigger.classList.add('saved');
+      label.textContent = '✓ Saved';
+    } else {
+      trigger.classList.remove('saved');
+      label.textContent = 'Save to Pipeline';
+    }
+
+    // Close overlay if open
+    if (overlayOpen) closeOverlay();
+  }
+
+  function showPanel(id) {
+    document.querySelectorAll('.overlay-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function toggleOverlay() {
+    if (overlayOpen) {
+      closeOverlay();
+      return;
+    }
+
+    const overlay = document.getElementById('jf-overlay');
+    overlay.classList.add('open');
+    overlayOpen = true;
+
+    // Show correct panel based on scenario
+    const panelMap = {
+      'default': 'panel-form',
+      'already-saved': 'panel-already-saved',
+      'free-limit': 'panel-free-limit',
+      'not-connected': 'panel-not-connected',
+    };
+    showPanel(panelMap[currentScenario] || 'panel-form');
+  }
+
+  function closeOverlay() {
+    const overlay = document.getElementById('jf-overlay');
+    overlay.classList.remove('open');
+    overlayOpen = false;
+    // Reset to form panel after close animation
+    setTimeout(() => {
+      if (!overlayOpen) showPanel('panel-form');
+    }, 400);
+  }
+
+  function simulateSave() {
+    showPanel('panel-loading');
+    setTimeout(() => {
+      showPanel('panel-success');
+      // Update trigger button
+      const trigger = document.getElementById('jf-trigger');
+      const label = document.getElementById('trigger-label');
+      trigger.classList.add('saved');
+      label.textContent = '✓ Saved';
+    }, 1200);
+  }
+
+  function showPipelineModal(e) {
+    document.getElementById('pipeline-modal-overlay').classList.add('open');
+  }
+
+  function hidePipelineModal(e) {
+    if (!e || e.target === document.getElementById('pipeline-modal-overlay')) {
+      document.getElementById('pipeline-modal-overlay').classList.remove('open');
+    }
+  }
+
+  function toggleJobDescription() {
+    const body = document.getElementById('jd-body');
+    const fade = document.getElementById('jd-fade');
+    const toggle = document.getElementById('jd-toggle');
+    jdExpanded = !jdExpanded;
+    if (jdExpanded) {
+      body.classList.add('expanded');
+      fade.style.display = 'none';
+      toggle.textContent = 'Show less ↑';
+    } else {
+      body.classList.remove('expanded');
+      fade.style.display = '';
+      toggle.textContent = 'Show full description ↓';
+    }
+  }
+
+  // Close overlay on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('pipeline-modal-overlay').classList.contains('open')) {
+        hidePipelineModal();
+      } else {
+        closeOverlay();
+      }
+    }
+  });
+</script>
+</body>
+</html>
