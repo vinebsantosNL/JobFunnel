@@ -103,9 +103,15 @@ function tryScrapWithRetry(retries = 3, delay = 800): void {
 // Initial scrape on load
 tryScrapWithRetry()
 
-// Re-scrape on LinkedIn SPA navigation (pushState)
+// Re-scrape on LinkedIn SPA navigation (pushState).
+// Only trigger when the URL actually changes — LinkedIn mutates the DOM constantly
+// and firing tryScrapWithRetry on every change would be a significant perf hit.
+let lastUrl = location.href
 const observer = new MutationObserver(() => {
-  tryScrapWithRetry()
+  if (location.href !== lastUrl) {
+    lastUrl = location.href
+    tryScrapWithRetry()
+  }
 })
 
 observer.observe(document.body, { childList: true, subtree: true })

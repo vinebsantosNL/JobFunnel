@@ -12,15 +12,21 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   const supabase = await createClient()
 
-  const { data: { session }, error } = await supabase.auth.getSession()
+  // getUser() validates the JWT with the Supabase auth server (server-safe).
+  // getSession() alone is insecure on the server — it reads the cookie without validation.
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (!user || userError) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-  if (!session || error) {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   return NextResponse.json({
     token: session.access_token,
     expiresAt: new Date(session.expires_at! * 1000).toISOString(),
-    email: session.user.email,
+    email: user.email,
   })
 }

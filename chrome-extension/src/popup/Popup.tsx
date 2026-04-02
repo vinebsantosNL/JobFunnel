@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ScrapedJob, Stage, Priority, ExtMessage } from '../shared/types'
+import type { ScrapedJob, Stage, Priority, ExtMessage, BoardSource } from '../shared/types'
 import { API_BASE, STORAGE_KEYS } from '../shared/config'
 import type { StoredAuth } from '../shared/types'
 
@@ -28,7 +28,7 @@ const PRIORITY_OPTIONS: { value: Priority; label: string }[] = [
   { value: 'low', label: 'Low' },
 ]
 
-const BOARD_LABELS: Record<string, string> = {
+const BOARD_LABELS: Record<BoardSource, string> = {
   linkedin: 'LinkedIn',
   indeed: 'Indeed',
   stepstone: 'StepStone',
@@ -41,6 +41,7 @@ export function Popup() {
   const [scraped, setScraped] = useState<ScrapedJob | null>(null)
   const [email, setEmail] = useState<string | null>(null)
   const [savedJobId, setSavedJobId] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>({
     company_name: '',
     job_title: '',
@@ -134,8 +135,7 @@ export function Popup() {
       if (response.error === 'FREE_TIER_LIMIT') {
         setView('free-limit')
       } else {
-        // On unexpected error — go back to form with error would be ideal
-        // For now reset to form
+        setSaveError('Something went wrong. Please try again.')
         setView('form')
       }
     }
@@ -209,6 +209,12 @@ export function Popup() {
 
       {view === 'form' && scraped && (
         <>
+          {saveError && (
+            <div className="form-error-bar">
+              <span>{saveError}</span>
+              <button className="form-error-dismiss" onClick={() => setSaveError(null)}>✕</button>
+            </div>
+          )}
           <div className="board-bar">
             <span className="board-chip">{BOARD_LABELS[scraped.source] ?? scraped.source}</span>
             <span className="board-url">{new URL(scraped.job_url).hostname.replace('www.', '')}</span>

@@ -4,7 +4,6 @@ import { createJobSchema } from '@/lib/validations/job'
 import { getJobApplications, createJobApplication } from '@/lib/services/jobService'
 import { handleApiError } from '@/lib/utils/errors'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { CreateJobInput } from '@/lib/validations/job'
 
 export async function GET(request: Request) {
   try {
@@ -50,6 +49,6 @@ async function handlePost(supabase: SupabaseClient, userId: string, request: Req
   const parsed = createJobSchema.safeParse(await request.json())
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const job = await createJobApplication(supabase, userId, parsed.data as CreateJobInput)
+  const job = await createJobApplication(supabase, userId, parsed.data)
   return NextResponse.json(job, { status: 201 })
 }
